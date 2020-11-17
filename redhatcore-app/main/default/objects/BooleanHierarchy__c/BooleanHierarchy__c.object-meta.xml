@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customSettingsType>Hierarchy</customSettingsType>
+    <description>This is an extension to Boolean Metadata and Boolean Setting.   The usage is just define an field with the same name as the boolean setting and define to the hierarchy needed.</description>
+    <enableFeeds>false</enableFeeds>
+    <label>Boolean Hierarchy</label>
+    <visibility>Public</visibility>
+</CustomObject>
