@@ -1,0 +1,51 @@
+#!/bin/bash -e
+fullname=$1
+apppath=${1%/}
+if [ -d "$apppath" ]
+then 
+    re1='s/.*\({[^}]*"path"\s*:\s*"'"$apppath"'[/]*"\s*[^}]*}\).*/\1\n/p'
+    re2='s/.*"package"\s*:\s*"\([^"]*\)"\s*.*/\1/p'
+    fullname="$(sed -z -n -e "$re1" < sfdx-project.json|sed -z -n -e  "$re2")"
+    if ( grep -q "\"$fullname@" sfdx-project.json )
+    then
+        echo "Assuming the $fullname package has already been deployed."
+        fullname=""
+    fi
+else 
+    re1='s/.*\({[^}]*"package"\s*:\s*"'"$fullname"'"\s*[^}]*}\).*/\1\n/p'
+    re2='s/.*"path"\s*:\s*"\([^"]*\)"\s*.*/\1/p'
+    apppath="$(sed -z -n -e "$re1" < sfdx-project.json|sed -z -n -e  "$re2")"
+    apppath=${apppath%/}
+fi
+if [ ! -d "$apppath" ]
+then 
+    echo  "usage: $0 <package> ..." 1>&2
+    echo  "-or- usage: $0 <path> ..." 1>&2
+    exit 1
+fi
+shift
+mdapipath="$apppath".mdapi
+rm -rf "$mdapipath"
+if [ -n "$fullname" ]
+then
+    echo sfdx force:source:convert -r "$apppath"/ -d "$mdapipath"/  -n "$fullname"
+    sfdx force:source:convert -r "$apppath"/ -d "$mdapipath"/  -n "$fullname"
+else
+    echo sfdx force:source:convert -r "$apppath"/ -d "$mdapipath"/
+    sfdx force:source:convert -r "$apppath"/ -d "$mdapipath"/
+fi
+if [ -d "$mdapipath/testSuites" ]
+then
+  echo "Warning: ApexTestSuite cannot be deployed as part of an unmanaged package." 1>&2
+  script='for i in "$@";do if [ -r "$mdapipath/testSuites/$i.testSuite" ] ; then sed -i -z -e "s,\(\\s*<name>ApexTestSuite</name>\)\\s*<members>$i</members>,\\1," "$mdapipath/package.xml";fi;done'
+  sed -n -e 's,\s*<members>\(.*\)</members>\s*,\1,p' $mdapipath/package.xml | mdapipath="$mdapipath" xargs bash -c "$script" -
+  sed -i -z -e 's,\s*<types>\s*<name>ApexTestSuite</name>\s*</types>,,' "$mdapipath/package.xml"
+fi
+echo sfdx force:mdapi:deploy -d "$mdapipath" --testlevel=RunSpecifiedTests -r "$(cd "$mdapipath"/classes/ && fgrep -i -l '@isTest' *.cls|sed -n -e 's,[.]cls$,,p'|tr '\n' ',')" --loglevel=warn -w 10 "$@"
+sfdx force:mdapi:deploy -d "$mdapipath" --testlevel=RunSpecifiedTests -r "$(cd "$mdapipath"/classes/ && fgrep -i -l '@isTest' *.cls|sed -n -e 's,[.]cls$,,p'|tr '\n' ',')" --loglevel=warn -w 10 "$@"
+echo rm -rf "$mdapipath"
+rm -rf "$mdapipath"
+# This is just to make sure we have all the console output before we return to the command prompt
+sleep 3
+i=0;while [ $i -lt 25 ] ; do echo "";i=$(expr $i + 1);done
+ 
