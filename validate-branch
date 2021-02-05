@@ -1,13 +1,8 @@
 #!/bin/bash -x
-if [ -z "$1" -a -z "$2" ]
-then 
-    echo "Usage: $0 package.xml <testSuiteName>" 2>&1
-    exit 1
-fi
-
 package=$(find $(/bin/pwd) -name "$1")
 if [ ! -r "$package" ] 
 then 
+    echo "Usage: $0 package.xml <testSuiteName>" 2>&1
     echo "Cannot find $1" 1>&2
     exit 1
 fi
@@ -16,8 +11,10 @@ shift
 testSuite=$(find $(/bin/pwd) -name "$1.testSuite-meta.xml")
 if [ ! -r "$testSuite" ]
 then 
+    echo "Usage: $0 package.xml <testSuiteName>" 2>&1
     echo "Cannot find testSuite $1" 1>&2
     exit 1
 fi
+shift
 
-exec sfdx force:source:deploy -c -l RunSpecifiedTests -r $(sed -n -e 's,.*<testClassName>\(.*\)</testClassName>.*,\1,p' "$testSuite" | tr '\n' ',') --manifest "$package" --json --loglevel fatal
+exec sfdx force:source:deploy -c -l RunSpecifiedTests -r $(sed -n -e 's,.*<testClassName>\(.*\)</testClassName>.*,\1,p' "$testSuite" | tr '\n' ',') --manifest "$package" --loglevel fatal "$@"

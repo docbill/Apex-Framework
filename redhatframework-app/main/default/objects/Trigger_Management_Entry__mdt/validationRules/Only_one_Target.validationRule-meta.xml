@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Only_one_Target</fullName>
+    <active>true</active>
+    <errorConditionFormula>NOT(OR(ISBLANK(TEXT(Non_Entity_Object__c)),ISBLANK(Entity_Object__r.QualifiedApiName)))</errorConditionFormula>
+    <errorDisplayField>Non_Entity_Object__c</errorDisplayField>
+    <errorMessage>Cannot specify both a target entity and a non-target entity.</errorMessage>
+</ValidationRule>
