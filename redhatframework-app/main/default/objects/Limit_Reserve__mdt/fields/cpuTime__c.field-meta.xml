@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>cpuTime__c</fullName>
+    <defaultValue>10</defaultValue>
+    <deprecated>false</deprecated>
+    <description>How much time in ms to reserve?</description>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>How much time in ms to reserve?</inlineHelpText>
+    <label>cpuTime</label>
+    <precision>10</precision>
+    <required>true</required>
+    <scale>0</scale>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

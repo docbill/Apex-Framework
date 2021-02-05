@@ -15,7 +15,8 @@ As one can see in the following document, normally a user is only required to de
 
 ![UML Diagram](TriggerManagementUML.vpd.png)
 
-[Sample Trigger Framwork Flow](https://app.diagrams.net/?mode=google&gfw=1#G1GkpK-78hD_V12utMTiP2sIoJM38Rbon5)
+[Trigger Framework Example](https://app.diagrams.net/?mode=google&gfw=1#G1GkpK-78hD_V12utMTiP2sIoJM38Rbon5)
+
 
 ## Client Trigger
 

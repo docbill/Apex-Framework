@@ -41,9 +41,8 @@ then
   sed -n -e 's,\s*<members>\(.*\)</members>\s*,\1,p' $mdapipath/package.xml | mdapipath="$mdapipath" xargs bash -c "$script" -
   sed -i -z -e 's,\s*<types>\s*<name>ApexTestSuite</name>\s*</types>,,' "$mdapipath/package.xml"
 fi
-echo sfdx force:mdapi:deploy -d "$mdapipath" --testlevel=RunSpecifiedTests -r "$(cd "$mdapipath"/classes/ && fgrep -i -l '@isTest' *.cls|sed -n -e 's,[.]cls$,,p'|tr '\n' ',')" --loglevel=warn -w 10 "$@"
-sfdx force:mdapi:deploy -d "$mdapipath" --testlevel=RunSpecifiedTests -r "$(cd "$mdapipath"/classes/ && fgrep -i -l '@isTest' *.cls|sed -n -e 's,[.]cls$,,p'|tr '\n' ',')" --loglevel=warn -w 10 "$@"
-echo rm -rf "$mdapipath"
+echo sfdx force:mdapi:deploy -d "$mdapipath" --testlevel=RunSpecifiedTests -r "$(cd "$mdapipath"/classes/ && fgrep -i -l '@isTest' *.cls|sed -n -e 's,[.]cls$,,p'|tr '\n' ',')" --loglevel=warn -w 30 "$@"
+sfdx force:mdapi:deploy -d "$mdapipath" --testlevel=RunSpecifiedTests -r "$(cd "$mdapipath"/classes/ && fgrep -i -l '@isTest' *.cls|sed -n -e 's,[.]cls$,,p'|tr '\n' ',')" --loglevel=warn -w 30 "$@"
 rm -rf "$mdapipath"
 # This is just to make sure we have all the console output before we return to the command prompt
 sleep 3

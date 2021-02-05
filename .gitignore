@@ -39,3 +39,4 @@ package.json
 README.md
 config/project-scratch-def.json
 
+*.mdapi/

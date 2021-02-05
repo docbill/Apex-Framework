@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>This is a set of entries to manage the order of trigger operations, and which methods are active.</description>
+    <label>Trigger Management Entry</label>
+    <pluralLabel>Trigger Management Entries</pluralLabel>
+    <visibility>Public</visibility>
+</CustomObject>
