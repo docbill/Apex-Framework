@@ -16,12 +16,13 @@
  * If instead you are invoke this from an unlocked package that does not have a depency to include the TriggerManagement class, you can
  * use reflection to implement your trigger and trigger class.   An example of this will be added to the DailyScheduler package.
  * 
- * @version 2021-01-29
+ * @version 2021-02-14
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-11-12 - Created
  * @since 2020-12-03 - Use BooleanValuesHelper instead of AbstractTrigger for boolean values
  * @since 2021-01-29 - Ignore malformed call exceptions if not in a test class
+ * @since 2021-02-14 DE25830 - Read the Boolean Metadata from the correct helper
  */
 public without sharing class TriggerManagement implements Callable {
     /**
@@ -99,14 +100,11 @@ public without sharing class TriggerManagement implements Callable {
     }
 
     @TestVisible
-    static BooleanValuesHelper bvHelperFromMetadata {
-        get { 
-            if(bvHelperFromMetadata == null) {
-                bvHelperFromMetadata = BooleanValuesHelper.getBooleanValuesHelper('',true);
-            }
-            return bvHelperFromMetadata;
-        }
-        set;
+    static Boolean getValueFromMetadata(String name,Boolean defaultValue) {
+        // clear any previous settings to make sure we read metadata
+        BooleanValuesHelper.booleanSettingMap.remove(name);
+        BooleanValuesHelper.overrideSettingMap.remove(name);
+        return BooleanValuesHelper.getBooleanValue(name,defaultValue,false);
     }
 
     @TestVisible
@@ -123,11 +121,11 @@ public without sharing class TriggerManagement implements Callable {
             if(! String.valueOf(ex).substringBefore(':').endsWithIgnoreCase('ExtensionMalformedCallException')) {
                 throw ex;
             }
-            BooleanValuesHelper.booleanSettingMap.remove(action);
-            BooleanValuesHelper.overrideSettingMap.remove(action);
-            Boolean needsRethrow = Test.isRunningTest() && bvHelperFromMetadata.getValue(action,false);
+            Boolean needsRethrow = Test.isRunningTest() && getValueFromMetadata(action,false);
+            // make sure we don't call this action again
             BooleanValuesHelper.booleanSettingMap.put(action,false);
             BooleanValuesHelper.overrideSettingMap.put(action,false);
+            // do not store this value for automatic addition into the metadata
             if(BooleanValuesHelper.missingMap != null) {
                 BooleanValuesHelper.missingMap.remove(action);
             }

@@ -41,10 +41,8 @@ then
   sed -n -e 's,\s*<members>\(.*\)</members>\s*,\1,p' $mdapipath/package.xml | mdapipath="$mdapipath" xargs bash -c "$script" -
   sed -i -z -e 's,\s*<types>\s*<name>ApexTestSuite</name>\s*</types>,,' "$mdapipath/package.xml"
 fi
-echo sfdx force:mdapi:deploy -d "$mdapipath" --testlevel=RunSpecifiedTests -r "$(cd "$mdapipath"/classes/ && fgrep -i -l '@isTest' *.cls|sed -n -e 's,[.]cls$,,p'|tr '\n' ',')" --loglevel=warn -w 30 "$@"
-sfdx force:mdapi:deploy -d "$mdapipath" --testlevel=RunSpecifiedTests -r "$(cd "$mdapipath"/classes/ && fgrep -i -l '@isTest' *.cls|sed -n -e 's,[.]cls$,,p'|tr '\n' ',')" --loglevel=warn -w 30 "$@"
-rm -rf "$mdapipath"
-# This is just to make sure we have all the console output before we return to the command prompt
-sleep 3
-i=0;while [ $i -lt 25 ] ; do echo "";i=$(expr $i + 1);done
+testclasses="$(cd "$mdapipath"/classes/ && fgrep -i -l '@isTest' *.cls|sed -n -e 's,[.]cls$,,p'|tr '\n' ',')"
+echo sfdx force:mdapi:deploy -d "$mdapipath" --testlevel=RunSpecifiedTests -r $testclasses --loglevel=warn -w 30 "$@"
+(strace -o /tmp/strace.$$ -f sfdx force:mdapi:deploy -d "$mdapipath" --testlevel=RunSpecifiedTests -r $testclasses --loglevel=warn -w 30 "$@" 2>&1; sleep 10)|cat
+rm -rf "$mdapipath" /tmp/strace.$$
  

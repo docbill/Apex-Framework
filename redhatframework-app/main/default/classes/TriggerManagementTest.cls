@@ -1,11 +1,12 @@
 /**
  * This is a test class for TriggerManagement.
  * 
- * @version 2020-01-29
+ * @version 2021-02-14
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-11-15 Created
  * @since 2021-01-29 Added callTriggerTest
+ * @since 2021-02-14 DE25830 - Test with actual boolean metadata
  */
 @isTest
 public class TriggerManagementTest implements Callable {
@@ -17,12 +18,15 @@ public class TriggerManagementTest implements Callable {
     public TriggerManagementTest() {}
 
 
+    static Integer malformedCount = 0;
+
     /**
      * Method to invoke all trigger methods on an object.
      */
     public Object call(String action, Map<String, Object> args) {
         switch on action {
-            when 'malformed','malformed2' {
+            when 'malformed','TEST.FALSE-KEY1','TEST.TRUE-KEY1' {
+                malformedCount++;
                 throw new ExtensionMalformedCallException('I expected this');
             }
             when 'exception' {
@@ -41,25 +45,34 @@ public class TriggerManagementTest implements Callable {
     @isTest
     static void callTriggerTest() {
         BooleanValuesHelper.missingMap = new Map<String,Boolean>();
-        BooleanValuesHelper.getBooleanValue('malformed',true);
-        System.assertEquals(false,TriggerManagement.bvHelperFromMetadata.getValue('malformed',false),'bvHelper check failed');
-        // pretend like we have metadata
-        TriggerManagement.bvHelperFromMetadata.booleanMap.put('malformed',true);
+        System.assertEquals(true,BooleanValuesHelper.getBooleanValue('malformed',true),'BooleanValuesHelper.getBooleanValue(malformed,true)');
+        System.assertEquals(true,BooleanValuesHelper.getBooleanValue('TEST.FALSE-KEY1',true),'BooleanValuesHelper.getBooleanValue(TEST.FALSE-KEY1,true)');
+        System.assertEquals(false,BooleanValuesHelper.getBooleanValue('TEST.TRUE-KEY1',false),'BooleanValuesHelper.getBooleanValue(TEST.TRUE-KEY1,false)');
+        System.assertEquals(true,BooleanValuesHelper.getBooleanValue('exception',true),'BooleanValuesHelper.getBooleanValue(exception,true)');
+        System.assertEquals(0,malformedCount,'malformedCount');
+
+        Test.startTest();
+        System.assertEquals(true,TriggerManagement.getValueFromMetadata('TEST.TRUE-KEY1',false),'bvHelper check failed');
+
         try {
-            TriggerManagement.callTrigger(new TriggerManagementTest(),'malformed',new Map<String,Object>());
+            TriggerManagement.callTrigger(new TriggerManagementTest(),'TEST.TRUE-KEY1',new Map<String,Object>());
             System.assert(false,'Expected ExtensionMalformedCallException');
         }
         catch(ExtensionMalformedCallException ex) {
             System.debug('caught expected exception: '+ex);
-            System.assertEquals(false,BooleanValuesHelper.getBooleanValue('malformed',true));
+            System.assertEquals(false,BooleanValuesHelper.getBooleanValue('TEST.TRUE-KEY1',true));
         }
+        System.assertEquals(1,malformedCount,'malformedCount');
 
         // check that an we don't throw if there is no metadata value
-        BooleanValuesHelper.getBooleanValue('malformed2',true);
-        TriggerManagement.callTrigger(new TriggerManagementTest(),'malformed2',new Map<String,Object>());
+        TriggerManagement.callTrigger(new TriggerManagementTest(),'malformed',new Map<String,Object>());
+        System.assertEquals(2,malformedCount,'malformedCount');
+
+        // check that an we don't throw if there is the metadata value is false
+        TriggerManagement.callTrigger(new TriggerManagementTest(),'TEST.FALSE-KEY1',new Map<String,Object>());
+        System.assertEquals(3,malformedCount,'malformedCount');
 
         // non-malformed exceptions should be thrown
-        BooleanValuesHelper.getBooleanValue('exception',true);
         try {
             TriggerManagement.callTrigger(new TriggerManagementTest(),'exception',new Map<String,Object>());
             System.assert(false,'Expected Exception');
@@ -68,6 +81,8 @@ public class TriggerManagementTest implements Callable {
             System.debug('caught expected exception: '+ex);
             System.assertEquals(true,BooleanValuesHelper.getBooleanValue('exception',true));
         }
+        Test.stopTest();
+        System.assertEquals(3,malformedCount,'malformedCount');
     }
 
     @isTest

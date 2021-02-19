@@ -1,11 +1,12 @@
 /**
  * This is a set of utilities for treating boolean metadata a a map.
  * 
- * @version 2020-01-29
+ * @version 2021-02-13
  * 
  * @author Bill Riemers <briemers@redhat.com>
  * @since 2020-12-02 - Created
  * @since 2021-01-29 - Allow ignoreMetadata per instance 
+ * @since 2021-02-13 DE25830 - Fix to make sure maps are per helper instance
  */
 public without sharing class BooleanValuesHelper {
     private static Map<Boolean,Map<String,BooleanValuesHelper>> booleanValuesHelperMaps = (new Map<Boolean,Map<String,BooleanValuesHelper>>{
@@ -82,8 +83,8 @@ public without sharing class BooleanValuesHelper {
         return getBooleanValuesHelper(source,null);
     }
 
-    private static Map<String,Boolean> booleanMapFromDefaults = null;
-    private static Map<String,Boolean> booleanMapFromMetadata = null;
+    private Map<String,Boolean> booleanMapFromDefaults = null;
+    private Map<String,Boolean> booleanMapFromMetadata = null;
 
     /**
      * This is the map of data obtained from the BooleanMetadata__mdt table with BooleanHierarchy overrides.
@@ -93,7 +94,7 @@ public without sharing class BooleanValuesHelper {
             Boolean needsReset = (ignoreMetadata != (! useTestingDefaults) && useTestingDefaultsSaveVersion != useTestingDefaultsVersion);
             if(ignoreMetadata == false || (ignoreMetadata == null && useTestingDefaults == false)) {
                 if(booleanMapFromMetadata == null || needsReset) {
-                    booleanMapFromMetadata = getBooleanMap(source);
+                    booleanMapFromMetadata = getBooleanMap(source,ignoreMetadata);
                     useTestingDefaultsSaveVersion = useTestingDefaultsVersion;
                 }
                 return booleanMapFromMetadata;
@@ -157,12 +158,26 @@ public without sharing class BooleanValuesHelper {
      * @return the value in the map or the defaultValue
      */
     public static Boolean getBooleanValue(final String name,Boolean defaultValue) {
+        return getBooleanValue(name,defaultValue,null);
+    }
+
+    /**
+     * Check if a trigger is active by referencing the
+     * booleanSettingMap.  If an entry does not exist in
+     * the map, one will be add by referencing BooleanSetting__c.
+     *
+     * @param name the name of the boolean setting
+     * @param defaultValue the value to return if null
+     * @param ignoreMetadata when true we ignore the value not the existance of metadata
+     * @return the value in the map or the defaultValue
+     */
+    public static Boolean getBooleanValue(final String name,Boolean defaultValue,Boolean ignoreMetadata) {
         final Integer i=name.indexOf('.');
         String source = '';
         if(i>= 0) {
             source = name.left(i);
         }
-        final BooleanValuesHelper bvHelper = getBooleanValuesHelper(source);
+        final BooleanValuesHelper bvHelper = getBooleanValuesHelper(source,ignoreMetadata);
         String key = name;
         if(i >= 0) {
             key = name.substring(i+1);
@@ -238,18 +253,7 @@ public without sharing class BooleanValuesHelper {
      * a BooleanHierarchy__c field with the field name matching the developer name.
      * 
      * @param source
-     * @return map
-     */
-    public static Map<String,Boolean> getBooleanMap(final String source) {
-        return getBooleanMap(source,null);
-    }
-
-    /**
-     * Query the map from the BooleanMetadata__mdt table.  Each value maybe overwritten by
-     * a BooleanHierarchy__c field with the field name matching the developer name.
-     * 
-     * @param source
-     * @param ignoreMetadata
+     * @param ignoreMetadata when true ignore the values, but not the existance
      * @return map
      */
     public static Map<String,Boolean> getBooleanMap(final String source,Boolean ignoreMetadata) {
