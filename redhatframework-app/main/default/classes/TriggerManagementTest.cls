@@ -1,12 +1,13 @@
 /**
  * This is a test class for TriggerManagement.
  * 
- * @version 2021-02-14
+ * @version 2021-03-30
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-11-15 Created
  * @since 2021-01-29 Added callTriggerTest
  * @since 2021-02-14 DE25830 - Test with actual boolean metadata
+ * @since 2021-03-30 - Increase test coverage
  */
 @isTest
 public class TriggerManagementTest implements Callable {
@@ -86,6 +87,21 @@ public class TriggerManagementTest implements Callable {
     }
 
     @isTest
+    static void callTriggerTest2() {
+        Trigger_Management_Entry__mdt entry = (Trigger_Management_Entry__mdt)JSON.deserialize(
+            '{"Class_Name__c":"'+TriggerManagement.class.getName()+'"}',
+            Trigger_Management_Entry__mdt.class
+        );
+        Test.startTest();
+        try {
+            TriggerManagement.callTrigger(new Map<String,Callable>(),entry,null);
+        }
+        catch(Exception ex) {}
+        Test.stopTest();
+        System.assertNotEquals(null,TriggerManagement.lastRethrownException,'lastRethrownException');
+    }
+
+    @isTest
     static void callTest() {
         for(TriggerArguments.TriggerType triggerTypeValue : TriggerManagement.triggerFieldMap.keySet() ) {
             triggerArgumentsValue = null;
@@ -130,6 +146,24 @@ public class TriggerManagementTest implements Callable {
         Attachment attach = new Attachment(Body = Blob.valueOf('anything'),Name='TestAttachment',ParentId=acc.Id);
         // we are only are verifying no exception is thrown
         insert attach;
+    }
+
+    @isTest
+    static void getEntityBaseConditionTest() {
+        Test.startTest();
+        System.assertEquals( '',
+            TriggerManagement.getEntityBasedCondition('catDog',null,null,null),
+            'getEntityBasedCondition(catdog,null,null,null)' );
+        System.assertEquals( '',
+            TriggerManagement.getEntityBasedCondition(null,'catdog__c','a','b'),
+            'getEntityBasedCondition(null,catdog__c,a,b)' );
+        System.assertNotEquals( '',
+            TriggerManagement.getEntityBasedCondition(null,'catdog','a','b'),
+            'getEntityBasedCondition(null,catdog__c,a,b)' );
+        System.assertNotEquals( '',
+            TriggerManagement.getEntityBasedCondition(null,'catdog__e','a','b'),
+            'getEntityBasedCondition(null,catdog__e,a,b)' );
+        Test.stopTest();
     }
 
     public class ExtensionMalformedCallException extends Exception {}

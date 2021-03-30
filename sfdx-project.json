@@ -8,8 +8,8 @@
             "path": "redhatframework-app",
             "default": false,
             "package": "RedHatFramework",
-            "versionName": "ver 1.0",
-            "versionNumber": "1.0.0.NEXT"
+            "versionName": "ver 1.1",
+            "versionNumber": "1.1.0.NEXT"
         }
     ],
     "namespace": "",
@@ -29,6 +29,8 @@
         "RedHatFramework@0.9.0-2": "04t3a000000LcwjAAC",
         "RedHatFramework@1.0.0-1": "04t3a000000LcxmAAC",
         "RedHatFramework@1.0.0-2": "04t3a000000LcyaAAC",
-        "RedHatFramework@1.0.0-3": "04t3a000000LcyfAAC"
+        "RedHatFramework@1.0.0-3": "04t3a000000LcyfAAC",
+        "RedHatFramework@1.1.0-1": "04t3a000001enUDAAY",
+        "RedHatFramework@1.1.0-2": "04t3a000001enUIAAY"
     }
 }

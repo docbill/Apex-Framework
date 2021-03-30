@@ -1,11 +1,12 @@
 /**
  * Test class for DatabaseHelper.
  * 
- * @version 2021-01-07
+ * @version 2021-03-30
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-08-18 US268650 - Created
  * @since 2021-01-07 US281262 - Added setEnqueueScope for Queuable splitting of dml
+ * @since 2021-03-30 - Increase test coverage
  */
 @IsTest
 private class DatabaseHelperTest {
@@ -385,12 +386,25 @@ private class DatabaseHelperTest {
             insert currentUser;
         }
         catch(DMLException ex) {
+            TriggerManagement.lastRethrownException = ex;
             result = new DatabaseHelper.Result(DatabaseHelper.DMLOperation.INSERT_OP,ex,currentUser);
+            List<String> resultStrings = DatabaseHelper.addStackTraceString(
+                new List<String>(),
+                ex );
+            System.assertNotEquals(0,resultStrings.size(),'Expected a stack trace string');
         }
         // this will be null because we created the result from an exception
         System.assertEquals(null,DatabaseHelper.getId(result),'Expected null');
         System.assertNotEquals(null,result.getException().statusCode,'getException().statusCode');
         System.assertNotEquals(null,result.getException().fields,'getException().fields');
+        Exception typeEx = null;
+        try {
+            DatabaseHelper.initCause(result.getException());
+        }
+        catch(System.TypeException ex) {
+            typeEx = ex;
+        }
+        System.assertNotEquals(null,typeEx,'typeEx');
     }
 
     @isTest
@@ -429,5 +443,21 @@ private class DatabaseHelperTest {
         // for some reason the following check fails when doing a package deploy but not when running standalone
         // User u = [select Id,FirstName from User where Id = :currentUser.Id];
         // System.assertEquals(currentUser.FirstName,u.FirstName,'Failed to assign FirstName');
+    }
+
+    @IsTest
+    static void enqueueJobTest() {
+        List<DatabaseHelper.DatabaseHelperQueueable> queueableList = (
+            new List<DatabaseHelper.DatabaseHelperQueueable>{
+                new DatabaseHelper.DatabaseHelperQueueable(
+                    new DatabaseHelper(),
+                    DatabaseHelper.DMLOperation.INSERT_OP,
+                    (new List<List<SObject>>{new List<SObject>()}) )
+            }
+        );
+        Test.startTest();
+        queueableList = DatabaseHelper.enqueueJob(queueableList);
+        Test.stopTest();
+        System.assertEquals(null,queueableList,'queueableList');
     }
 }

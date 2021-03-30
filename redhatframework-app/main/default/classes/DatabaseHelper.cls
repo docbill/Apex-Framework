@@ -2,17 +2,19 @@
  * This Class implements some useful database utilities.  Many copied from TestDataFactory.  It is pretty dangerious to use these in code, but
  * sometimes you need to deactivate triggers to repair or migrate data.   So these are available to call from anonymous apex...
  *
- * @version 2021-01-27
+ * @version 2021-03-24
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-08-19 US266008 - Added governor limit checks
  * @since 2021-01-07 US281262 - Added setEnqueueScope for Queuable splitting of dml
  * @since 2021-01-27 workaround stack trace bug
+ * @since 2021-02-11 initCause on exceptions
+ * @since 2021-03-24 lock on DatabaseHelper.class.getName() when enqueueJob is called
+ * @since 2021-03-24 remember in queueable instance boolean values
  * 
  * @todo update TestDataFactory to call this class, rather than having a duplicate implementation.
  */
 public with sharing class DatabaseHelper {
-
     /**
      * This is just a wiled guess at the minimum numer of ms we should reserve for a DML
      * Statement.
@@ -373,6 +375,7 @@ public with sharing class DatabaseHelper {
         Boolean isUpsertResultClass = false;
         Boolean isDeleteResultClass = false;
         Boolean isUndeleteResultClass = false;
+        TriggerManagement.lastRethrownException = null;
         if(legacyMode == true) {
             switch on op {
                 when INSERT_OP, UPDATE_OP {
@@ -537,6 +540,13 @@ public with sharing class DatabaseHelper {
         return retval;
     }
 
+    @TestVisible
+    static void initCause(Exception ex) {
+        if(TriggerManagement.lastRethrownException != null) {
+            ex.initCause(TriggerManagement.lastRethrownException);
+        }
+    }
+
     /**
      * This is a class that can use to in leiu of the Database.*Result objects.
      * That way we can add to this set exceptions that were never actually thrown
@@ -617,6 +627,7 @@ public with sharing class DatabaseHelper {
                     for(Database.Error e : errors) {
                         ResultException ex = new ResultException(e.getMessage());
                         ex.statusCode = e.getStatusCode();
+                        initCause(ex);
                         ex.stackTraceString = null;
                         exceptions.add(ex);
                     }
@@ -701,6 +712,26 @@ public with sharing class DatabaseHelper {
 
     }
 
+    @TestVisible
+    static List<DatabaseHelperQueueable> enqueueJob(List<DatabaseHelperQueueable> queueableList) {
+        if(! queueableList.isEmpty()) {
+            queueableList[0].queueableList = queueableList;
+            queueableList[0].booleanSettingMap = BooleanValuesHelper.booleanSettingMap;
+            queueableList[0].overrideSettingMap = BooleanValuesHelper.overrideSettingMap;
+            System.enqueueJob(queueableList[0]);
+            queueableList = null;
+        }
+        return queueableList;
+    }
+
+    @TestVisible
+    static List<String> addStackTraceString(List<String> results,Exception cause) {
+        if(cause != null) {
+            results.add(cause.getStackTraceString());
+        }
+        return results;
+    }
+
     // we use this class to convert to json
     private class SimpleResult {
         Boolean success;
@@ -734,9 +765,15 @@ public with sharing class DatabaseHelper {
                         Integer.valueOf('catdog');
                     }
                     catch(Exception ex) {
+                        List<String> results = addStackTraceString(
+                            new List<String>(),
+                            ex.getCause() );
+
                         for(String v : ex.getStackTraceString().split('\n',3)) {
-                            value = v;
+                            results.add(v);
                         }
+
+                        value = String.join(results,'\n');
                     }
                 }
                 stackTraceString = value;
@@ -787,12 +824,18 @@ public with sharing class DatabaseHelper {
         }
     }
 
+    static List<DatabaseHelperQueueable> databaseHelperQueueableList = null;
+
     public class DatabaseHelperQueueable implements Queueable {
         DatabaseHelper helper;
         DMLOperation op;
         List<List<SObject>> recordsList;
+        List<DatabaseHelperQueueable> queueableList;
         Integer enqueueScope;
+        Map<String,Boolean> booleanSettingMap;
+        Map<String,Boolean> overrideSettingMap;
 
+        @TestVisible
         DatabaseHelperQueueable(
             DatabaseHelper helper,
             DMLOperation op,
@@ -805,15 +848,46 @@ public with sharing class DatabaseHelper {
         }
 
         public void enqueueJob() {
+            if(DatabaseHelper.databaseHelperQueueableList == null) {
+                DatabaseHelper.databaseHelperQueueableList = new List<DatabaseHelperQueueable>();
+            }
             if(! recordsList.isEmpty()) {
-                System.debug('enqueueJob');
-                System.enqueueJob(this);
+                DatabaseHelper.databaseHelperQueueableList.add(this);
+            }
+            if(! DatabaseHelper.databaseHelperQueueableList.isEmpty()) {
+                final String LOCK_STRING = DatabaseHelper.class.getName();
+                if(ThreadLock.lock(LOCK_STRING)) {
+                    try {
+                        this.booleanSettingMap = BooleanValuesHelper.booleanSettingMap;
+                        this.overrideSettingMap = BooleanValuesHelper.overrideSettingMap;
+                        this.queueableList = DatabaseHelper.databaseHelperQueueableList;
+                        System.debug('enqueueJob');
+                        System.enqueueJob(this.queueableList[0]);
+                    }
+                    finally {
+                        ThreadLock.unlock(LOCK_STRING);
+                        this.booleanSettingMap = null;
+                        this.overrideSettingMap = null;
+                        this.queueableList = null;
+                        DatabaseHelper.databaseHelperQueueableList = null;
+                        recordsList.clear();
+                    }
+                }
             }
         }
     
         public void execute(QueueableContext context) {
             List<SObject> currentList = recordsList.remove(0);
-            enqueueJob();
+            if(recordsList.isEmpty()) {
+                this.queueableList.remove(0);
+            }
+            BooleanValuesHelper.booleanSettingMap.clear();
+            BooleanValuesHelper.booleanSettingMap.putAll(this.booleanSettingMap);
+            BooleanValuesHelper.overrideSettingMap.clear();
+            BooleanValuesHelper.overrideSettingMap.putAll(this.overrideSettingMap);
+            this.queueableList = DatabaseHelper.enqueueJob(this.queueableList);
+            this.booleanSettingMap = null;
+            this.overrideSettingMap = null;
             helper.setEnqueueScope(null).dmlStatement(op,currentList);
         }
     }

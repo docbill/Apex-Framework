@@ -37,6 +37,7 @@ public without sharing class TriggerArguments {
     public static final String OLD_LIST_KEY = 'old';
     public static final String OLD_MAP_KEY = 'oldMap';
     public static final String TARGET_OBJECT_TYPE_KEY = 'targetObjectType';
+    public static final String CALLABLE_MAP = 'callableMap';
 
     public Enum TriggerType { BEFORE_INSERT, AFTER_INSERT, BEFORE_UPDATE, AFTER_UPDATE, BEFORE_DELETE, AFTER_DELETE, AFTER_UNDELETE }
 
@@ -238,6 +239,21 @@ public without sharing class TriggerArguments {
      */
     public final TriggerType triggerTypeValue;
 
+    /** 
+     * The map of all callable triggers called so far as part of the current DML
+     * operation.
+     */
+    public final Map<String,Callable> callableMap {
+        get;
+        set {
+            if(value == null) {
+                value = new Map<String,Callable>();
+            }
+            callableArguments.put(CALLABLE_MAP,value);
+            callableMap = value;
+        } 
+    }
+
     /**
      * Constructor.  A null or empty value will construct using Trigger values.
      * 
@@ -281,6 +297,7 @@ public without sharing class TriggerArguments {
         this.targetObjectType = (String)this.callableArguments.get(TARGET_OBJECT_TYPE_KEY);
         // the triggerTypeType value will allow us to use switch statements
         this.triggerTypeValue = getTriggerType();
+        this.callableMap = (Map<String,Callable>)this.callableArguments.get(CALLABLE_MAP);
     }
 
     /**

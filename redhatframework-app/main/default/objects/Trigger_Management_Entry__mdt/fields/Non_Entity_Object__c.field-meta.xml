@@ -19,6 +19,11 @@
                 <label>Attachment</label>
             </value>
             <value>
+                <fullName>Event</fullName>
+                <default>false</default>
+                <label>Event</label>
+            </value>
+            <value>
                 <fullName>Task</fullName>
                 <default>false</default>
                 <label>Task</label>
