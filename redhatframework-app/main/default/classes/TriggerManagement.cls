@@ -16,15 +16,23 @@
  * If instead you are invoke this from an unlocked package that does not have a depency to include the TriggerManagement class, you can
  * use reflection to implement your trigger and trigger class.   An example of this will be added to the DailyScheduler package.
  * 
- * @version 2021-02-14
+ * @version 2021-03-30
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-11-12 - Created
  * @since 2020-12-03 - Use BooleanValuesHelper instead of AbstractTrigger for boolean values
  * @since 2021-01-29 - Ignore malformed call exceptions if not in a test class
+ * @since 2021-02-11 - Check for custom classes includes __?, not just __c
+ * @since 2021-02-11 - Add the callableMap is now added into the callableArguments
+ * @since 2021-02-11 - Added lastCaughtException
  * @since 2021-02-14 DE25830 - Read the Boolean Metadata from the correct helper
+ * @since 2021-03-03 US286760 - Add support for multiple listeners on a platform event
+ * @since 2021-03-30 - Increase test coverage
  */
 public without sharing class TriggerManagement implements Callable {
+    /** This is a way to reach in and grab the exception from the last DML operation. */
+    public static Exception lastRethrownException = null;
+
     /**
      * Standard constructor.
      */
@@ -34,6 +42,7 @@ public without sharing class TriggerManagement implements Callable {
      * Method to invoke all trigger methods on an object.
      */
     public Object call(String action, Map<String, Object> args) {
+        lastRethrownException = null;
         switch on action {
             when null,'','AbstractTrigger' {
                 action = getUniqueTriggerString(action);
@@ -45,7 +54,7 @@ public without sharing class TriggerManagement implements Callable {
         if(! BooleanValuesHelper.getBooleanValue('DeactivateAll',false)) {
             //System.debug('Trigger Management entered '+action);
             TriggerArguments localTrigger = new TriggerArguments(args);
-            String queryString = createQueryString(localTrigger);
+            String queryString = createQueryString(action,localTrigger);
             if(queryString != null) {
                 String key = localTrigger.targetObjectType+':'+queryString;
                 String lastAction = lastActionMap.get(key);
@@ -53,7 +62,7 @@ public without sharing class TriggerManagement implements Callable {
                 if(lastAction == null || action.equals(lastAction) ) {
                     lastActionMap.put(key,action);
                     List<Trigger_Management_Entry__mdt> entries = queryEntriesByEntity(queryString,localTrigger.targetObjectType);
-                    callTriggerMethods(entries,localTrigger.callableArguments);
+                    callTriggerMethods(entries,localTrigger);
                 }
             }
         }
@@ -80,20 +89,15 @@ public without sharing class TriggerManagement implements Callable {
     }
 
     // For each entry, create the callable class, and invoke it with the specified MasterLabel as the action.
-    static void callTriggerMethods(List<Trigger_Management_Entry__mdt> entries,Map<String,Object> callableArguments) {
+    static void callTriggerMethods(List<Trigger_Management_Entry__mdt> entries,TriggerArguments localTrigger) {
         //System.debug('TriggerManagement entries='+entries);
         if(entries != null) {
-            Map<String,Callable> callableMap = new Map<String,Callable>(); 
+            Map<String,Object> callableArguments = localTrigger.callableArguments;
+            Map<String,Callable> callableMap = localTrigger.callableMap;
             for(Trigger_Management_Entry__mdt entry : entries ) {
                 //System.debug('TriggerManagement entry.MasterLabel='+entry.MasterLabel);
                 if(BooleanValuesHelper.getBooleanValue(entry.MasterLabel,true)) {
-                    //System.debug('TriggerManagement entry.Class_Name__c='+entry.Class_Name__c);
-                    Callable c = callableMap.get(entry.Class_Name__c);
-                    if(c == null) {
-                        c = (Callable)Type.forName(entry.Class_Name__c).newInstance();
-                        callableMap.put(entry.Class_Name__c,c);
-                    }
-                    callTrigger(c,entry.MasterLabel,callableArguments);
+                    callTrigger(callableMap,entry,callableArguments);
                 }
             }
         }
@@ -105,6 +109,28 @@ public without sharing class TriggerManagement implements Callable {
         BooleanValuesHelper.booleanSettingMap.remove(name);
         BooleanValuesHelper.overrideSettingMap.remove(name);
         return BooleanValuesHelper.getBooleanValue(name,defaultValue,false);
+    }
+
+    @TestVisible
+    static void callTrigger(
+        Map<String,Callable> callableMap,
+        Trigger_Management_Entry__mdt entry,
+        Map<String,Object> callableArguments
+    ) {
+        lastRethrownException=null;
+        try {
+            //System.debug('TriggerManagement entry.Class_Name__c='+entry.Class_Name__c);
+            Callable c = callableMap.get(entry.Class_Name__c);
+            if(c == null) {
+                c = (Callable)Type.forName(entry.Class_Name__c).newInstance();
+                callableMap.put(entry.Class_Name__c,c);
+            }
+            callTrigger(c,entry.MasterLabel,callableArguments);
+        }
+        catch(Exception ex) {
+            lastRethrownException=ex;
+            throw ex;
+        }
     }
 
     @TestVisible
@@ -185,7 +211,7 @@ public without sharing class TriggerManagement implements Callable {
 
     // dynamically generate the query string based on the trigger arguments
     @TestVisible
-    static String createQueryString(TriggerArguments localTrigger) {
+    static String createQueryString(String action,TriggerArguments localTrigger) {
         String queryString = null;
         //System.debug('localTrigger.targetObjectType='+localTrigger.targetObjectType);
         if(String.isNotBlank(localTrigger.targetObjectType)) {
@@ -193,29 +219,55 @@ public without sharing class TriggerManagement implements Callable {
             //System.debug('TriggerManagement triggerField='+triggerField);
             if(triggerField != null) {
                 final String nonEntityValue = getNonEntityValue( localTrigger.targetObjectType );
-                String entityCondition = '';
-                // An entity condition would always fail for custom objects.
-                // So instead we'll have to accept all entities for custom objects and filter later.
-                if(nonEntityValue == null && ! localTrigger.targetObjectType.endsWithIgnoreCase('__c') ) {
-                    entityCondition = ' and '
-                        + Trigger_Management_Entry__mdt.Entity_Object__c.getDescribe().getName()
-                        + '='+quoteValue(localTrigger.targetObjectType.toUpperCase());
-                }
+                final String entityObjectFieldName = Trigger_Management_Entry__mdt.Entity_Object__c.getDescribe().getName();
+                final String entityBasedCondition = getEntityBasedCondition(
+                    nonEntityValue,
+                    localTrigger.targetObjectType,
+                    entityObjectFieldName,
+                    action );
                 queryString = 'select MasterLabel,'
                     + Trigger_Management_Entry__mdt.Class_Name__c.getDescribe().getName()+','
-                    + Trigger_Management_Entry__mdt.Entity_Object__c.getDescribe().getName().replace('__c','__r.QualifiedApiName')+','
+                    + entityObjectFieldName.replace('__c','__r.QualifiedApiName')+','
                     + Trigger_Management_Entry__mdt.Non_Entity_Object__c.getDescribe().getName()+','
                     + Trigger_Management_Entry__mdt.Sequence_Number__c.getDescribe().getName()+','
                     + 'DeveloperName'
                     + ' from '+Trigger_Management_Entry__mdt.SObjectType.getDescribe().getName()
                     + ' where '+triggerfield.getDescribe().getName()+'=true'
-                    + entityCondition
+                    + entityBasedCondition
                     + ' and '+Trigger_Management_Entry__mdt.Non_Entity_Object__c.getDescribe().getName() + '='+quoteValue(nonEntityValue)
                     + ' order by '+Trigger_Management_Entry__mdt.Sequence_Number__c.getDescribe().getName();
             }
         }
         //System.debug('TriggerManagement queryString='+queryString);
         return queryString;
+    }
+
+    @TestVisible
+    static String getEntityBasedCondition(
+        String nonEntityValue,
+        String targetObjectType,
+        String entityObjectFieldName,
+        String action )
+    {
+        String entityBasedCondition = '';
+        if(nonEntityValue == null) {
+            String suffix = targetObjectType.right(3);
+            // An entity condition would always fail for custom objects.
+            // So instead we'll have to accept all entities for custom objects and filter later.
+            if(! suffix.startsWith('__')) {
+                entityBasedCondition = ' and '
+                    + entityObjectFieldName
+                    + '='+quoteValue(targetObjectType.toUpperCase());
+            }
+            // if this is a platform event we'll filter on the master label
+            // because we allow more than one trigger per object, because
+            // each represents a separate listener
+            else if(suffix == '__e') {
+                entityBasedCondition = ' and MasterLabel like '
+                    + quoteValue(action.toUpperCase()+'.%');
+            }
+        }
+        return entityBasedCondition;
     }
 
     static String quoteValue(String value) {
