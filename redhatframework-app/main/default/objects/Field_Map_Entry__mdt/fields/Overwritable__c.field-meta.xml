@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Overwritable__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>Check to indicate this will overwrite a non-null field value</description>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>Check to indicate this will overwrite a non-null field value</inlineHelpText>
+    <label>Overwritable</label>
+    <type>Checkbox</type>
+</CustomField>

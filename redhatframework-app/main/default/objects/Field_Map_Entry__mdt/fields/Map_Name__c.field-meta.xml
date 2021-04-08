@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Map_Name__c</fullName>
+    <description>This is the name of the map.</description>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <label>Map Name</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>true</sorted>
+            <value>
+                <fullName>APTS Asset Queue</fullName>
+                <default>false</default>
+                <label>APTS Asset Queue</label>
+            </value>
+            <value>
+                <fullName>APTS Order Creator</fullName>
+                <default>true</default>
+                <label>APTS Order Creator</label>
+            </value>
+            <value>
+                <fullName>Test_Map</fullName>
+                <default>false</default>
+                <label>Test_Map</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
