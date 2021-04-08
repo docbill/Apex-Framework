@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>APTS_Asset_Queue</fullName>
+    <columns>Sequence_Number__c</columns>
+    <columns>MasterLabel</columns>
+    <columns>Destination_Entity__c</columns>
+    <columns>Destination_Field__c</columns>
+    <columns>Source_Entity__c</columns>
+    <columns>Source_Field__c</columns>
+    <columns>Default_Value__c</columns>
+    <columns>Overwritable__c</columns>
+    <columns>Nullable__c</columns>
+    <columns>Required__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Map_Name__c</field>
+        <operation>equals</operation>
+        <value>APTS Asset Queue</value>
+    </filters>
+    <label>APTS Asset Queue</label>
+    <language>en_US</language>
+</ListView>

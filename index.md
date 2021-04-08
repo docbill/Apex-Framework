@@ -25,6 +25,11 @@ See Also: [Boolean Values](docs/topics/booleanvalues/)
 This is an enhancement for the salesforce Database object that allows automatic governor limit checks, better error tracking, and trigger deactivation.   It is a good idea to use this helper to simplify your code, and to better handle governor limit exceptions.
 
 See Also: [Database Helper](docs/topics/databasehelper/)
+### Field_Map
+
+This is a simple class for specifying fields to copy from one object to another in a matadata map.
+
+See Also: [Field Map](docs/topics/fieldmaps/)
 
 ### DatabaseUtilities (@Depreciated)
 
