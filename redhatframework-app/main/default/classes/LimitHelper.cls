@@ -62,6 +62,7 @@
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-08-13 US266008 - Created
+ * @since 2021-04-28 - Add queueable jobs limits check
  */
 public without sharing class LimitHelper {
     /**
@@ -95,16 +96,29 @@ public without sharing class LimitHelper {
                 MasterLabel,
                 cpuTime__c,
                 dmlStatements__c,
-                dmlRows__c
+                dmlRows__c,
+                queries__c,
+                queueableJobs__c
             from Limit_Reserve__mdt
             where MasterLabel = :masterLabel
             limit 1 ])
         {
             value = r;
-            cpuTimeReserved += r.cpuTime__c.intValue();
-            dmlStatementsReserved += r.dmlStatements__c.intValue();
-            dmlRowsReserved += r.dmlRows__c.intValue();
-            queriesReserved += r.dmlStatements__c.intValue();
+            if(r.cpuTime__c != null) {
+                cpuTimeReserved += r.cpuTime__c.intValue();
+            }
+            if(r.dmlStatements__c != null) {
+                dmlStatementsReserved += r.dmlStatements__c.intValue();
+            }
+            if(r.dmlRows__c != null) {
+                dmlRowsReserved += r.dmlRows__c.intValue();
+            }
+            if(r.queries__c != null) {
+                queriesReserved += r.queries__c.intValue();
+            }
+            if(r.queueableJobs__c != null) {
+                queueableJobsReserved += r.queueableJobs__c.intValue();
+            }
         }
         reservedList.add(0,value);
     }
@@ -122,10 +136,21 @@ public without sharing class LimitHelper {
             if(value instanceof Limit_Reserve__mdt) {
                 Limit_Reserve__mdt r = (Limit_Reserve__mdt)value;
                 xmasterLabel = r.MasterLabel;
-                cpuTimeReserved -= r.cpuTime__c.intValue();
-                dmlStatementsReserved -= r.dmlStatements__c.intValue();
-                dmlRowsReserved -= r.dmlRows__c.intValue();
-                queriesReserved -= r.dmlStatements__c.intValue();
+                if(r.cpuTime__c != null) {
+                    cpuTimeReserved -= r.cpuTime__c.intValue();
+                }
+                if(r.dmlStatements__c != null) {
+                    dmlStatementsReserved -= r.dmlStatements__c.intValue();
+                }
+                if(r.dmlRows__c != null) {
+                    dmlRowsReserved -= r.dmlRows__c.intValue();
+                }
+                if(r.queries__c != null) {
+                    queriesReserved -= r.queries__c.intValue();
+                }
+                if(r.queueableJobs__c != null) {
+                    queueableJobsReserved -= r.queueableJobs__c.intValue();
+                }
             }
             else {
                 xmasterLabel = String.valueOf(value);
@@ -192,6 +217,21 @@ public without sharing class LimitHelper {
         return this;
     }
 
+    // How many queueableJobs are needed for the next call?
+    private Integer queueableJobs = 0;
+
+    /**
+     * Set how many queueableJobs are needed for the next call?
+     * 
+     * @param value
+     * @return this
+     */
+    public LimitHelper setQueueableJobs(Integer value) {
+        queueableJobs = value;
+        return this;
+    }
+
+
     /**
      * Check all the assigned limit values.
      * 
@@ -204,6 +244,7 @@ public without sharing class LimitHelper {
             checkLimitDMLStatements(dmlStatements,true);
             checkLimitDMLRows(dmlRows,true);
             checkLimitQueries(queries,true);
+            checkLimitQueueableJobs(queueableJobs,true);
         }
         catch(LimitsException ex) {
             if(throwsException == true 
@@ -282,7 +323,7 @@ public without sharing class LimitHelper {
             Integer dmlStatementsLimit = Limits.getLimitDMLStatements()-dmlStatementsReserved;
             System.debug('checkLimitDMLStatements '+dmlStatements+' out of '+dmlStatementsLimit);
             if(dmlStatements > dmlStatementsLimit) {
-                return createLimitsMessage('DML Rows',dmlStatements,dmlStatementsLimit,throwsException);
+                return createLimitsMessage('DML Statements',dmlStatements,dmlStatementsLimit,throwsException);
             }
         }
         return null;
@@ -306,7 +347,34 @@ public without sharing class LimitHelper {
             Integer queriesLimit = Limits.getLimitQueries()-queriesReserved;
             System.debug('checkLimitQueries '+queries+' out of '+queriesLimit);
             if(queries > queriesLimit) {
-                return createLimitsMessage('Queue-',queries,queriesLimit,throwsException);
+                return createLimitsMessage('Queries',queries,queriesLimit,throwsException);
+            }
+        }
+        return null;
+    }
+
+    /** 
+     * You can specify exactly the number of queueableJobs you want to reserve.  A negative value
+     * will deactivate this check.
+     */
+    public static Integer queueableJobsReserved = 0;
+
+    /**
+     * Called to check just the queueable jobs limit.
+     * 
+     * @param queueableJobsRequired
+     * @param throwsException a null is equivalent to throwsExceptionDefault
+     */
+    public static String checkLimitQueueableJobs(Integer queueableJobsRequired,Boolean throwsException) {
+        if(queueableJobsRequired != null && queueableJobsReserved >= 0) {
+            Integer queueableJobs = queueableJobsRequired+Limits.getQueueableJobs();
+            Integer queueableJobsLimit = 0;
+            if((! Test.isRunningTest())||(! System.isQueueable())) {
+                queueableJobsLimit = Limits.getLimitQueueableJobs()-queueableJobsReserved;
+            }
+            System.debug('checkLimitQueueableJobs '+queueableJobs+' out of '+queueableJobsLimit);
+            if(queueableJobs > queueableJobsLimit) {
+                return createLimitsMessage('Queueable Jobs',queueableJobs,queueableJobsLimit,throwsException);
             }
         }
         return null;

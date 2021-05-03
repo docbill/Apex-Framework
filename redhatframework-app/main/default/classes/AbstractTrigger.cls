@@ -2,7 +2,7 @@
  * This is an abstract class to help reduce the redunancies 
  * in the various trigger classes.
  *
- * @version 2020-12-01
+ * @version 2021-04-27
  * 
  * @author Bill Riemers <briemers@redhat.com>
  * @since 2013-04-08 - Added processTriggerComplete method to auto insert custom settings
@@ -13,6 +13,7 @@
  * @since 2020-11-12 - Call TriggerManagement
  * @since 2020-11-17 - Call SObjectCallableTrigger.assignLegacy
  * @since 2020-12-01 - Move boolean values into the Metadata_Values_Helper class
+ * @since 2021-04-27 US292962 - No longer create missing metadata
  * 
  * @author Yancy Cruz <ycruz@redhat.com>
  * @since 2018-01-24 - US152262. Added fields for user map query.
@@ -241,8 +242,8 @@ class AbstractTrigger {
      * missing custom settings.
      */
     public static void processTriggerComplete() {
-        if((! missingMap.isEmpty()) && insertMissing++ <= 0) {
-            BooleanValuesHelper.createMissingBooleanMetadata();
-        }
+//        if((! missingMap.isEmpty()) && insertMissing++ <= 0) {
+//            BooleanValuesHelper.createMissingBooleanMetadata();
+//        }
     }
 }

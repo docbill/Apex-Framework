@@ -1,12 +1,13 @@
 /**
  * This is a set of utilities for treating boolean metadata a a map.
  * 
- * @version 2021-02-13
+ * @version 2021-04-27
  * 
  * @author Bill Riemers <briemers@redhat.com>
  * @since 2020-12-02 - Created
  * @since 2021-01-29 - Allow ignoreMetadata per instance 
  * @since 2021-02-13 DE25830 - Fix to make sure maps are per helper instance
+ * @since 2021-04-27 US292962 - No longer create missing metadata
  */
 public without sharing class BooleanValuesHelper {
     private static Map<Boolean,Map<String,BooleanValuesHelper>> booleanValuesHelperMaps = (new Map<Boolean,Map<String,BooleanValuesHelper>>{
@@ -225,18 +226,6 @@ public without sharing class BooleanValuesHelper {
         }
     }
 
-    @TestVisible
-    private static Boolean enableCreateBooleanMetadata {
-        get {
-            if(enableCreateBooleanMetadata == null) {
-                enableCreateBooleanMetadata = ! useTestingDefaults;
-            }
-            return enableCreateBooleanMetadata;
-        }
-        set;
-    }
-
-
     // Allow resource injection in the test class.
     public static BooleanHierarchy__c booleanHierarchyInstance {
         get {
@@ -318,104 +307,4 @@ public without sharing class BooleanValuesHelper {
         }
         return key;
     }
-
-    public static void createMissingBooleanMetadata() {
-        if(! (System.isFuture() || System.isBatch() || System.isQueueable() || System.isScheduled())) {
-            createMissingBooleanMetadata(true);
-        }
-    }
-
-    /**
-     * This can be called to automatically create an values listed in the missingMap.
-     */
-    @TestVisible
-    private static Map<String,Metadata.CustomMetadata> createMissingBooleanMetadata(Boolean callFuture) {
-        Map<String,Metadata.CustomMetadata> customMetadataMap = new Map<String,Metadata.CustomMetadata>();
-        if(enableCreateBooleanMetadata && missingMap != null && ! missingMap.isEmpty()) {
-            final Map<Boolean,String> valueMap = ( new Map<Boolean,String>{
-                null => 'Default',
-                false => 'False',
-                true => 'True'
-            } );
-    
-            for(String name : missingMap.keySet()) {
-                Metadata.CustomMetadata missingRecord = new Metadata.CustomMetadata();
-                missingRecord.fullName = 'BooleanMetadata.'+getApiName(name);
-                System.debug('missingRecord.fullName='+missingRecord.fullName);
-                missingRecord.label = name;
-                System.debug('missingRecord.label='+missingRecord.label);
-                Metadata.CustomMetadataValue relValue = new Metadata.CustomMetadataValue();
-                relValue.field = 'Value__c';
-                relValue.value = valueMap.get(missingMap.get(name));
-                missingRecord.values.add(relValue);
-                customMetadataMap.put(missingRecord.fullName,missingRecord);
-            }
-
-            List<Metadata.Metadata> duplicates = 
-                Metadata.Operations.retrieve(Metadata.MetadataType.CustomMetadata, 
-                new List<String>(customMetadataMap.keySet()) );
-            for(Metadata.Metadata record : duplicates) {
-                System.debug('Duplicate record: '+record.fullName);
-                customMetadataMap.remove(record.fullName);
-            }
-            if(! customMetadataMap.isEmpty()) {
-                Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
-                for(Metadata.CustomMetadata record : customMetadataMap.values()) {
-                    mdContainer.addMetadata(record);
-                }
-                DeployCallback myCallback = new DeployCallback();
-                myCallback.missingMap = missingMap;
-
-                // we stop tracking further missing values
-                missingMap = null;
-                try {
-                    if(callFuture) {
-                        createMissingBooleanMetadataFuture(myCallback.missingMap);
-                    }
-                    else {
-                        Metadata.Operations.enqueueDeployment(mdContainer, myCallback);
-                    }
-                }
-                catch(Exception ex) {
-                    // we expect this in a test class
-                    System.debug('Metadata.Operations.enqueueDeployment: failed');
-                    System.debug(ex);
-                }
-            }
-        }
-        return customMetadataMap;
-    }
-
-    @future
-    private static void createMissingBooleanMetadataFuture(Map<String,Boolean> missingMap) {
-        BooleanValuesHelper.missingMap = missingMap;
-        System.debug('missingMap='+missingMap);
-        createMissingBooleanMetadata(false);
-    }
-
-    static String getApiName(String name) {
-        return name.replaceAll('[^a-zA-Z0-9]',' ').trim().normalizeSpace().replaceAll(' ','_');
-    }
-
-    public class DeployCallback implements Metadata.DeployCallback {
-        Map<String,Boolean> missingMap;
-
-        public void handleResult(
-            Metadata.DeployResult result,
-            Metadata.DeployCallbackContext context
-        ) {
-            System.debug('context='+context);
-            
-            if (result.status == Metadata.DeployStatus.Succeeded) {
-                System.debug('Deployment was successful');
-            }
-            else {
-                System.debug('missingMap='+missingMap);
-                System.debug('errorStatusCode='+result.errorStatusCode);
-                System.debug('errorMessage='+result.errorMessage);
-                System.debug('Deployment was not successful');
-            }
-        }
-    }
-
 }
