@@ -1,7 +1,7 @@
 /**
  * This class used to copy data from one object to another using Field_Map_Entry__mdt and User_Field_Map_Entry__mdt values
  *
- * @version 2020-04-06
+ * @version 2021-04-27
  * 
  * @author  Bill C Riemers <briemers@redhat.com>
  * @since 2019-11-21 - Created
@@ -9,6 +9,7 @@
  * @since 2020-02-10 US244638 US245940 - Added support for User_Field_Map_Entry__mdt
  * @since 2020-03-05 US244638 US245940 - Added isDebugging flag
  * @since 2021-04-06 - Increase test coverage
+ * @since 2021-04-27 - Changes towards depreciated Map_Name__c (picklists are not handled well by unlocked packages)
  */
 public class Field_Map {
     public static final String DEBUG_SETTING = 'Field_Map.debug';
@@ -126,36 +127,49 @@ public class Field_Map {
         }
         Set<String> sourceFieldNames = new Set<String>();
         List<FieldMapEntry> fmeList = new List<FieldMapEntry>();
-        addAll( fmeList, [
-            select
-                Source_Entity__r.QualifiedApiName,
-                Source_Field__r.QualifiedApiName,
-                Destination_Entity__c,
-                Destination_Field__c,
-                Default_Value__c,
-                Nullable__c,
-                Overwritable__c,
-                Required__c,
-                Sequence_Number__c
-            from User_Field_Map_Entry__mdt 
-            where Source_Entity__r.QualifiedApiName = :sourceEntityName
-                and Map_Name__c = :mapName
-                and Source_Field__c != null ] );
-        addAll( fmeList, [
-            select
-                Source_Entity__r.QualifiedApiName,
-                Source_Field__r.QualifiedApiName,
-                Destination_Entity__r.QualifiedApiName,
-                Destination_Field__r.QualifiedApiName,
-                Default_Value__c,
-                Nullable__c,
-                Overwritable__c,
-                Required__c,
-                Sequence_Number__c
-            from Field_Map_Entry__mdt 
-            where Source_Entity__r.QualifiedApiName = :sourceEntityName
-                and Map_Name__c = :mapName
-                and Source_Field__c != null ] );
+        Map<String,String> masterLabelLikeMap = (new Map<String,String>{
+            mapName => '%',
+            null => mapName+'.%'
+        });
+        for(String xmapName : masterLabelLikeMap.keySet()) {
+            String masterLabelLike = masterLabelLikeMap.get(xmapName);
+            addAll( fmeList, mapName, [
+                select
+                    Map_Name__c,
+                    MasterLabel,
+                    Source_Entity__r.QualifiedApiName,
+                    Source_Field__r.QualifiedApiName,
+                    Destination_Entity__c,
+                    Destination_Field__c,
+                    Default_Value__c,
+                    Nullable__c,
+                    Overwritable__c,
+                    Required__c,
+                    Sequence_Number__c
+                from User_Field_Map_Entry__mdt 
+                where Source_Entity__r.QualifiedApiName = :sourceEntityName
+                    and Map_Name__c = :xmapName
+                    and MasterLabel like :masterLabelLike
+                    and Source_Field__c != null ] );
+            addAll( fmeList, mapName, [
+                select
+                    Map_Name__c,
+                    MasterLabel,
+                    Source_Entity__r.QualifiedApiName,
+                    Source_Field__r.QualifiedApiName,
+                    Destination_Entity__r.QualifiedApiName,
+                    Destination_Field__r.QualifiedApiName,
+                    Default_Value__c,
+                    Nullable__c,
+                    Overwritable__c,
+                    Required__c,
+                    Sequence_Number__c
+                from Field_Map_Entry__mdt 
+                where Source_Entity__r.QualifiedApiName = :sourceEntityName
+                    and Map_Name__c = :xmapName
+                    and MasterLabel like :masterLabelLike
+                    and Source_Field__c != null ] );
+        }
         if(fieldEntriesForTesting2 != null) {
             // this allows resource injection from a test class
             fmeList = fieldEntriesForTesting2;
@@ -171,15 +185,23 @@ public class Field_Map {
         return sourceFieldNames;
     }
 
-    static void addAll(List<FieldMapEntry> targetList, List<User_Field_Map_Entry__mdt> sourceList) {
+    static void addAll(List<FieldMapEntry> targetList, final String mapName, List<User_Field_Map_Entry__mdt> sourceList) {
         for(User_Field_Map_Entry__mdt fme : sourceList) {
-            targetList.add( new FieldMapEntry(fme) );
+            if( ( fme.Map_Name__c == null && fme.MasterLabel.startsWithIgnoreCase(mapName+'.'))
+                || mapName == fme.Map_Name__c )
+            {
+                targetList.add( new FieldMapEntry(fme) );
+            }
         }
     }
 
-    static void addAll(List<FieldMapEntry> targetList, List<Field_Map_Entry__mdt> sourceList) {
+    static void addAll(List<FieldMapEntry> targetList, final String mapName, List<Field_Map_Entry__mdt> sourceList) {
         for(Field_Map_Entry__mdt fme : sourceList) {
-            targetList.add( new FieldMapEntry(fme) );
+            if( ( fme.Map_Name__c == null && fme.MasterLabel.startsWithIgnoreCase(mapName+'.'))
+                || mapName == fme.Map_Name__c )
+            {
+                targetList.add( new FieldMapEntry(fme) );
+            }
         }
     }
 
@@ -216,8 +238,10 @@ public class Field_Map {
             retval = new List<FieldMapEntry>();
             switch on destinationEntityName {
                 when 'Event','Task','User' {
-                    addAll(retval,[
+                    addAll(retval,mapName,[
                         select
+                            Map_Name__c,
+                            MasterLabel,
                             Source_Entity__r.QualifiedApiName,
                             Source_Field__r.QualifiedApiName,
                             Destination_Entity__c,
@@ -229,15 +253,17 @@ public class Field_Map {
                             Sequence_Number__c
                         from User_Field_Map_Entry__mdt 
                         where Destination_Entity__c = :destinationEntityName
-                            and Map_Name__c = :mapName
+                            and Map_Name__c in (null,:mapName)
                             and Destination_Field__c != null
                         // doing an or selection causes an internal salesforce error
                         //                    and (Source_Entity__r.QualifiedApiName in :sourceEntitySet OR Default_Value__c != null)
                         order by Sequence_Number__c ASC NULLS LAST ] );
                 }
                 when else  {
-                    addAll(retval,[
+                    addAll(retval,mapName,[
                         select
+                            Map_Name__c,
+                            MasterLabel,
                             Source_Entity__r.QualifiedApiName,
                             Source_Field__r.QualifiedApiName,
                             Destination_Entity__r.QualifiedApiName,
@@ -249,7 +275,7 @@ public class Field_Map {
                             Sequence_Number__c
                         from Field_Map_Entry__mdt 
                         where Destination_Entity__r.QualifiedApiName = :destinationEntityName
-                            and Map_Name__c = :mapName
+                            and Map_Name__c in (null,:mapName)
                             and Destination_Field__c != null
                         // doing an or selection causes an internal salesforce error
                         //                    and (Source_Entity__r.QualifiedApiName in :sourceEntitySet OR Default_Value__c != null)

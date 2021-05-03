@@ -1,12 +1,13 @@
 /**
  * Test class for DatabaseHelper.
  * 
- * @version 2021-03-30
+ * @version 2021-04-27
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-08-18 US268650 - Created
  * @since 2021-01-07 US281262 - Added setEnqueueScope for Queuable splitting of dml
  * @since 2021-03-30 - Increase test coverage
+ * @since 2021-04-27 DE26549 - Added split test
  */
 @IsTest
 private class DatabaseHelperTest {
@@ -387,19 +388,19 @@ private class DatabaseHelperTest {
         }
         catch(DMLException ex) {
             TriggerManagement.lastRethrownException = ex;
-            result = new DatabaseHelper.Result(DatabaseHelper.DMLOperation.INSERT_OP,ex,currentUser);
+            result = new DatabaseHelperResult(DatabaseHelper.DMLOperation.INSERT_OP,ex,currentUser);
             List<String> resultStrings = DatabaseHelper.addStackTraceString(
                 new List<String>(),
                 ex );
             System.assertNotEquals(0,resultStrings.size(),'Expected a stack trace string');
         }
         // this will be null because we created the result from an exception
-        System.assertEquals(null,DatabaseHelper.getId(result),'Expected null');
+        System.assertEquals(null,DatabaseHelperResult.getId(result),'Expected null');
         System.assertNotEquals(null,result.getException().statusCode,'getException().statusCode');
         System.assertNotEquals(null,result.getException().fields,'getException().fields');
         Exception typeEx = null;
         try {
-            DatabaseHelper.initCause(result.getException());
+            DatabaseHelperResult.initCause(result.getException());
         }
         catch(System.TypeException ex) {
             typeEx = ex;
@@ -423,7 +424,7 @@ private class DatabaseHelperTest {
         account1.Name='enqueueScopeTest2-1';
         Account account2 = new Account(Name='enqueueScopeTest2-2');
         accounts.add(account2);
-        results = new DatabaseHelper().setEnqueueScope(1).safeUpsert(accounts);
+        results = new DatabaseHelper().setEnqueueScope(2).safeUpsert(accounts);
         System.assertEquals(0,results.size());
         Test.stopTest();
 
@@ -447,17 +448,67 @@ private class DatabaseHelperTest {
 
     @IsTest
     static void enqueueJobTest() {
-        List<DatabaseHelper.DatabaseHelperQueueable> queueableList = (
-            new List<DatabaseHelper.DatabaseHelperQueueable>{
-                new DatabaseHelper.DatabaseHelperQueueable(
+        List<DatabaseHelperQueueable> queueableList = (
+            new List<DatabaseHelperQueueable>{
+                new DatabaseHelperQueueable(
                     new DatabaseHelper(),
                     DatabaseHelper.DMLOperation.INSERT_OP,
                     (new List<List<SObject>>{new List<SObject>()}) )
             }
         );
         Test.startTest();
-        queueableList = DatabaseHelper.enqueueJob(queueableList);
+        queueableList = DatabaseHelperQueueable.enqueueJob(queueableList);
         Test.stopTest();
         System.assertEquals(null,queueableList,'queueableList');
+    }
+
+    @isTest
+    static void splitTest() {
+        List<Account> accounts = (new List<Account>{
+            new Account(Name='1'),
+            new Account(Name='2'),
+            new Account(Name='3'),
+            new Account(Name='4'),
+            new Account(Name='5'),
+            new Account(Name='6'),
+            new Account(Name='7'),
+            new Account(Name='8')
+        });
+        List<List<SObject>> results = DatabaseHelper.split(accounts,null);
+        System.assertEquals(1,results.size());
+        System.assertEquals(accounts.size(),results[0].size());
+        results = DatabaseHelper.split(accounts,0);
+        System.assertEquals(1,results.size());
+        System.assertEquals(accounts.size(),results[0].size());
+        results = DatabaseHelper.split(accounts,1);
+        System.assertEquals(8,results.size());
+        System.assertEquals(1,results[0].size());
+        System.assertEquals(1,results[1].size());
+        System.assertEquals(1,results[2].size());
+        System.assertEquals(1,results[3].size());
+        System.assertEquals(1,results[4].size());
+        System.assertEquals(1,results[5].size());
+        System.assertEquals(1,results[6].size());
+        System.assertEquals(1,results[7].size());
+        results = DatabaseHelper.split(accounts,-1);
+        System.assertEquals(9,results.size());
+        System.assertEquals(0,results[0].size());
+        System.assertEquals(1,results[1].size());
+        System.assertEquals(1,results[2].size());
+        System.assertEquals(1,results[3].size());
+        System.assertEquals(1,results[4].size());
+        System.assertEquals(1,results[5].size());
+        System.assertEquals(1,results[6].size());
+        System.assertEquals(1,results[7].size());
+        System.assertEquals(1,results[8].size());
+        results = DatabaseHelper.split(accounts,4);
+        System.assertEquals(2,results.size());
+        System.assertEquals(4,results[0].size());
+        System.assertEquals(4,results[1].size());
+        results = DatabaseHelper.split(accounts,-4);
+        System.assertEquals(3,results.size());
+        System.assertEquals(0,results[0].size());
+        System.assertEquals(4,results[1].size());
+        System.assertEquals(4,results[2].size());
     }
 }

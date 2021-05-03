@@ -1,10 +1,11 @@
 /**
  * This is a test class for LimitHelper.
  * 
- * @version 2020-08-18
+ * @version 2021-04-28
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-08-18 US268650 - Created
+ * @since 2021-04-28 - Add queueableJobs limits check
  */
 @IsTest
 private class LimitHelperTest {
@@ -34,6 +35,8 @@ private class LimitHelperTest {
         System.assertEquals(-1,LimitHelper.cpuTimeReserved,'cpuTimeReserved Default');
         System.assertEquals(0,LimitHelper.dmlStatementsReserved,'dmlStatementsReserved Default');
         System.assertEquals(0,LimitHelper.dmlRowsReserved,'dmlRowsReserved Default');
+        System.assertEquals(0,LimitHelper.queriesReserved,'queriesReserved Default');
+        System.assertEquals(0,LimitHelper.queueableJobsReserved,'queueableJobsReserved Default');
         System.assertEquals(null,LimitHelper.reservedList[0],LimitHelper.reservedList);
         // push all values
         for(String ml : masterLabels) {
@@ -47,6 +50,8 @@ private class LimitHelperTest {
                 System.assertEquals(-1,LimitHelper.cpuTimeReserved,'cpuTimeReserved Default');
                 System.assertEquals(0,LimitHelper.dmlStatementsReserved,'dmlStatementsReserved Default');
                 System.assertEquals(0,LimitHelper.dmlRowsReserved,'dmlRowsReserved Default');
+                System.assertEquals(0,LimitHelper.queriesReserved,'queriesReserved Default');
+                System.assertEquals(0,LimitHelper.queueableJobsReserved,'queueableJobsReserved Default');
             }
         }
         // pop all values
@@ -64,6 +69,8 @@ private class LimitHelperTest {
                 System.assertEquals(-1,LimitHelper.cpuTimeReserved,'cpuTimeReserved Default');
                 System.assertEquals(0,LimitHelper.dmlStatementsReserved,'dmlStatementsReserved Default');
                 System.assertEquals(0,LimitHelper.dmlRowsReserved,'dmlRowsReserved Default');
+                System.assertEquals(0,LimitHelper.queriesReserved,'queriesReserved Default');
+                System.assertEquals(0,LimitHelper.queueableJobsReserved,'queueableJobsReserved Default');
             }
         }
         // push all values again
@@ -78,6 +85,8 @@ private class LimitHelperTest {
                 System.assertEquals(-1,LimitHelper.cpuTimeReserved,'cpuTimeReserved Default');
                 System.assertEquals(0,LimitHelper.dmlStatementsReserved,'dmlStatementsReserved Default');
                 System.assertEquals(0,LimitHelper.dmlRowsReserved,'dmlRowsReserved Default');
+                System.assertEquals(0,LimitHelper.queriesReserved,'queriesReserved Default');
+                System.assertEquals(0,LimitHelper.queueableJobsReserved,'queueableJobsReserved Default');
             }
         }
         // pop all values at once
@@ -86,6 +95,8 @@ private class LimitHelperTest {
         System.assertEquals(-1,LimitHelper.cpuTimeReserved,'cpuTimeReserved Default');
         System.assertEquals(0,LimitHelper.dmlStatementsReserved,'dmlStatementsReserved Default');
         System.assertEquals(0,LimitHelper.dmlRowsReserved,'dmlRowsReserved Default');
+        System.assertEquals(0,LimitHelper.queriesReserved,'queriesReserved Default');
+        System.assertEquals(0,LimitHelper.queueableJobsReserved,'queueableJobsReserved Default');
     }
 
     @isTest 
@@ -408,4 +419,83 @@ private class LimitHelperTest {
         System.assertNotEquals(null,caughtException,'Expected a LimitHelper.LimitsException');
     }
 
+    @isTest 
+    static void queueableJobsTest() {
+        LimitHelper.queueableJobsReserved = Limits.getLimitQueueableJobs();
+        String message = LimitHelper.checkLimitQueueableJobs(0,false);
+        System.assertEquals(null,message,'Unexpected Limit');
+
+        message = LimitHelper.checkLimitQueueableJobs(0,null);
+        System.assertEquals(null,message,'Unexpected Limit');
+
+        LimitHelper.checkLimitQueueableJobs(0, true); // no exception should be thrown
+
+        message = LimitHelper.checkLimitQueueableJobs(1,false);
+        System.assertNotEquals(null,message,'Expected Limit');
+
+        message = LimitHelper.checkLimitQueueableJobs(1,null);
+        System.assertNotEquals(null,message,'Expected Limit');
+
+        Exception caughtException = null;
+        try {
+            message = LimitHelper.checkLimitQueueableJobs(1,true);
+        }
+        catch(LimitHelper.LimitsException ex) {
+            caughtException = ex;
+        }
+        System.assertNotEquals(null,caughtException,'Expected a LimitHelper.LimitsException');
+
+        LimitHelper.throwsExceptionDefault = true;
+
+        LimitHelper.checkLimitQueueableJobs(0, null); // no exception should be thrown
+
+        caughtException=null;
+        try {
+            message = LimitHelper.checkLimitQueueableJobs(1,null);
+        }
+        catch(LimitHelper.LimitsException ex) {
+            caughtException = ex;
+        }
+        System.assertNotEquals(null,caughtException,'Expected a LimitHelper.LimitsException');
+    }
+
+    @isTest 
+    static void checkLimitsQueueableJobsTest() {
+        LimitHelper.queueableJobsReserved = Limits.getLimitQueueableJobs();
+        String message = (new LimitHelper()).setQueueableJobs(0).checkLimits(false);
+        System.assertEquals(null,message,'Unexpected Limit');
+
+        message = (new LimitHelper()).setQueueableJobs(0).checkLimits(null);
+        System.assertEquals(null,message,'Unexpected Limit');
+
+        (new LimitHelper()).setQueueableJobs(0).checkLimits( true); // no exception should be thrown
+
+        message = (new LimitHelper()).setQueueableJobs(1).checkLimits(false);
+        System.assertNotEquals(null,message,'Expected Limit');
+
+        message = (new LimitHelper()).setQueueableJobs(1).checkLimits(null);
+        System.assertNotEquals(null,message,'Expected Limit');
+
+        Exception caughtException = null;
+        try {
+            message = (new LimitHelper()).setQueueableJobs(1).checkLimits(true);
+        }
+        catch(LimitHelper.LimitsException ex) {
+            caughtException = ex;
+        }
+        System.assertNotEquals(null,caughtException,'Expected a LimitHelper.LimitsException');
+
+        LimitHelper.throwsExceptionDefault = true;
+
+        (new LimitHelper()).setQueueableJobs(0).checkLimits( null); // no exception should be thrown
+
+        caughtException=null;
+        try {
+            message = (new LimitHelper()).setQueueableJobs(1).checkLimits(null);
+        }
+        catch(LimitHelper.LimitsException ex) {
+            caughtException = ex;
+        }
+        System.assertNotEquals(null,caughtException,'Expected a LimitHelper.LimitsException');
+    }
 }

@@ -1,11 +1,12 @@
 /**
  * Test class for Metadata Values Helper
  * 
- * @version 2021-01-29
+ * @version 2021-04-27
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-12-02 - Created
  * @since 2021-01-29 - Update for allow ignoreMetadata per instance 
+ * @since 2021-04-27 US292962 - No longer create missing boolean metadata
  */
 @IsTest
 private class BooleanValuesHelperTest {
@@ -147,42 +148,4 @@ private class BooleanValuesHelperTest {
         BooleanValuesHelper.booleanSettingMap.clear();
 		System.assertEquals(false,BooleanValuesHelper.getBooleanValue('TEST.'+key,true),'Failed get default setting');
 	}
-
-    @isTest
-	static void createMissingBooleanMetadataTest() {
-        System.assertEquals(false,BooleanValuesHelper.enableCreateBooleanMetadata,'BooleanValuesHelper.enableCreateBooleanMetadata');
-        BooleanValuesHelper.enableCreateBooleanMetadata = true;
-        Map<String,Boolean> missingMap = (new Map<String,Boolean>{TEST_DEFAULT_KEY1 => true});
-		BooleanValuesHelper.missingMap = missingMap;
-
-		Test.startTest();
-		Map<String,Metadata.CustomMetadata> metadataMap = BooleanValuesHelper.createMissingBooleanMetadata(false);
-        System.assertEquals(0,metadataMap.size(),'Expected all duplicates: '+metadataMap);
-        System.assertNotEquals(null,BooleanValuesHelper.missingMap,'BooleanValuesHelper.missingMap');
-
-		missingMap.put('TEST.TEST-TEST-TEST',false);
-		metadataMap = BooleanValuesHelper.createMissingBooleanMetadata(true);
-		System.assertEquals(1,metadataMap.size(),'Expected a key '+metadataMap);
-        System.assertEquals(null,BooleanValuesHelper.missingMap,'BooleanValuesHelper.missingMap');
-
-        BooleanValuesHelper.missingMap = missingMap;
-		missingMap.put('TEST.TEST_TEST_TEST',false);
-		metadataMap = BooleanValuesHelper.createMissingBooleanMetadata(true);
-		System.assertEquals(1,metadataMap.size(),'Expected a key '+metadataMap);
-        System.assertEquals(null,BooleanValuesHelper.missingMap,'BooleanValuesHelper.missingMap');
-        // this is just for coverage
-		BooleanValuesHelper.createMissingBooleanMetadata();
-		Test.stopTest();
-	}
-
-    // the following are tests to boost coverage
-	@isTest
-	static void coverageTests() {
-		BooleanValuesHelper.DeployCallback callback = new BooleanValuesHelper.DeployCallback();
-		Metadata.DeployResult result = new Metadata.DeployResult();
-		callback.handleResult(result,null);
-		result.status = Metadata.DeployStatus.Succeeded;
-		callback.handleResult(result,null);
-	}
-
 }

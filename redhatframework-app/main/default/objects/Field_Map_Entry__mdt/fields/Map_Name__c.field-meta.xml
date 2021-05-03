@@ -10,7 +10,7 @@
     <valueSet>
         <restricted>true</restricted>
         <valueSetDefinition>
-            <sorted>true</sorted>
+            <sorted>false</sorted>
             <value>
                 <fullName>APTS Asset Queue</fullName>
                 <default>false</default>

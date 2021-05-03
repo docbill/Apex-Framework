@@ -11,6 +11,7 @@
  * @since 2021-02-11 initCause on exceptions
  * @since 2021-03-24 lock on DatabaseHelper.class.getName() when enqueueJob is called
  * @since 2021-03-24 remember in queueable instance boolean values
+ * @since 2021-04-27 DE26549 - Increment queue counter
  * 
  * @todo update TestDataFactory to call this class, rather than having a duplicate implementation.
  */
@@ -21,8 +22,8 @@ public with sharing class DatabaseHelper {
      */
     private static final Integer MINIMUM_TIME_PER_DML = 10;
 
-    @TestVisible
-    private enum DMLOperation { INSERT_OP, UPDATE_OP, UPSERT_OP, DELETE_OP, UNDELETE_OP }
+    /** Used internally. */
+    public enum DMLOperation { INSERT_OP, UPDATE_OP, UPSERT_OP, DELETE_OP, UNDELETE_OP }
 
     private Boolean checkLimits = null;
     private Boolean legacyMode = false;
@@ -74,6 +75,14 @@ public with sharing class DatabaseHelper {
     public DatabaseHelper setEnqueueScope(Integer value) {
         enqueueScope = value;
         return this;
+    }
+
+    /**
+     * Retrieve value set for enqueueScope.
+     * @return enqueueScope
+     */
+    public Integer getEnqueueScope() {
+        return enqueueScope;
     }
 
     /**
@@ -266,14 +275,20 @@ public with sharing class DatabaseHelper {
      * @param op dml operation to perform
      * @param recordList to insert
      */
-    private List<Object> dmlStatement(
+    public List<Object> dmlStatement(
         DMLOperation op,
         List<SObject> recordList )
     {
-        if(enqueueScope != null && enqueueScope != 0 && Limits.getQueueableJobs() < Limits.getLimitQueueableJobs()) {
+        Integer queueableJobs = 0;
+        if(enqueueScope != null && enqueueScope != 0) {
             List<List<SObject>> recordsList = split(recordList,-enqueueScope);
-            recordList = recordsList.remove(0);
-            new DatabaseHelperQueueable(this,op,recordsList).enqueueJob();
+            if(recordsList.size() > 1) {
+                queueableJobs = 1;
+                if((new LimitHelper()).setQueueableJobs(1).checkLimits(false) == null) {
+                    recordList = recordsList.remove(0);
+                    new DatabaseHelperQueueable(this,op,recordsList).enqueueJob();
+                }
+            }
         }
         Integer requiredDML = 0;
         if(! recordList.isEmpty()) {
@@ -293,6 +308,7 @@ public with sharing class DatabaseHelper {
                     .setCpuTime(MINIMUM_TIME_PER_DML)
                     .setDmlStatements(requiredDML)
                     .setDmlRows(recordList.size())
+                    .setQueueableJobs(queueableJobs)
                     .checkLimits( (options == null || options.optAllOrNone == true) );
             }
             if(limitMessage != null) {
@@ -328,7 +344,7 @@ public with sharing class DatabaseHelper {
                 AbstractTrigger.setBooleanSettings('DeactivateAll',false);
             }
         }
-        return convertResultType(op,retval,recordList);
+        return DatabaseHelperResult.convertResultType(op,retval,recordList,legacyMode);
     }
 
     /**
@@ -343,111 +359,28 @@ public with sharing class DatabaseHelper {
     static List<List<SObject>> split(List<SObject> records,Integer size) {
         List<List<SObject>> retval = new List<List<SObject>>();
         if(records != null) {
-            Integer i=0;
-            List<SObject> currentList = new List<SObject>();
-            for(SObject record : records) {
-                if(record != null) {
-                    if(size != null && size !=0 && i++ >= size) {
-                        i=0;
-                        retval.add(currentList);
-                        currentList = new List<SObject>();
-                        if(size < 0) {
-                            size = -size;
+            // DE26549 reworked this logic
+            if(size == null || size == 0) {
+                retval.add(records);
+            }
+            else {
+                List<SObject> currentList = new List<SObject>();
+                Integer remaining=size;
+                if(size < 0) {
+                    size = -size;
+                    remaining = 0;
+                }
+                for(SObject record : records) {
+                    if(record != null) {
+                        if(remaining-- < 1) {
+                            retval.add(currentList);
+                            currentList = new List<SObject>();
+                            remaining = size-1; // We count this record right away
                         }
+                        currentList.add(record);
                     }
-                    currentList.add(record);
                 }
-            }
-            retval.add(currentList);
-        }
-        return retval;
-    }
-
-    private List<Object> convertResultType(
-        DMLOperation op,
-        List<Object> results,
-        List<SObject> records
-    ) {
-        List<Object> retval = results;
-        System.Type apexType = null;
-        Boolean isResultClass = false;
-        Boolean isSaveResultClass = false;
-        Boolean isUpsertResultClass = false;
-        Boolean isDeleteResultClass = false;
-        Boolean isUndeleteResultClass = false;
-        TriggerManagement.lastRethrownException = null;
-        if(legacyMode == true) {
-            switch on op {
-                when INSERT_OP, UPDATE_OP {
-                    if(results instanceof List<Database.SaveResult>) {
-                        return results;
-                    }
-                    isSaveResultClass = true;
-                    apexType = Database.SaveResult.class;
-                    retval = new List<Database.SaveResult>();
-                }
-                when UPSERT_OP {
-                    if(results instanceof List<Database.UpsertResult>) {
-                        return results;
-                    }
-                    isUpsertResultClass = true;
-                    apexType = Database.UpsertResult.class;
-                    retval = new List<Database.UpsertResult>();
-                }
-                when DELETE_OP {
-                    if(results instanceof List<Database.DeleteResult>) {
-                        return results;
-                    }
-                    isDeleteResultClass = true;
-                    apexType = Database.DeleteResult.class;
-                    retval = new List<Database.DeleteResult>();
-                }
-                when UNDELETE_OP {
-                    if(results instanceof List<Database.UndeleteResult>) {
-                        return results;
-                    }
-                    isUndeleteResultClass = true;
-                    apexType = Database.UndeleteResult.class;
-                    retval = new List<Database.UndeleteResult>();
-                }
-            }
-        }
-        else if(records != null) {
-            if(results instanceof List<Result>) {
-                return results;
-            }
-            apexType = Result.class;
-            isResultClass = true;
-            retval = new List<Result>();
-        }
-        if(apexType != null) {
-            Iterator<SObject> recordIterator = null;
-            if(records != null) {
-                recordIterator = records.iterator();
-            }
-            for(Object r : results) {
-                SObject record = null;
-                if(recordIterator != null && recordIterator.hasNext()) {
-                    record = recordIterator.next();
-                }
-                for(;;) {
-                    if((! isResultClass) && r instanceof Result ) {
-                        retval.add( ((Result)r).convertResult( apexType) );
-                    }
-                    else if( r instanceof Result
-                        || (isSaveResultClass && r instanceof Database.SaveResult)
-                        || (isUpsertResultClass && r instanceof Database.UpsertResult)
-                        || (isDeleteResultClass && r instanceof Database.DeleteResult)
-                        || (isUndeleteResultClass && r instanceof Database.UndeleteResult)
-                    ) {
-                        retval.add(r);
-                    }
-                    else {
-                        r = new Result(op,r,record,getErrors(r));
-                        continue;
-                    }
-                    break;
-                }
+                retval.add(currentList);
             }
         }
         return retval;
@@ -456,7 +389,7 @@ public with sharing class DatabaseHelper {
     private List<Object> convertException(DMLOperation op,Exception ex,Iterator<SObject> recordIterator) {
         List<Result> retval = new List<Result>();
         while(recordIterator.hasNext()) {
-            retval.add(new Result(op,ex,recordIterator.next()));
+            retval.add(new DatabaseHelperResult(op,ex,recordIterator.next()));
         }
         return retval;
     }
@@ -514,214 +447,73 @@ public with sharing class DatabaseHelper {
     }
 
     /**
-     * Method to check success with out depending on the type of database results.
-     * 
-     * @param result from a insert,update,upsert,delete,or undelete
-     * @return id value if assigned
-     */
-    @TestVisible
-    private static Id getId(Object result) {
-        Id retval = null;
-        if(result instanceof Database.SaveResult) {
-            retval = ((Database.SaveResult)result).getId();
-        }
-        else if(result instanceof Database.UpsertResult) {
-            retval = ((Database.UpsertResult)result).getId();
-        }
-        else if(result instanceof Database.DeleteResult) {
-            retval = ((Database.DeleteResult)result).getId();
-        }
-        else if(result instanceof Database.UndeleteResult) {
-            retval = ((Database.UndeleteResult)result).getId();
-        }
-        else if(result instanceof Result) {
-            retval = ((Result)result).getId();
-        }
-        return retval;
-    }
-
-    @TestVisible
-    static void initCause(Exception ex) {
-        if(TriggerManagement.lastRethrownException != null) {
-            ex.initCause(TriggerManagement.lastRethrownException);
-        }
-    }
-
-    /**
      * This is a class that can use to in leiu of the Database.*Result objects.
      * That way we can add to this set exceptions that were never actually thrown
      * and such.
      */
-    public class Result {
-        final Object result;
-        final SObject record;
-        final Boolean insertFlag;
-
-        /**
-         * Constructor
-         * @param op the dml statement that was performed
-         * @param result one of Database.SaveResult, Database.UpsertResult,...
-         * @param record the message being operated on
-         */
-        public Result(DMLOperation op,Object result,SObject record,List<Database.Error> errors) {
-            this.result = result;
-            this.record = record;
-            this.insertFlag = (op == DMLOperation.INSERT_OP);
-            this.errors = errors;
-            // make sure we initialize the stack trace
-            this.exceptions.isEmpty();
-        }
-
-        /**
-         * Constructor
-         * 
-         * @param op the dml statement that was performed
-         * @param result one of Database.SaveResult, Database.UpsertResult,...
-         * @param record the message being operated on
-         */
-        public Result(DMLOperation op,Exception result,SObject record) {
-            this.result = result;
-            this.record = record;
-            this.insertFlag = (op == DMLOperation.INSERT_OP);
-            this.exceptions = new List<ResultException>();
-            if(! (result instanceof ResultException)) {
-                ResultException xresult = new ResultException(result);
-                xresult.message = result.getMessage();
-                xresult.stackTraceString = result.getStackTraceString();
-                result = xresult;
-            }
-            exceptions.add((ResultException)result);
-        }
-
+    public interface Result {
         /**
          * Find the record we operated on.
          * 
          * @return record
          */
-        public SObject getSObject() { return record; }
-
-        private List<Database.Error> errors {
-            get {
-                if(errors == null) {
-                    errors = new List<Database.Error>();
-                    for(ResultException re : exceptions) {
-                        errors.add(re.getError());
-                    }
-                }
-                return errors;
-            }
-            set;
-        }
-
+        SObject getSObject();
         /**
          * This returns all errors as Database.Error type.
          * 
          * @return list of all errors
          */
-        public List<Database.Error> getErrors() { return errors; }
-
-        private List<ResultException> exceptions {
-            get {
-                if(exceptions == null) {
-                    exceptions = new List<ResultException>();
-                    for(Database.Error e : errors) {
-                        ResultException ex = new ResultException(e.getMessage());
-                        ex.statusCode = e.getStatusCode();
-                        initCause(ex);
-                        ex.stackTraceString = null;
-                        exceptions.add(ex);
-                    }
-                }
-                return exceptions;
-            }
-            set;
-        }
+        List<Database.Error> getErrors();
 
         /**
          * This returns all errors as DatabaseHelper.ResultException type.
          * 
          * @return list of all errors
          */
-        public List<ResultException> getExceptions() { return exceptions; }
+        List<ResultException> getExceptions();
 
         /**
          * Return just the first exception as DatabaseHelper.ResultException type.
          * 
          * @return the first exception or null if there were none
          */
-        public ResultException getException() {
-            if(exceptions.isEmpty()) {
-                return null;
-            }
-            return exceptions[0];
-        }
+        ResultException getException();
 
         /**
          * What is the id value we operated on?
          * 
          * @return id value
          */
-        public Id getId() { return getId(result); }
+        Id getId();
 
         /**
          * Was the DML successful?
          * 
          * @return true if success
          */
-        public Boolean isSuccess() { return isSuccess(result); }
+        Boolean isSuccess();
 
         /**
          * Test this was an insert or an upsert that created a record.
          * 
          * @return true if a new record was created
          */
-        public Boolean isCreated() {
-            if(result instanceof Database.UpsertResult) {
-                return ((Database.UpsertResult)result).isCreated();
-            }
-            return insertFlag && isSuccess(result);
-        }
+        Boolean isCreated();
 
         /**
          * Query a list of stack traces for each exception.
          * 
          * @return list of stack traces 
          */
-        public List<String> getStackTraceStrings() {
-            List<String> retval = new List<String>();
-            for(Exception e : getExceptions()) {
-                retval.add(e.getStackTraceString());
-            }
-            return retval;
-        }
+        List<String> getStackTraceStrings();
 
-        @TestVisible
-        private Object convertResult(System.Type apexType) {
-            if(
-                (result instanceof Database.SaveResult && Database.SaveResult.class.equals(apexType))
-                || (result instanceof Database.UpsertResult && Database.UpsertResult.class.equals(apexType))
-                || (result instanceof Database.DeleteResult && Database.DeleteResult.class.equals(apexType))
-                || (result instanceof Database.UndeleteResult && Database.UndeleteResult.class.equals(apexType))
-                || (result instanceof Result && Result.class.equals(apexType))
-            ) {
-                return result;
-            }
-            String s = JSON.serialize(new SimpleResult(this),true);
-            return JSON.deserialize(s,apexType);
-        }
-
-    }
-
-    @TestVisible
-    static List<DatabaseHelperQueueable> enqueueJob(List<DatabaseHelperQueueable> queueableList) {
-        if(! queueableList.isEmpty()) {
-            queueableList[0].queueableList = queueableList;
-            queueableList[0].booleanSettingMap = BooleanValuesHelper.booleanSettingMap;
-            queueableList[0].overrideSettingMap = BooleanValuesHelper.overrideSettingMap;
-            System.enqueueJob(queueableList[0]);
-            queueableList = null;
-        }
-        return queueableList;
+        /**
+         * Convert the result to a different type.
+         * 
+         * @param apexType
+         * @return converted result
+         */
+        Object convertResult(System.Type apexType);
     }
 
     @TestVisible
@@ -732,19 +524,6 @@ public with sharing class DatabaseHelper {
         return results;
     }
 
-    // we use this class to convert to json
-    private class SimpleResult {
-        Boolean success;
-        Id id;
-        List<Database.Error> errors;
-        
-        SimpleResult(Result r) {
-            id = r.getId();
-            errors = r.getErrors();
-            success = r.isSuccess();
-        }
-    }
-
     /**
      * We use an exception class for error, so we can throw if we want and we can
      * get a stack trace.
@@ -752,7 +531,7 @@ public with sharing class DatabaseHelper {
     public class ResultException extends Exception {
         private transient Boolean ignoreStackTraceString = false;
 
-        private String stackTraceString {
+        public String stackTraceString {
             get {
                 if(ignoreStackTraceString == true) {
                     return null;
@@ -821,74 +600,6 @@ public with sharing class DatabaseHelper {
 
         public override String getStackTraceString() {
             return stackTraceString;
-        }
-    }
-
-    static List<DatabaseHelperQueueable> databaseHelperQueueableList = null;
-
-    public class DatabaseHelperQueueable implements Queueable {
-        DatabaseHelper helper;
-        DMLOperation op;
-        List<List<SObject>> recordsList;
-        List<DatabaseHelperQueueable> queueableList;
-        Integer enqueueScope;
-        Map<String,Boolean> booleanSettingMap;
-        Map<String,Boolean> overrideSettingMap;
-
-        @TestVisible
-        DatabaseHelperQueueable(
-            DatabaseHelper helper,
-            DMLOperation op,
-            List<List<SObject>> recordsList)
-        {
-            this.helper = helper;
-            this.op = op;
-            this.recordsList = recordsList;
-            this.enqueueScope = helper.enqueueScope;
-        }
-
-        public void enqueueJob() {
-            if(DatabaseHelper.databaseHelperQueueableList == null) {
-                DatabaseHelper.databaseHelperQueueableList = new List<DatabaseHelperQueueable>();
-            }
-            if(! recordsList.isEmpty()) {
-                DatabaseHelper.databaseHelperQueueableList.add(this);
-            }
-            if(! DatabaseHelper.databaseHelperQueueableList.isEmpty()) {
-                final String LOCK_STRING = DatabaseHelper.class.getName();
-                if(ThreadLock.lock(LOCK_STRING)) {
-                    try {
-                        this.booleanSettingMap = BooleanValuesHelper.booleanSettingMap;
-                        this.overrideSettingMap = BooleanValuesHelper.overrideSettingMap;
-                        this.queueableList = DatabaseHelper.databaseHelperQueueableList;
-                        System.debug('enqueueJob');
-                        System.enqueueJob(this.queueableList[0]);
-                    }
-                    finally {
-                        ThreadLock.unlock(LOCK_STRING);
-                        this.booleanSettingMap = null;
-                        this.overrideSettingMap = null;
-                        this.queueableList = null;
-                        DatabaseHelper.databaseHelperQueueableList = null;
-                        recordsList.clear();
-                    }
-                }
-            }
-        }
-    
-        public void execute(QueueableContext context) {
-            List<SObject> currentList = recordsList.remove(0);
-            if(recordsList.isEmpty()) {
-                this.queueableList.remove(0);
-            }
-            BooleanValuesHelper.booleanSettingMap.clear();
-            BooleanValuesHelper.booleanSettingMap.putAll(this.booleanSettingMap);
-            BooleanValuesHelper.overrideSettingMap.clear();
-            BooleanValuesHelper.overrideSettingMap.putAll(this.overrideSettingMap);
-            this.queueableList = DatabaseHelper.enqueueJob(this.queueableList);
-            this.booleanSettingMap = null;
-            this.overrideSettingMap = null;
-            helper.setEnqueueScope(null).dmlStatement(op,currentList);
         }
     }
 }

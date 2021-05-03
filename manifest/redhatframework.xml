@@ -7,6 +7,8 @@
     <members>BooleanValuesHelper</members>
     <members>BooleanValuesHelperTest</members>
     <members>DatabaseHelper</members>
+    <members>DatabaseHelperQueueable</members>
+    <members>DatabaseHelperResult</members>
     <members>DatabaseHelperTest</members>
     <members>DatabaseUtilities</members>
     <members>DatabaseUtilitiesTest</members>
@@ -51,6 +53,7 @@
     <members>Field_Map_Entry.Test_ContactDoNotCall</members>
     <members>Field_Map_Entry.Test_Contact_Email</members>
     <members>Field_Map_Entry.Test_Contact_Title</members>
+    <members>Limit_Reserve.Test_Reserve</members>
     <members>String_Values.AbstractTrigger_UserField_JobFunction</members>
     <members>String_Values.AbstractTrigger_UserField_LeadDevTeam</members>
     <members>String_Values.AbstractTrigger_UserField_MarketingUser</members>
@@ -65,6 +68,9 @@
     <members>Trigger_Management_Entry.Contract_Before_assignLegacyCallable</members>
     <members>Trigger_Management_Entry.Opp_Before_assignLegacyCallable</members>
     <members>Trigger_Management_Entry.TriggerManagementTest</members>
+    <members>User_Field_Map_Entry.Test_Contact_Email</members>
+    <members>User_Field_Map_Entry.Test_Contact_Title</members>
+    <members>User_Field_Map_Entry.Test_ReceivesInfoEmails</members>
   </types>
   <types>
     <name>Layout</name>
@@ -109,6 +115,7 @@
     <members>Limit_Reserve__mdt.dmlRows__c</members>
     <members>Limit_Reserve__mdt.dmlStatements__c</members>
     <members>Limit_Reserve__mdt.queries__c</members>
+    <members>Limit_Reserve__mdt.queueableJobs__c</members>
     <members>String_Values__mdt.Active__c</members>
     <members>String_Values__mdt.Key__c</members>
     <members>String_Values__mdt.Source__c</members>
