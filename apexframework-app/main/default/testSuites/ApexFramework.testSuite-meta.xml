@@ -5,6 +5,7 @@
     <testClassName>LimitHelperTest</testClassName>
     <testClassName>Metadata_Values_HelperTest</testClassName>
     <testClassName>SObjectCallableTriggerTest</testClassName>
+    <testClassName>ThreadLockTest</testClassName>
     <testClassName>TriggerArgumentsTest</testClassName>
     <testClassName>TriggerManagementTest</testClassName>
 </ApexTestSuite>

@@ -16,6 +16,8 @@
     <members>Metadata_Values_HelperTest</members>
     <members>SObjectCallableTrigger</members>
     <members>SObjectCallableTriggerTest</members>
+    <members>ThreadLock</members>
+    <members>ThreadLockTest</members>
     <members>TriggerArguments</members>
     <members>TriggerArgumentsTest</members>
     <members>TriggerManagement</members>
