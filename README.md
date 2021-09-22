@@ -2,17 +2,11 @@
 
 This is a package of framework entities used by Apex coding standards, that should make it easier to follow best practices.  It is expected that most unlocked packages will have access to this framework by either a direct package dependency, or by org based dependency.   If for some reason neither is appropriate for your project, some of the components in this package may still be accessed by reflection and salesforce interfaces.
 
-## Release 1.0
+## Release 1.2
 
-This is the initial release of this package.  Much of what you find already existed in our production org prior to this release.  However, there has been a significant amount of refactoring to eliminate org dependencies from this package.   There are a few components such as the Callable Trigger framework that are net new for this release.
+This is the initial open source release of this package.  This is based on code in Red Hat's production org.  Depreciated code has been removed from this release.  Everything remaining is believed to be of interest for the open source community.
 
 ## Class Overview
-
-### AbstractTrigger (@Depreciated)
-
-This is base trigger handler class Apex has been using since 2012.  While this artifcat can still be used for sobjects types that are exclusive to a single package, or legacy code that rides the monthly release train, developers are adviced to switch the CallableTrigger methods for new development.
-
-See Also: [Callable Triggers](docs/topics/callabletriggers/)
 
 ### BooleanValueHelper
 
@@ -30,10 +24,6 @@ See Also: [Database Helper](docs/topics/databasehelper/)
 This is a simple class for specifying fields to copy from one object to another in a matadata map.
 
 See Also: [Field Map](docs/topics/fieldmaps/)
-
-### DatabaseUtilities (@Depreciated)
-
-This is an earlier version of the DatabaseHelper.   This class should be considered depreciated.  If you are considering using DatabaseUtilities, use DatabaseHelper instead.   Most of the DatabaseUtilities methods were implemented just to call DatabaseHelper.
 
 ### LimitHelper
 
@@ -82,12 +72,6 @@ See Also: [Boolean Values](docs/topics/booleanvalues/), [Callable Triggers](docs
 ### BooleanMetadata__mdt
 
 This is metadata settings for boolean values available as a map in the BooleanValueHelper class.  These values are normally used so that apex code can be toggled between an active and inactive state.  This allows one to deploy code in a deactivated state and activate once the business is ready for the new functionality.  This may also be used to deactivate code that is considered depreciated, but still maybe needed in the future.
-
-See Also: [Boolean Values](docs/topics/booleanvalues/), [Callable Triggers](docs/topics/callabletriggers/)
-
-### BooleanSetting__c (@Depreciated)
-
-This is the legacy version of BooleanMetadata__mdt.   New BooleanSetting__c should not be needed.  But some legacy code still expects to be able to update the boolean values with a DML operation.  So this is still used a fallback, when the BooleanMetadata__mdt has a default value, and the value was not defined by BooleanHierarchy__c.
 
 See Also: [Boolean Values](docs/topics/booleanvalues/), [Callable Triggers](docs/topics/callabletriggers/)
 
