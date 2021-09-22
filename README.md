@@ -145,7 +145,7 @@ The folder name must be declared in the sfdx-project.json file for this to work.
 
 When you are ready to go to MERGE, QA, STAGE, and even PROD you are going to need an unlocked package version.  To create a new version edit the sfdx-project.json file should there be an update to your major version number. e.g. 1.2 to 1.3.  Once your major version is set you can create the version with the command:
 
-```sfdx force:package:version:create -x -p redhatframework -d redhatframework-app -c -p ApexFramework -d redhatframework-app/ --wait 1000 -x -v DevHub```
+```sfdx force:package:version:create -x -p apexframework -d apexframework-app -c -p ApexFramework -d apexframework-app/ --wait 1000 -x -v DevHub```
 
 Note the install link.  You can modify that link and use it to install your version on the respective sandbox, if you have the appropriate permissions.  Otherwise you will need to give the link to devops.   You can also use the ```sfdx force:package:install``` command.  For example to install to merge:
 
