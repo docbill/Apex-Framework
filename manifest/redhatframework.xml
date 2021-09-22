@@ -21,6 +21,8 @@
     <members>SObjectCallableTrigger</members>
     <members>SObjectCallableTriggerTest</members>
     <members>ThreadLock</members>
+    <members>ThreadLockCallableTrigger</members>
+    <members>ThreadLockCallableTriggerTest</members>
     <members>ThreadLockTest</members>
     <members>TriggerArguments</members>
     <members>TriggerArgumentsTest</members>

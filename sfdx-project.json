@@ -8,19 +8,20 @@
             "path": "redhatframework-app",
             "default": false,
             "package": "RedHatFramework",
-            "versionName": "ver 1.1.2",
-            "versionNumber": "1.1.2.NEXT"
+            "versionName": "ver 1.1.3",
+            "versionNumber": "1.1.3.NEXT"
         }
     ],
     "namespace": "",
     "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "51.0",
+    "sourceApiVersion": "52.0",
     "packageAliases": {
         "RedHatFramework": "0Ho3a000000k9bwCAA",
         "RedHatFramework@1.0.0-3": "04t3a000000LcyfAAC",
         "RedHatFramework@1.1.0-2": "04t3a000001enUIAAY",
         "RedHatFramework@1.1.1-1": "04t3a000001enVfAAI",
         "RedHatFramework@1.1.2-1": "04t3a000001enXMAAY",
-        "RedHatFramework@1.1.2-2": "04t3a000001enXWAAY"
+        "RedHatFramework@1.1.2-2": "04t3a000001enXWAAY",
+        "RedHatFramework@1.1.3-1": "04t3a000001iPu7AAE"
     }
 }
