@@ -38,6 +38,16 @@
                 <default>false</default>
                 <label>User</label>
             </value>
+            <value>
+                <fullName>Apttus_Config2__ProductConfiguration__c</fullName>
+                <default>false</default>
+                <label>Apttus_Config2__ProductConfiguration__c</label>
+            </value>
+            <value>
+                <fullName>Apttus_Proposal__Proposal__c</fullName>
+                <default>false</default>
+                <label>Apttus_Proposal__Proposal__c</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>
