@@ -1,3 +1,5 @@
+// Copyright Red Hat
+// SPDX-License-Identifier: GPL-3.0-only
 /**
  * Test class for ThreadLock
  * 

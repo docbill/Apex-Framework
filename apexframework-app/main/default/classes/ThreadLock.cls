@@ -1,3 +1,5 @@
+// Copyright Red Hat
+// SPDX-License-Identifier: GPL-3.0-only
 /**
  * This is a class for thread locking.   The normal usage is:
  * 
