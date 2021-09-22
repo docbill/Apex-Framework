@@ -41,7 +41,7 @@ public class Field_Map {
      */
     public Field_Map(String name) {
         mapName = name;
-        isDebugging = AbstractTrigger.isActive(DEBUG_SETTING,Test.isRunningTest());
+        isDebugging = BooleanValuesHelper.getBooleanValue(DEBUG_SETTING,Test.isRunningTest());
     }
 
     /**

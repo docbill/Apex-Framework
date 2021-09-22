@@ -10,7 +10,7 @@
  * }
  * </pre>
  * 
- * Note: The AbstractTrigger method will make this type of call automatically when invoked from a trigger, so there is no need to add this 
+ * Note: The depreciated AbstractTrigger method will make this type of call automatically when invoked from a trigger, so there is no need to add this 
  * trigger to standard objects using an AbstractTrigger method calling all the trigger event types you need.
  * 
  * An SObjectCallableTrigger can be referenced as an example of how to write your callable trigger.

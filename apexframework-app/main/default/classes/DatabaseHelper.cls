@@ -298,9 +298,9 @@ public with sharing class DatabaseHelper {
         }
         Boolean deactivateTriggers = this.deactivateTriggers
             && (requiredDML > 0)
-            && ! AbstractTrigger.isActive('DeactivateAll',false);
+            && ! BooleanValuesHelper.getBooleanValue('DeactivateAll',false);
         if(deactivateTriggers) {
-            AbstractTrigger.setBooleanSettings('DeactivateAll',true);
+            BooleanValuesHelper.setValuesWhichStartWith('DeactivateAll',true);
         }
         List<Object> retval = null;
         try {
@@ -343,7 +343,7 @@ public with sharing class DatabaseHelper {
         }
         finally {
             if(deactivateTriggers) {
-                AbstractTrigger.setBooleanSettings('DeactivateAll',false);
+                BooleanValuesHelper.setValuesWhichStartWith('DeactivateAll',false);
             }
         }
         return DatabaseHelperResult.convertResultType(op,retval,recordList,legacyMode);
