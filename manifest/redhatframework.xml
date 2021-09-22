@@ -4,174 +4,30 @@
     <name>ApexClass</name>
     <members>AbstractTrigger</members>
     <members>AbstractTriggerTest</members>
-    <members>BooleanValuesHelper</members>
-    <members>BooleanValuesHelperTest</members>
-    <members>DatabaseHelper</members>
-    <members>DatabaseHelperQueueable</members>
-    <members>DatabaseHelperResult</members>
-    <members>DatabaseHelperTest</members>
     <members>DatabaseUtilities</members>
     <members>DatabaseUtilitiesTest</members>
-    <members>Field_Map</members>
-    <members>Field_MapTest</members>
-    <members>LimitHelper</members>
-    <members>LimitHelperTest</members>
-    <members>Metadata_Values_Helper</members>
-    <members>Metadata_Values_HelperTest</members>
-    <members>SObjectCallableTrigger</members>
-    <members>SObjectCallableTriggerTest</members>
     <members>ThreadLock</members>
     <members>ThreadLockCallableTrigger</members>
     <members>ThreadLockCallableTriggerTest</members>
     <members>ThreadLockTest</members>
-    <members>TriggerArguments</members>
-    <members>TriggerArgumentsTest</members>
-    <members>TriggerManagement</members>
-    <members>TriggerManagementTest</members>
   </types>
   <types>
     <name>CustomMetadata</name>
-    <members>BooleanMetadata.Account_Before_assignLegacy</members>
-    <members>BooleanMetadata.Account_Before_assignLegacyCallable</members>
-    <members>BooleanMetadata.Case_Before_assignLegacy</members>
-    <members>BooleanMetadata.Case_Before_assignLegacyCallable</members>
-    <members>BooleanMetadata.Contact_Before_assignLegacy</members>
-    <members>BooleanMetadata.Contact_Before_assignLegacyCallable</members>
-    <members>BooleanMetadata.Contract_Before_assignLegacy</members>
-    <members>BooleanMetadata.Contract_Before_assignLegacyCallable</members>
-    <members>BooleanMetadata.DeactivateAll</members>
-    <members>BooleanMetadata.Opp_Before_assignLegacy</members>
-    <members>BooleanMetadata.Opp_Before_assignLegacyCallable</members>
-    <members>BooleanMetadata.TEST_DEFAULT_KEY1</members>
-    <members>BooleanMetadata.TEST_DEFAULT_KEY2</members>
-    <members>BooleanMetadata.TEST_FALSE_KEY1</members>
-    <members>BooleanMetadata.TEST_FALSE_KEY2</members>
-    <members>BooleanMetadata.TEST_TRUE_KEY1</members>
-    <members>BooleanMetadata.TEST_TRUE_KEY2</members>
-    <members>Decimal2_Values.TEST_ACTIVE_KEY1</members>
-    <members>Decimal2_Values.TEST_ACTIVE_KEY2</members>
-    <members>Decimal2_Values.TEST_INACTIVE_KEY1</members>
-    <members>Decimal2_Values.TEST_INACTIVE_KEY2</members>
-    <members>Field_Map_Entry.Test_ContactDoNotCall</members>
-    <members>Field_Map_Entry.Test_Contact_Email</members>
-    <members>Field_Map_Entry.Test_Contact_Title</members>
-    <members>Limit_Reserve.Test_Reserve</members>
     <members>String_Values.AbstractTrigger_UserField_JobFunction</members>
     <members>String_Values.AbstractTrigger_UserField_LeadDevTeam</members>
     <members>String_Values.AbstractTrigger_UserField_MarketingUser</members>
     <members>String_Values.AbstractTrigger_UserField_Region</members>
-    <members>String_Values.TEST_ACTIVE_KEY1</members>
-    <members>String_Values.TEST_ACTIVE_KEY2</members>
-    <members>String_Values.TEST_INACTIVE_KEY1</members>
-    <members>String_Values.TEST_INACTIVE_KEY2</members>
-    <members>Trigger_Management_Entry.Account_Before_assignLegacyCallable</members>
-    <members>Trigger_Management_Entry.Case_Before_assignLegacyCallable</members>
-    <members>Trigger_Management_Entry.Contact_Before_assignLegacyCallable</members>
-    <members>Trigger_Management_Entry.Contract_Before_assignLegacyCallable</members>
-    <members>Trigger_Management_Entry.Opp_Before_assignLegacyCallable</members>
-    <members>Trigger_Management_Entry.TriggerManagementTest</members>
-    <members>User_Field_Map_Entry.Test_Contact_Email</members>
-    <members>User_Field_Map_Entry.Test_Contact_Title</members>
-    <members>User_Field_Map_Entry.Test_ReceivesInfoEmails</members>
-  </types>
-  <types>
-    <name>Layout</name>
-    <members>BooleanMetadata__mdt-Boolean Metadata Layout</members>
-    <members>Decimal2_Values__mdt-Decimal Value Layout</members>
-    <members>Limit_Reserve__mdt-Limit Reserve Layout</members>
-    <members>String_Values__mdt-String Value Layout</members>
-    <members>Trigger_Management_Entry__mdt-Trigger Management Entry Layout</members>
   </types>
   <types>
     <name>CustomObject</name>
-    <members>BooleanHierarchy__c</members>
-    <members>BooleanMetadata__mdt</members>
     <members>BooleanSetting__c</members>
-    <members>Decimal2_Values__mdt</members>
-    <members>Field_Map_Entry__mdt</members>
-    <members>Limit_Reserve__mdt</members>
-    <members>String_Values__mdt</members>
-    <members>Trigger_Management_Entry__mdt</members>
-    <members>User_Field_Map_Entry__mdt</members>
   </types>
   <types>
     <name>CustomField</name>
-    <members>BooleanHierarchy__c.DeactivateAll__c</members>
-    <members>BooleanMetadata__mdt.Value__c</members>
     <members>BooleanSetting__c.Value__c</members>
-    <members>Decimal2_Values__mdt.Active__c</members>
-    <members>Decimal2_Values__mdt.Key__c</members>
-    <members>Decimal2_Values__mdt.Source__c</members>
-    <members>Decimal2_Values__mdt.Value__c</members>
-    <members>Field_Map_Entry__mdt.Default_Value__c</members>
-    <members>Field_Map_Entry__mdt.Destination_Entity__c</members>
-    <members>Field_Map_Entry__mdt.Destination_Field__c</members>
-    <members>Field_Map_Entry__mdt.Map_Name__c</members>
-    <members>Field_Map_Entry__mdt.Nullable__c</members>
-    <members>Field_Map_Entry__mdt.Overwritable__c</members>
-    <members>Field_Map_Entry__mdt.Required__c</members>
-    <members>Field_Map_Entry__mdt.Sequence_Number__c</members>
-    <members>Field_Map_Entry__mdt.Source_Entity__c</members>
-    <members>Field_Map_Entry__mdt.Source_Field__c</members>
-    <members>Limit_Reserve__mdt.cpuTime__c</members>
-    <members>Limit_Reserve__mdt.dmlRows__c</members>
-    <members>Limit_Reserve__mdt.dmlStatements__c</members>
-    <members>Limit_Reserve__mdt.queries__c</members>
-    <members>Limit_Reserve__mdt.queueableJobs__c</members>
-    <members>String_Values__mdt.Active__c</members>
-    <members>String_Values__mdt.Key__c</members>
-    <members>String_Values__mdt.Source__c</members>
-    <members>String_Values__mdt.Value__c</members>
-    <members>Trigger_Management_Entry__mdt.After_Delete__c</members>
-    <members>Trigger_Management_Entry__mdt.After_Insert__c</members>
-    <members>Trigger_Management_Entry__mdt.After_Undelete__c</members>
-    <members>Trigger_Management_Entry__mdt.After_Update__c</members>
-    <members>Trigger_Management_Entry__mdt.Before_Delete__c</members>
-    <members>Trigger_Management_Entry__mdt.Before_Insert__c</members>
-    <members>Trigger_Management_Entry__mdt.Before_Update__c</members>
-    <members>Trigger_Management_Entry__mdt.Class_Name__c</members>
-    <members>Trigger_Management_Entry__mdt.Entity_Object__c</members>
-    <members>Trigger_Management_Entry__mdt.Non_Entity_Object__c</members>
-    <members>Trigger_Management_Entry__mdt.Sequence_Number__c</members>
-    <members>User_Field_Map_Entry__mdt.Default_Value__c</members>
-    <members>User_Field_Map_Entry__mdt.Destination_Entity__c</members>
-    <members>User_Field_Map_Entry__mdt.Destination_Field__c</members>
-    <members>User_Field_Map_Entry__mdt.Map_Name__c</members>
-    <members>User_Field_Map_Entry__mdt.Nullable__c</members>
-    <members>User_Field_Map_Entry__mdt.Overwritable__c</members>
-    <members>User_Field_Map_Entry__mdt.Required__c</members>
-    <members>User_Field_Map_Entry__mdt.Sequence_Number__c</members>
-    <members>User_Field_Map_Entry__mdt.Source_Entity__c</members>
-    <members>User_Field_Map_Entry__mdt.Source_Field__c</members>
   </types>
   <types>
     <name>ListView</name>
-    <members>BooleanHierarchy__c.View_All</members>
-    <members>BooleanMetadata__mdt.APTS</members>
-    <members>BooleanMetadata__mdt.Account</members>
-    <members>BooleanMetadata__mdt.Att</members>
-    <members>BooleanMetadata__mdt.Campaign</members>
-    <members>BooleanMetadata__mdt.Case</members>
-    <members>BooleanMetadata__mdt.Contact</members>
-    <members>BooleanMetadata__mdt.Contract</members>
-    <members>BooleanMetadata__mdt.Credit</members>
-    <members>BooleanMetadata__mdt.D</members>
-    <members>BooleanMetadata__mdt.E</members>
-    <members>BooleanMetadata__mdt.I</members>
-    <members>BooleanMetadata__mdt.IE</members>
-    <members>BooleanMetadata__mdt.Lead</members>
-    <members>BooleanMetadata__mdt.LineItem</members>
-    <members>BooleanMetadata__mdt.Note</members>
-    <members>BooleanMetadata__mdt.OHS</members>
-    <members>BooleanMetadata__mdt.OLS</members>
-    <members>BooleanMetadata__mdt.Opp</members>
-    <members>BooleanMetadata__mdt.P</members>
-    <members>BooleanMetadata__mdt.R</members>
-    <members>BooleanMetadata__mdt.S</members>
-    <members>BooleanMetadata__mdt.SSP</members>
-    <members>BooleanMetadata__mdt.Task</members>
-    <members>BooleanMetadata__mdt.User</members>
-    <members>BooleanMetadata__mdt.ViewAll</members>
     <members>BooleanSetting__c.Account_Triggers</members>
     <members>BooleanSetting__c.All_NonTriggers</members>
     <members>BooleanSetting__c.All_Triggers</members>
@@ -186,45 +42,11 @@
     <members>BooleanSetting__c.LineItem_Triggers</members>
     <members>BooleanSetting__c.Task_Triggers</members>
     <members>BooleanSetting__c.User_Triggers</members>
-    <members>Decimal2_Values__mdt.APTS_NAT</members>
-    <members>Decimal2_Values__mdt.APTS_SKU_Status</members>
-    <members>Decimal2_Values__mdt.All</members>
-    <members>Field_Map_Entry__mdt.APTS_Asset_Queue</members>
-    <members>Field_Map_Entry__mdt.APTS_Asset_Queue_ALI_Change_Log</members>
-    <members>Field_Map_Entry__mdt.APTS_Order_Creator</members>
-    <members>Field_Map_Entry__mdt.Test_Map</members>
-    <members>Field_Map_Entry__mdt.View_All</members>
-    <members>Field_Map_Entry__mdt.View_Asset_Line_Item</members>
-    <members>Field_Map_Entry__mdt.View_Order</members>
-    <members>Field_Map_Entry__mdt.View_Order_Line_Item</members>
-    <members>String_Values__mdt.APTS_SKU_Status</members>
-    <members>String_Values__mdt.All</members>
-    <members>Trigger_Management_Entry__mdt.Account</members>
-    <members>Trigger_Management_Entry__mdt.Attachment</members>
-    <members>Trigger_Management_Entry__mdt.Case</members>
-    <members>Trigger_Management_Entry__mdt.Contact</members>
-    <members>Trigger_Management_Entry__mdt.Contract</members>
-    <members>Trigger_Management_Entry__mdt.Opportunity</members>
-    <members>Trigger_Management_Entry__mdt.Test</members>
-    <members>Trigger_Management_Entry__mdt.View_All</members>
-    <members>User_Field_Map_Entry__mdt.SSO</members>
-    <members>User_Field_Map_Entry__mdt.Test_Map</members>
-    <members>User_Field_Map_Entry__mdt.View_All</members>
-  </types>
-  <types>
-    <name>ValidationRule</name>
-    <members>Decimal2_Values__mdt.Validate_Label</members>
-    <members>String_Values__mdt.Validate_Label</members>
-    <members>Trigger_Management_Entry__mdt.Only_one_Target</members>
   </types>
   <types>
     <name>ApexTestSuite</name>
     <members>RedHatFramework</members>
   </types>
-  <types>
-    <name>ApexTrigger</name>
-    <members>AttachmentTriggerManagement</members>
-  </types>
-  <version>51.0</version>
+  <version>52.0</version>
   <fullName>RedHatFramework</fullName>
 </Package>
