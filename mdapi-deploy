@@ -37,7 +37,7 @@ fi
 if [ -d "$mdapipath/testSuites" ]
 then
   echo "Warning: ApexTestSuite cannot be deployed as part of an unmanaged package." 1>&2
-  script='for i in "$@";do if [ -r "$mdapipath/testSuites/$i.testSuite" ] ; then sed -i -z -e "s,\(\\s*<name>ApexTestSuite</name>\)\\s*<members>$i</members>,\\1," "$mdapipath/package.xml";fi;done'
+  script='for i in "$@";do if [ -r "$mdapipath/testSuites/$i.testSuite" ] ; then sed -i -z -e "s,\(\\s*<name>ApexTestSuite</name>\)\\s*<members>$i</members>,\\1," -e "s,\\s*<members>$i</members>\(\\s*<name>ApexTestSuite</name>\),\\1," "$mdapipath/package.xml";fi;done'
   sed -n -e 's,\s*<members>\(.*\)</members>\s*,\1,p' $mdapipath/package.xml | mdapipath="$mdapipath" xargs bash -c "$script" -
   sed -i -z -e 's,\s*<types>\s*<name>ApexTestSuite</name>\s*</types>,,' "$mdapipath/package.xml"
 fi

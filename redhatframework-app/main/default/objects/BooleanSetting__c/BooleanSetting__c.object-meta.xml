@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
-    <customSettingsType>List</customSettingsType>
-    <description>Used to store any boolean setting, such as the active/deactive status of trigger class methods.</description>
-    <enableFeeds>false</enableFeeds>
-    <label>Boolean Setting</label>
-    <visibility>Public</visibility>
-</CustomObject>
