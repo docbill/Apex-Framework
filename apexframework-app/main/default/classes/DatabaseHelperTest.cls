@@ -455,7 +455,7 @@ private class DatabaseHelperTest {
                 new DatabaseHelperQueueable(
                     new DatabaseHelper(),
                     DatabaseHelper.DMLOperation.INSERT_OP,
-                    (new List<List<SObject>>{new List<SObject>()}) )
+                    (new List<List<SObject>>{new List<SObject>{new Account(Name='Bob')}}) )
             }
         );
         Test.startTest();

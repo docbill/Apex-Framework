@@ -3,17 +3,18 @@
 /**
  * This Class allows recursive dml updates via the queueable interface.
  *
- * @version 2021-04-28
+ * @version 2021-10-27
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2021-04-28 - Separated from the DatabaseHelper class
+ * @since 2021-10-27 US307550 - Fixed enqueueing multiple dml calls
  */
 public class DatabaseHelperQueueable implements Queueable {
     static List<DatabaseHelperQueueable> databaseHelperQueueableList = null;
 
     DatabaseHelper helper;
     DatabaseHelper.DMLOperation op;
-    List<List<SObject>> recordsList;
+    List<List<SObject>> recordsList = new List<List<SObject>>();
     List<DatabaseHelperQueueable> queueableList;
     Integer enqueueScope;
     Map<String,Boolean> booleanSettingMap;
@@ -26,8 +27,12 @@ public class DatabaseHelperQueueable implements Queueable {
     {
         this.helper = helper;
         this.op = op;
-        this.recordsList = recordsList;
         this.enqueueScope = helper.getEnqueueScope();
+        for(List<SObject> records : recordsList) {
+            if(records != null && ! records.isEmpty()) {
+                this.recordsList.add(records);
+            }
+        }
     }
 
     @TestVisible
@@ -52,16 +57,16 @@ public class DatabaseHelperQueueable implements Queueable {
         if(! recordsList.isEmpty()) {
             databaseHelperQueueableList.add(this);
         }
-        if(! databaseHelperQueueableList.isEmpty()) {
+        for(DatabaseHelperQueueable dhq : databaseHelperQueueableList) {
             final String LOCK_STRING = DatabaseHelper.class.getName();
             if(ThreadLock.lock(LOCK_STRING)) {
                 try {
-                    this.booleanSettingMap = BooleanValuesHelper.booleanSettingMap;
-                    this.overrideSettingMap = BooleanValuesHelper.overrideSettingMap;
-                    this.queueableList = databaseHelperQueueableList;
+                    dhq.booleanSettingMap = BooleanValuesHelper.booleanSettingMap;
+                    dhq.overrideSettingMap = BooleanValuesHelper.overrideSettingMap;
+                    dhq.queueableList = databaseHelperQueueableList;
                     if(null == (new LimitHelper()).setQueueableJobs(1).checkLimits(! Test.isRunningTest())) {
                         System.debug('2.enqueueJob');
-                        System.enqueueJob(this.queueableList[0]);
+                        System.enqueueJob(dhq);
                     }
                 }
                 finally {
@@ -73,6 +78,7 @@ public class DatabaseHelperQueueable implements Queueable {
                     recordsList.clear();
                 }
             }
+            break;
         }
     }
 
