@@ -4,7 +4,7 @@
  * This Class implements some useful database utilities.  Many copied from TestDataFactory.  It is pretty dangerious to use these in code, but
  * sometimes you need to deactivate triggers to repair or migrate data.   So these are available to call from anonymous apex...
  *
- * @version 2021-03-24
+ * @version 2021-10-27
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-08-19 US266008 - Added governor limit checks
@@ -14,6 +14,7 @@
  * @since 2021-03-24 lock on DatabaseHelper.class.getName() when enqueueJob is called
  * @since 2021-03-24 remember in queueable instance boolean values
  * @since 2021-04-27 DE26549 - Increment queue counter
+ * @since 2021-10-27 US307550 - Fixed enqueueing multiple dml calls
  * 
  * @todo update TestDataFactory to call this class, rather than having a duplicate implementation.
  */
@@ -284,10 +285,12 @@ public with sharing class DatabaseHelper {
         Integer queueableJobs = 0;
         if(enqueueScope != null && enqueueScope != 0) {
             List<List<SObject>> recordsList = split(recordList,-enqueueScope);
-            if(recordsList.size() > 1) {
+            if(recordsList.size() > 1 || enqueueScope > 0) {
                 queueableJobs = 1;
                 if((new LimitHelper()).setQueueableJobs(1).checkLimits(false) == null) {
-                    recordList = recordsList.remove(0);
+                    if(! recordsList.isEmpty()) {
+                        recordList = recordsList.remove(0);
+                    }
                     new DatabaseHelperQueueable(this,op,recordsList).enqueueJob();
                 }
             }
