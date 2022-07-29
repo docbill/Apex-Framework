@@ -113,15 +113,15 @@ The ApexFramework.testSuite is an easy way to test all the classes included in t
 
 ## Script Overview
 
-### mdapi-deploy
+### scripts/bash/mdapi-deploy
 
 This script may be used to deploy this package as an unmanaged package.  Say you wish to deploy to dev1  You would run the command:
 
-```./mdapi-deploy ApexFramework -u dev1```
+```./scripts/bash/mdapi-deploy ApexFramework -u dev1```
 
 One could also deploy unpackaged data by specifing the folder. e.g.
 
-```./mdapi-delpoy force-app -u dev1```
+```./scripts/bash/mdapi-deploy src-temp -u dev1```
 
 The folder name must be declared in the sfdx-project.json file for this to work.
 
@@ -129,7 +129,7 @@ The folder name must be declared in the sfdx-project.json file for this to work.
 
 When you are ready to go to MERGE, QA, STAGE, and even PROD you are going to need an unlocked package version.  To create a new version edit the sfdx-project.json file should there be an update to your major version number. e.g. 1.2 to 1.3.  Once your major version is set you can create the version with the command:
 
-```sfdx force:package:version:create -x -p apexframework -d apexframework-app -c -p ApexFramework -d apexframework-app/ --wait 1000 -x -v DevHub```
+```sfdx force:package:version:create -x -p apexframework -d src-apexframework -c -p ApexFramework -d src-apexframework/ --wait 1000 -x -v DevHub```
 
 Note the install link.  You can modify that link and use it to install your version on the respective sandbox, if you have the appropriate permissions.  Otherwise you will need to give the link to devops.   You can also use the ```sfdx force:package:install``` command.  For example to install to merge:
 
