@@ -5,7 +5,7 @@
             "default": true
         },
         {
-            "path": "src-apexframework",
+            "path": "src/apexframework",
             "default": false,
             "package": "ApexFramework",
             "versionName": "ver 1.2",
