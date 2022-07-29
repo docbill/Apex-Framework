@@ -38,7 +38,11 @@ Only the DatabaseHelper method usage was more concise and easier to read.
 
 All the safe methods use this custom return type. e.g.
 
-```List<Database.Result> results = new DatabaseHelper.safeInsert(recordList);```
+```List<DatabaseHelper.Result> results = new DatabaseHelper.safeInsert(recordList);```
+
+as opposed to the legacy methods that use the standard return types:
+
+```List<Database.SaveResult> results = new DatabaseHelper.legacyInsert(recordList);```
 
 ### Methods include:
 
@@ -94,4 +98,37 @@ Note only one queueable process can be invoked.  So if that limit has already be
 
 ```setCheckLimits(Boolean value)``` -- Called to change the check limits property.
 
+## Enqueue Usage Pattern
+
+Suppose you have set of record dml operations that tend to generate governor limit exceptions when you process too many records.
+
+The following code could use the enqueueScope to process the records as queueable jobs when there are too many records:
+```
+// First grab a lock to allow daisy chaining
+Boolean databaseHelperLock = ThreadLock.lock(DatabaseHelper.class.getName());
+// Now get a DatabaseHelper that enqueues all records after the first 200.
+DatabaseHelper dh = new DatabaseHelper().setEnqueueScope(-200);
+try {
+    // do our dml
+    dh.safeInsert(insertList1); // ignoring results
+    dh.safeInsert(insertList2); // ignoring results
+    dh.safeUpdate(updateList1); // ignoring results
+    for(DatabaseHelperResult r : dh.safeDelete(deleteList1)) {
+        if(! r.isSuccess() ) {
+            // only errors on the first 200 records will be reported            
+            System.debug('Failed to delete '+r.getSObject()+' due to error: '+r.getMessages());
+        }
+    }
+}
+finally {
+    if(databaseHelperLock) {
+        // release the lock
+        ThreadLock.unlock(DatabaseHelper.class.getName());
+        // do a dummy dml to enqueue the overflow dml operations
+        dh.setEnqueueScope(1).safeUpdate(new List<SObject>());
+    }
+}
+``` 
+
+@ToDo Add a callback for error handling on enqueued records.
 

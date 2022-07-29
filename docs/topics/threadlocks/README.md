@@ -7,17 +7,16 @@ Sometimes we need a way to prevent recursion. Some developers will simply use a 
 The usage pattern of this is really simple.  If your code is completely in one method you can usually do a try/finally block like:
 
 ```
-  	final String <MY_THREAD_KEY> = '<<<This is a unique value.>>>';
-    if(ThreadLock.lock(<MY_THREAD_KEY>)) {
-    	try {
-   			// do some work
-   		}
-   		finally {
-   			ThreadLock.unlock(<MY_THREAD_KEY>);
-    	}
-    }
-
-````
+final String <MY_THREAD_KEY> = '<<<This is a unique value.>>>';
+if(ThreadLock.lock(<MY_THREAD_KEY>)) {
+  try {
+    // do some work
+  }
+  finally {
+    ThreadLock.unlock(<MY_THREAD_KEY>);
+  }
+}
+```
 
 The first gotcha is you want to use the same thread name everywhere that is mutually exclusive excution.  If you make your <MY_THREAD_KEY> variable public then you are introducing the same class dependency as just using a static boolean.
 

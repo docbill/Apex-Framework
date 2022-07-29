@@ -102,11 +102,11 @@ For specifying the SObject to trigger one normally assigns the Entity Object to 
 
 ![Boolean Metadata](BooleanMetadata.png)
 
-The naming of Boolean Metadata is the same as the Trigger Management Entry.  A true value means the action is active, and will be called.  A false value means the action is inactive and will be ignored.   A value of Default is treated as true unless there is a BooleanHierarchy__c field or BooleanSetting__c record to override this value.
+The naming of Boolean Metadata is the same as the Trigger Management Entry.  A true value means the action is active, and will be called.  A false value means the action is inactive and will be ignored.   A value of Default is treated as true unless there is a BooleanHierarchy__c field to override this value.
 
 There is no need to check these settings in your trigger handler.  There is also a entry 'DeactivateAll' which will deactivate all callable triggers handlers.
 
-Do not worry if you forget the create the Boolean Metadata entry.  It will likely automatically created for you when needed.  Even if it cannot be created, a default value of true will be used.
+The feature to automatically create BooleanMetadata was removed because it broke Quick Deploy's.  So you must manually create the entries.
 
 ## Advanced Usage
 
