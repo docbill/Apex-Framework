@@ -40,3 +40,4 @@ README.md
 config/project-scratch-def.json
 
 *.mdapi/
+.sf/config.json
