@@ -21,6 +21,57 @@ The helper will query all the metadata values with this source name and store th
 String myStringValue = mvh.stringMap.get('myValue');
 Decimal myDecimalValue = mvh.decimalMap.get('myValue');
 ```
+## Array Design Pattern 
+
+1. Define the values like a map of array values in String_Values__mdt.  e.g.
+
+| Label                           | Source                  | Key     | Value                                                           | Active  |
+| :------------------------------ | :---------------------- | :------ | :------------------------------------------------------------:  | :-----: |
+| IE_ACTL_After.reprocess.value01 | IE_ACTL_After.reprocess | value01 | ```(?i)Aggregate query.*```                                     |	Checked |	 
+| IE_ACTL_After.reprocess.value02 | IE_ACTL_After.reprocess | value02 | ```(?i).*Limit Exceeded.*```                                    | Checked |	 
+| IE_ACTL_After.reprocess.value03 | IE_ACTL_After.reprocess | value03 | ```(?i).*Limits:.*out of.*```                                   | Checked |	 
+| IE_ACTL_After.reprocess.value04 | IE_ACTL_After.reprocess | value04 | ```(?i).*Regex too complicated.*```                             | Checked |	 
+| IE_ACTL_After.reprocess.value05 | IE_ACTL_After.reprocess | value05 | ```(?i).*unable to obtain exclusive access to this record.*```  | Checked |	 
+| IE_ACTL_After.reprocess.value06 | IE_ACTL_After.reprocess | value06 | ```(?i).*Unable to persist SalesAccount data.*```	              | Checked |	
+
+2. In your code retrieve the list of active values by name:
+
+```
+Metadata_Values_Helper reprocessHelper = Metadata_Values_Helper
+  .getMetadataValuesHelper('IE_ACTL_After.reprocess')
+List<String> List reprocessList = reprocessHelper.stringMap.values();
+```
+
+3. If you want to quickly find and update your values, create a list view for String_Values__mdt.
+
+## Map Design Pattern 
+
+1. Define the values like a map of values in String_Values__mdt.  e.g.
+
+| Label                             | Source          | Key               | Value               | Active  |
+| :-------------------------------  | :-------------- | :---------------- | :-----------------: | :-----: |
+| APTS_SKU_Status.Active            | APTS_SKU_Status | Active            | Activated           | Checked |	 
+| APTS_SKU_Status.Entered           | APTS_SKU_Status | Entered           | Ready for Renewal   | Checked |	 
+| APTS_SKU_Status.Expired           | APTS_SKU_Status | Expired           | Expired             | Checked	|
+| APTS_SKU_Status.QA Hold           | APTS_SKU_Status | QA Hold           | QA Hold             | Checked	|
+| APTS_SKU_Status.Signed            | APTS_SKU_Status | Signed            | Signed              |	Checked	|
+| APTS_SKU_Status.Terminated        | APTS_SKU_Status | Terminated        | Terminated          | Checked | 
+| APTS_SKU_Status.Termination Hold  | APTS_SKU_Status | Termination Hold  | Pending Termination	| Checked |	 
+
+2. In your code retrieve the map of active value, and respective values:
+
+```
+Metadata_Values_Helper skuStatusHelper = Metadata_Values_Helper
+  .getMetadataValuesHelper('IE_ACTL_After.reprocess')
+String active = skuStatusHelper.stringMap.get('Active');
+String entered = skuStatusHelper.stringMap.get('Entered');
+String qaHold = skuStatusHelper.stringMap.get('QA Hold');
+...
+String terminationHold = skuStatusHelper.stringMap.get('Termination Hold');
+```
+
+4. If you want to see just your list in the String_Values__mdt, add a respective list view.
+
 
 ## Depreciated Usage
 
