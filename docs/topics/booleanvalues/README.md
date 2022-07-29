@@ -50,7 +50,7 @@ if(BooleanValuesHelper.getBooleanValue('IE_CTL_Before.validateFields',false)) {
 ```
 
 
-The value as false means if IE_CTL_Before has not been added to the Boolean Metadata table, then return a value of false.
+The value as false means if IE_CTL_Before.validateFields has not been added to the BooleanMetadata table, or we are ignoring metadata, then return a value of false.  We typically ignore metadata values when a test class is running.
 
 ## Overriding Settings
 
