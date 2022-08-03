@@ -6,6 +6,12 @@ This is a package of framework entities used by Apex coding standards, that shou
 
 This is the initial open source release of this package.  This is based on code in Red Hat's production org.  Depreciated code has been removed from this release.  Everything remaining is believed to be of interest for the open source community.
 
+## Build/Deploy Instructions
+
+This package can be easily be build and installed with the following directions:
+* [Unlocked Package](docs/topics/unlockedPackage/)
+* [Unmanaged Package](docs/topics/unmanagedPackage/)
+
 ## Class Overview
 
 ### BooleanValueHelper
@@ -124,16 +130,3 @@ One could also deploy unpackaged data by specifing the folder. e.g.
 ```./scripts/bash/mdapi-deploy src-temp -u dev1```
 
 The folder name must be declared in the sfdx-project.json file for this to work.
-
-## Package Version Creation and Deployment
-
-When you are ready to go to MERGE, QA, STAGE, and even PROD you are going to need an unlocked package version.  To create a new version edit the sfdx-project.json file should there be an update to your major version number. e.g. 1.2 to 1.3.  Once your major version is set you can create the version with the command:
-
-```sfdx force:package:version:create -x -p apexframework -d src-apexframework -c -p ApexFramework -d src-apexframework/ --wait 1000 -x -v DevHub```
-
-Note the install link.  You can modify that link and use it to install your version on the respective sandbox, if you have the appropriate permissions.  Otherwise you will need to give the link to devops.   You can also use the ```sfdx force:package:install``` command.  For example to install to merge:
-
-```sfdx force:package:install --package "ApexFramework@<version>" -s AllUsers -w 1000 -u merge```
-
-Which ever way you choose to install, make sure you enable this package for all users.
-
