@@ -6,6 +6,12 @@ This is a package of framework entities used by Apex coding standards, that shou
 
 This is the initial open source release of this package.  This is based on code in Red Hat's production org.  Depreciated code has been removed from this release.  Everything remaining is believed to be of interest for the open source community.
 
+## Build/Deploy Instructions
+
+This package can be easily be build and installed with the following directions:
+* [Unlocked Package](docs/builds/UnlockedPackage/)
+* [Unmanaged Package](docs/builds/UnmanagedPackage/)
+
 ## Class Overview
 
 ### BooleanValueHelper
