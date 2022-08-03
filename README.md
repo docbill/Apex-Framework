@@ -9,8 +9,8 @@ This is the initial open source release of this package.  This is based on code 
 ## Build/Deploy Instructions
 
 This package can be easily be build and installed with the following directions:
-* [Unlocked Package](docs/topics/UnlockedPackage/)
-* [Unmanaged Package](docs/topics/UnmanagedPackage/)
+* [Unlocked Package](docs/topics/unlockedPackage/)
+* [Unmanaged Package](docs/topics/unmanagedPackage/)
 
 ## Class Overview
 
