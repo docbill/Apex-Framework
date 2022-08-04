@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Map_Name__c</fullName>
-    <deprecated>false</deprecated>
-    <description>This is the name of the map.</description>
+    <description>Prefix label instead.</description>
     <externalId>false</externalId>
-    <fieldManageability>SubscriberControlled</fieldManageability>
-    <label>Map Name</label>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Map Name (Depreciated)</label>
     <required>false</required>
     <type>Picklist</type>
     <valueSet>
@@ -26,6 +25,12 @@
                 <fullName>Test_Map</fullName>
                 <default>false</default>
                 <label>Test_Map</label>
+            </value>
+            <value>
+                <fullName>IE_Input__e.Product</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>IE_Input__e.Product</label>
             </value>
         </valueSetDefinition>
     </valueSet>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ListView xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Test_Map</fullName>
-    <columns>Sequence_Number__c</columns>
     <columns>MasterLabel</columns>
+    <columns>Sequence_Number__c</columns>
     <columns>Destination_Entity__c</columns>
     <columns>Destination_Field__c</columns>
     <columns>Source_Entity__c</columns>
@@ -13,10 +13,9 @@
     <columns>Required__c</columns>
     <filterScope>Everything</filterScope>
     <filters>
-        <field>Map_Name__c</field>
-        <operation>equals</operation>
-        <value>Test_Map</value>
+        <field>MasterLabel</field>
+        <operation>startsWith</operation>
+        <value>Test Map.</value>
     </filters>
-    <label>Test_Map</label>
-    <language>en_US</language>
+    <label>Test Map</label>
 </ListView>

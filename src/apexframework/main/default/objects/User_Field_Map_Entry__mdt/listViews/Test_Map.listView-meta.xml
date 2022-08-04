@@ -13,10 +13,9 @@
     <columns>Required__c</columns>
     <filterScope>Everything</filterScope>
     <filters>
-        <field>Map_Name__c</field>
-        <operation>equals</operation>
-        <value>Test_Map</value>
+        <field>MasterLabel</field>
+        <operation>startsWith</operation>
+        <value>Test Map.</value>
     </filters>
-    <label>Test_Map</label>
-    <language>en_US</language>
+    <label>Test Map</label>
 </ListView>
