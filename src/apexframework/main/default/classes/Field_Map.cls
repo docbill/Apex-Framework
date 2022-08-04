@@ -19,7 +19,7 @@ public class Field_Map {
     private final Boolean isDebugging;
     public final String mapName;
     @TestVisible
-    private Map<String,List<FieldMapEntry>> fieldEntriesByDestMap = new Map<String,List<FieldMapEntry>>();
+    private Map<String,List<FieldMapEntry>> fieldEntriesMap = new Map<String,List<FieldMapEntry>>();
 
     private Map<String,List<FieldMapEntry>> fieldEntriesBySourceMap = new Map<String,List<FieldMapEntry>>();
 
@@ -292,7 +292,7 @@ public class Field_Map {
     }
 
     private List<FieldMapEntry> getFieldMapEntriesByDest(final String destinationEntityName) {
-        List<FieldMapEntry> retval = fieldEntriesByDestMap.get(destinationEntityName);
+        List<FieldMapEntry> retval = fieldEntriesMap.get(destinationEntityName);
         if(retval == null) {
             retval = new List<FieldMapEntry>();
             switch on destinationEntityName {
@@ -341,7 +341,7 @@ public class Field_Map {
                         order by Sequence_Number__c ASC NULLS LAST ] );
                 }
             }
-            fieldEntriesByDestMap.put(destinationEntityName,retval);
+            fieldEntriesMap.put(destinationEntityName,retval);
         }
         return retval;
     }
