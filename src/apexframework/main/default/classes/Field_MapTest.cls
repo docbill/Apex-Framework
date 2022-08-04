@@ -159,7 +159,18 @@ public class Field_MapTest {
         System.assertEquals('Bob',destAccount.Name,'destAccount.Name');
         Test.stopTest();
     }
-    
+   
+    @isTest
+    static void getDestinationEntityMapTest() {
+        Field_Map fm = new Field_Map('Test Map');
+        String contactName = Contact.SObjectType.getDescribe().getName();
+        Test.startTest();
+        Map<String,SObject> entityMap = fm.getDestinationEntityMap(Contact.SObjectType);
+        System.assert(entityMap.containsKey(contactName),'Expected '+contactName+' in '+entityMap);
+        System.assert(entityMap.get(contactName) instanceof Contact,'Expected to be instance of contact: '+entityMap.get(Contact.class.getName()));
+        Test.stopTest();
+    }
+
     @isTest
     static void getDestinationFieldNamesTest() {
         Field_Map fm = new Field_Map('Test Map');

@@ -3,7 +3,7 @@
 /**
  * This class used to copy data from one object to another using Field_Map_Entry__mdt and User_Field_Map_Entry__mdt values
  *
- * @version 2021-04-27
+ * @version 2022-08-04
  * 
  * @author  Bill C Riemers <briemers@redhat.com>
  * @since 2019-11-21 - Created
@@ -12,13 +12,17 @@
  * @since 2020-03-05 US244638 US245940 - Added isDebugging flag
  * @since 2021-04-06 - Increase test coverage
  * @since 2021-04-27 - Changes towards depreciated Map_Name__c (picklists are not handled well by unlocked packages)
+ * @since 2022-08-04 SPP-4116 - Added getDestinationEntityMap method
  */
 public class Field_Map {
     public static final String DEBUG_SETTING = 'Field_Map.debug';
     private final Boolean isDebugging;
     public final String mapName;
     @TestVisible
-    private Map<String,List<FieldMapEntry>> fieldEntriesMap = new Map<String,List<FieldMapEntry>>();
+    private Map<String,List<FieldMapEntry>> fieldEntriesByDestMap = new Map<String,List<FieldMapEntry>>();
+
+    private Map<String,List<FieldMapEntry>> fieldEntriesBySourceMap = new Map<String,List<FieldMapEntry>>();
+
     public List<Field_Map_Entry__mdt> fieldEntriesForTesting {
         get;
         set {
@@ -32,6 +36,7 @@ public class Field_Map {
             }
         }
     }
+
     @TestVisible
     private List<FieldMapEntry> fieldEntriesForTesting2 = null;
 
@@ -81,9 +86,10 @@ public class Field_Map {
 
     /**
      * Implements special rules for copying fields.
+     * 
      * @param entityNameMap to use to field values
      * @param dest to copy to
-     * returns list s Error Messages
+     * @return list of Error Messages
      */
     public List<String> copyFields(Map<String,SObject> entityNameMap, SObject dest) 
     {
@@ -96,7 +102,7 @@ public class Field_Map {
             if(isDebugging) {
                 System.debug('copyFields('+destinationEntityName+','+entityNameMap.keySet()+')');
             }
-            List<FieldMapEntry> fmeList = getFieldMapEntries( dest );
+            List<FieldMapEntry> fmeList = getFieldMapEntriesByDest( dest );
             if(fieldEntriesForTesting2 != null) {
                 // this allows resource injection from a test class
                 fmeList = fieldEntriesForTesting2;
@@ -122,56 +128,20 @@ public class Field_Map {
         return copyFieldErrorList;
     }
 
+    /**
+     * Obtain all the field names for the specified source, prefixed with the specified string.
+     * 
+     * @param prefix string to prefix to field names, useful when generating a subquery
+     * @param sourceSObjectType the source SObjectType we are looking for
+     * @return a set of fieldnames prefixed with specified value
+     */
     public Set<String> getSourceFieldNames(String prefix,SObjectType sourceSObjectType) {
         final String sourceEntityName = sourceSObjectType.getDescribe().getName();
         if(isDebugging) {
             System.debug('getSourceFieldNames('+prefix+','+sourceEntityName+')');
         }
         Set<String> sourceFieldNames = new Set<String>();
-        List<FieldMapEntry> fmeList = new List<FieldMapEntry>();
-        Map<String,String> masterLabelLikeMap = (new Map<String,String>{
-            mapName => '%',
-            null => mapName+'.%'
-        });
-        for(String xmapName : masterLabelLikeMap.keySet()) {
-            String masterLabelLike = masterLabelLikeMap.get(xmapName);
-            addAll( fmeList, mapName, [
-                select
-                    Map_Name__c,
-                    MasterLabel,
-                    Source_Entity__r.QualifiedApiName,
-                    Source_Field__r.QualifiedApiName,
-                    Destination_Entity__c,
-                    Destination_Field__c,
-                    Default_Value__c,
-                    Nullable__c,
-                    Overwritable__c,
-                    Required__c,
-                    Sequence_Number__c
-                from User_Field_Map_Entry__mdt 
-                where Source_Entity__r.QualifiedApiName = :sourceEntityName
-                    and Map_Name__c = :xmapName
-                    and MasterLabel like :masterLabelLike
-                    and Source_Field__c != null ] );
-            addAll( fmeList, mapName, [
-                select
-                    Map_Name__c,
-                    MasterLabel,
-                    Source_Entity__r.QualifiedApiName,
-                    Source_Field__r.QualifiedApiName,
-                    Destination_Entity__r.QualifiedApiName,
-                    Destination_Field__r.QualifiedApiName,
-                    Default_Value__c,
-                    Nullable__c,
-                    Overwritable__c,
-                    Required__c,
-                    Sequence_Number__c
-                from Field_Map_Entry__mdt 
-                where Source_Entity__r.QualifiedApiName = :sourceEntityName
-                    and Map_Name__c = :xmapName
-                    and MasterLabel like :masterLabelLike
-                    and Source_Field__c != null ] );
-        }
+        List<FieldMapEntry> fmeList = getFieldMapEntriesBySource(sourceEntityName);
         if(fieldEntriesForTesting2 != null) {
             // this allows resource injection from a test class
             fmeList = fieldEntriesForTesting2;
@@ -185,6 +155,40 @@ public class Field_Map {
             }
         }
         return sourceFieldNames;
+    }
+
+    /**
+     * Create a map of entities we can copy to.  This is useful, if we are 
+     * planning on inserting brand new objects, or there is a field we can use
+     * for upserts.
+     * 
+     * @param sourceSObjectType the source object we are mapping from
+     * @return a map of entity qualified api name to a newly created SObject
+     */
+    public Map<String,SObject> getDestinationEntityMap(SObjectType sourceSObjectType) {
+        final String sourceEntityName = sourceSObjectType.getDescribe().getName();
+        if(isDebugging) {
+            System.debug('getDestinationEntityMap('+sourceEntityName+')');
+        }
+        Map<String,SObject> destinationEntityMap = new Map<String,SObject>();
+        List<FieldMapEntry> fmeList = getFieldMapEntriesBySource(sourceEntityName);
+        if(fieldEntriesForTesting2 != null) {
+            // this allows resource injection from a test class
+            fmeList = fieldEntriesForTesting2;
+        }
+        for(FieldMapEntry fme : fmeList)
+        {
+            if( fme.sourceEntityQualifiedApiName == sourceEntityName
+                && fme.destinationEntityQualifiedApiName != null ) 
+            {
+                destinationEntityMap.put(fme.destinationEntityQualifiedApiName,null);
+            }
+        }
+        for(String key : destinationEntityMap.keySet()) {
+            SObject obj = (SObject)Type.forName(key).newInstance();
+            destinationEntityMap.put(key,obj);
+        }
+        return destinationEntityMap;
     }
 
     static void addAll(List<FieldMapEntry> targetList, final String mapName, List<User_Field_Map_Entry__mdt> sourceList) {
@@ -210,7 +214,7 @@ public class Field_Map {
     public Set<String> getDestinationFieldNames(String prefix,SObjectType destinationSObjectType) {
         final String destEntityName = destinationSObjectType.getDescribe().getName();
         Set<String> destFieldNames = new Set<String>();
-        List<FieldMapEntry> fmeList = getFieldMapEntries( destEntityName );
+        List<FieldMapEntry> fmeList = getFieldMapEntriesByDest( destEntityName );
         if(fieldEntriesForTesting2 != null) {
             // this allows resource injection from a test class
             fmeList = fieldEntriesForTesting2;
@@ -226,16 +230,69 @@ public class Field_Map {
         return destFieldNames;
     }
 
-    private List<FieldMapEntry> getFieldMapEntries(SObject dest) {
+    private List<FieldMapEntry> getFieldMapEntriesBySource( String sourceEntityName )
+    {
+        List<FieldMapEntry> fmeList = fieldEntriesBySourceMap.get( sourceEntityName );
+        if(fmeList == null) {
+            fmeList = new List<FieldMapEntry>();
+            Map<String,String> masterLabelLikeMap = (new Map<String,String>{
+                mapName => '%',
+                null => mapName+'.%'
+            });
+            for(String xmapName : masterLabelLikeMap.keySet()) {
+                String masterLabelLike = masterLabelLikeMap.get(xmapName);
+                addAll( fmeList, mapName, [
+                    select
+                        Map_Name__c,
+                        MasterLabel,
+                        Source_Entity__r.QualifiedApiName,
+                        Source_Field__r.QualifiedApiName,
+                        Destination_Entity__c,
+                        Destination_Field__c,
+                        Default_Value__c,
+                        Nullable__c,
+                        Overwritable__c,
+                        Required__c,
+                        Sequence_Number__c
+                    from User_Field_Map_Entry__mdt 
+                    where Source_Entity__r.QualifiedApiName = :sourceEntityName
+                        and Map_Name__c = :xmapName
+                        and MasterLabel like :masterLabelLike
+                        and Source_Field__c != null ] );
+                addAll( fmeList, mapName, [
+                    select
+                        Map_Name__c,
+                        MasterLabel,
+                        Source_Entity__r.QualifiedApiName,
+                        Source_Field__r.QualifiedApiName,
+                        Destination_Entity__r.QualifiedApiName,
+                        Destination_Field__r.QualifiedApiName,
+                        Default_Value__c,
+                        Nullable__c,
+                        Overwritable__c,
+                        Required__c,
+                        Sequence_Number__c
+                    from Field_Map_Entry__mdt 
+                    where Source_Entity__r.QualifiedApiName = :sourceEntityName
+                        and Map_Name__c = :xmapName
+                        and MasterLabel like :masterLabelLike
+                        and Source_Field__c != null ] );
+            }
+            fieldEntriesBySourceMap.put( sourceEntityName, fmeList);
+        }
+        return fmeList;
+    }
+
+    private List<FieldMapEntry> getFieldMapEntriesByDest(SObject dest) {
         List<FieldMapEntry> retval = null;
         if(dest != null) {
-            retval = getFieldMapEntries(dest.getSObjectType().getDescribe().getName());
+            retval = getFieldMapEntriesByDest(dest.getSObjectType().getDescribe().getName());
         }
         return retval;
     }
-        
-    private List<FieldMapEntry> getFieldMapEntries(final String destinationEntityName) {
-        List<FieldMapEntry> retval = fieldEntriesMap.get(destinationEntityName);
+
+    private List<FieldMapEntry> getFieldMapEntriesByDest(final String destinationEntityName) {
+        List<FieldMapEntry> retval = fieldEntriesByDestMap.get(destinationEntityName);
         if(retval == null) {
             retval = new List<FieldMapEntry>();
             switch on destinationEntityName {
@@ -284,7 +341,7 @@ public class Field_Map {
                         order by Sequence_Number__c ASC NULLS LAST ] );
                 }
             }
-            fieldEntriesMap.put(destinationEntityName,retval);
+            fieldEntriesByDestMap.put(destinationEntityName,retval);
         }
         return retval;
     }
