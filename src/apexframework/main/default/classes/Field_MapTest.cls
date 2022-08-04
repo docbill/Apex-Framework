@@ -3,12 +3,13 @@
 /**
  * Test class for Field_Map
  * 
- * @version 2020-04-06
+ * @version 2022-08-04
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2019-12-19 - Created
  * @since 2020-03-05 US244638 US245940 - added tests using the user field map 
  * @since 2021-04-06 - Increase test coverage
+ * @since 2022-08-04 - Renamed "Test_Map" to "Test Map"
  */
 @isTest
 public class Field_MapTest {
@@ -61,7 +62,7 @@ public class Field_MapTest {
 
     @isTest
     static void testMap() {
-        Field_Map fm = new Field_Map('Test_Map');
+        Field_Map fm = new Field_Map('Test Map');
         contactAccountFieldMap.fieldEntriesForTesting2 = (new List<Field_Map.FieldMapEntry>{
             new Field_Map.FieldMapEntry(
                 Contact.class.getName(),
@@ -161,7 +162,7 @@ public class Field_MapTest {
     
     @isTest
     static void getDestinationFieldNamesTest() {
-        Field_Map fm = new Field_Map('Test_Map');
+        Field_Map fm = new Field_Map('Test Map');
 
         Test.startTest();
         List<String> destFieldNames = new List<String>(fm.getDestinationFieldNames('',Contact.SObjectType));
@@ -177,7 +178,7 @@ public class Field_MapTest {
     
     @isTest
     static void getSourceFieldNamesTest() {
-        Field_Map fm = new Field_Map('Test_Map');
+        Field_Map fm = new Field_Map('Test Map');
         Test.startTest();
         List<String> sourceFieldNames = new List<String>(fm.getSourceFieldNames('',Contact.SObjectType));
         sourceFieldNames.sort();

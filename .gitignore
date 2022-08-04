@@ -38,5 +38,5 @@ $RECYCLE.BIN/
 package.json
 config/project-scratch-def.json
 
-*.mdapi/
+**.mdapi/
 .sf/config.json

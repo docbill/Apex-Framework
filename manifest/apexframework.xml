@@ -67,9 +67,11 @@
 	<types>
 		<members>BooleanMetadata__mdt-Boolean Metadata Layout</members>
 		<members>Decimal2_Values__mdt-Decimal Value Layout</members>
+		<members>Field_Map_Entry__mdt-Field Map Entry Layout</members>
 		<members>Limit_Reserve__mdt-Limit Reserve Layout</members>
 		<members>String_Values__mdt-String Value Layout</members>
 		<members>Trigger_Management_Entry__mdt-Trigger Management Entry Layout</members>
+		<members>User_Field_Map_Entry__mdt-User Field Map Entry Layout</members>
 		<name>Layout</name>
 	</types>
 	<types>
