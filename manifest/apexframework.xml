@@ -53,6 +53,7 @@
         <members>String_Values__mdt.Key__c</members>
         <members>String_Values__mdt.Source__c</members>
         <members>String_Values__mdt.Value__c</members>
+        <members>Trigger_Management_Entry__mdt.Active__c</members>
         <members>Trigger_Management_Entry__mdt.After_Delete__c</members>
         <members>Trigger_Management_Entry__mdt.After_Insert__c</members>
         <members>Trigger_Management_Entry__mdt.After_Undelete__c</members>

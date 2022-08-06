@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ListView xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>View_All</fullName>
+    <fullName>Order_Transaction_Log</fullName>
     <columns>MasterLabel</columns>
     <columns>Entity_Object__c</columns>
     <columns>Non_Entity_Object__c</columns>
@@ -17,6 +17,11 @@
     <columns>NamespacePrefix</columns>
     <columns>DeveloperName</columns>
     <filterScope>Everything</filterScope>
-    <label>View All</label>
+    <filters>
+        <field>Entity_Object__c</field>
+        <operation>equals</operation>
+        <value>IE_Order_Transaction_Log</value>
+    </filters>
+    <label>Order Transaction Log</label>
     <language>en_US</language>
 </ListView>
