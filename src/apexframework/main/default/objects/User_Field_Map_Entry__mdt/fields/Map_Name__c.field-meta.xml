@@ -3,7 +3,7 @@
     <fullName>Map_Name__c</fullName>
     <description>Use label prefix instead.</description>
     <externalId>false</externalId>
-    <fieldManageability>DeveloperControlled</fieldManageability>
+    <fieldManageability>SubscriberControlled</fieldManageability>
     <label>Map Name (Depreciated)</label>
     <required>false</required>
     <type>Picklist</type>
@@ -18,7 +18,7 @@
             </value>
             <value>
                 <fullName>Test_Map</fullName>
-                <default>true</default>
+                <default>false</default>
                 <label>Test_Map</label>
             </value>
         </valueSetDefinition>

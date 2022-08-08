@@ -3,7 +3,7 @@
     <fullName>Map_Name__c</fullName>
     <description>Prefix label instead.</description>
     <externalId>false</externalId>
-    <fieldManageability>DeveloperControlled</fieldManageability>
+    <fieldManageability>SubscriberControlled</fieldManageability>
     <label>Map Name (Depreciated)</label>
     <required>false</required>
     <type>Picklist</type>
@@ -18,7 +18,7 @@
             </value>
             <value>
                 <fullName>APTS Order Creator</fullName>
-                <default>true</default>
+                <default>false</default>
                 <label>APTS Order Creator</label>
             </value>
             <value>

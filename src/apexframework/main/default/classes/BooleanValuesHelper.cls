@@ -3,7 +3,7 @@
 /**
  * This is a set of utilities for treating boolean metadata a a map.
  * 
- * @version 2021-09-21
+ * @version 2022-08-06
  * 
  * @author Bill Riemers <briemers@redhat.com>
  * @since 2020-12-02 - Created
@@ -11,6 +11,7 @@
  * @since 2021-02-13 DE25830 - Fix to make sure maps are per helper instance
  * @since 2021-04-27 US292962 - No longer create missing metadata
  * @since 2021-09-21 - User legacyMap instead of BooleanSetting__c
+ * @since 2022-08-06 - Trigger Management Entries Active flags will be treated as Boolean Metadata
  */
 public without sharing class BooleanValuesHelper {
     private static Map<Boolean,Map<String,BooleanValuesHelper>> booleanValuesHelperMaps = (new Map<Boolean,Map<String,BooleanValuesHelper>>{
@@ -253,24 +254,46 @@ public without sharing class BooleanValuesHelper {
         }
         Map<String,Boolean> retval = new Map<String,Boolean>();
         final String sourceWithSuffix = suffixWith(source,'.','');
-        List<BooleanMetadata__mdt> bmList = null;
+        List<SObject> queryList = new List<SObject>();
         Boolean isBlankSourceWithSuffix = String.isBlank(sourceWithSuffix);
         if(! isBlankSourceWithSuffix) {
             final String masterLabelLike = sourceWithSuffix+'%';
-            System.debug('masterLabelLike='+masterLabelLike);
-            bmList = [
-                select DeveloperName, MasterLabel, Value__c
-                from BooleanMetadata__mdt
-                where MasterLabel like :masterLabelLike ];
+            queryList.addAll([
+                SELECT DeveloperName, MasterLabel, Value__c
+                FROM BooleanMetadata__mdt
+                WHERE MasterLabel LIKE :masterLabelLike ]);
+            queryList.addAll([
+                SELECT DeveloperName, MasterLabel, Active__c
+                FROM Trigger_Management_Entry__mdt
+                WHERE Active__c != null AND MasterLabel LIKE :masterLabelLike ]);
         }
         else {
-            bmList = [
-                select DeveloperName, MasterLabel, Value__c
-                from BooleanMetadata__mdt
-                where not MasterLabel like '%.%' ];
-
+            queryList.addAll([
+                SELECT DeveloperName, MasterLabel, Value__c
+                FROM BooleanMetadata__mdt
+                WHERE NOT MasterLabel LIKE '%.%' ]);
+            queryList.addAll([
+                SELECT DeveloperName, MasterLabel, Active__c
+                FROM Trigger_Management_Entry__mdt
+                WHERE Active__c != null AND ( NOT MasterLabel like '%.%' ) ]);
         }
-        for(BooleanMetadata__mdt bm : bmList ) {
+        Map<String,BooleanMetadata__mdt> bmMap = new Map<String,BooleanMetadata__mdt>();
+        for(SObject value : queryList ) {
+            switch on value {
+                when BooleanMetadata__mdt bm {
+                    bmMap.put(bm.DeveloperName,bm);
+                }
+                when Trigger_Management_Entry__mdt tme {
+                    BooleanMetadata__mdt bm = new BooleanMetadata__mdt(
+                        DeveloperName = tme.DeveloperName,
+                        MasterLabel = tme.MasterLabel,
+                        Value__c = tme.Active__c
+                    );
+                    bmMap.put(bm.DeveloperName,bm);
+                }
+            }
+        }
+        for(BooleanMetadata__mdt bm : bmMap.values()) {
             if(isBlankSourceWithSuffix || bm.MasterLabel.startsWith(sourceWithSuffix)) {
                 Boolean value = null;
                 try {
