@@ -26,12 +26,6 @@
                 <default>false</default>
                 <label>Test_Map</label>
             </value>
-            <value>
-                <fullName>IE_Input__e.Product</fullName>
-                <default>false</default>
-                <isActive>false</isActive>
-                <label>IE_Input__e.Product</label>
-            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>
