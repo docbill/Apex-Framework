@@ -346,9 +346,6 @@ public without sharing class TriggerArguments {
             when else {
                 isBefore = (Boolean)lookupValue(useMap,IS_BEFORE_KEY,Trigger.isBefore);
                 isAfter = (Boolean)lookupValue(useMap,IS_AFTER_KEY,Trigger.isAfter);
-                isInsert = (Boolean)lookupValue(useMap,IS_INSERT_KEY,Trigger.isInsert);
-                isDelete = (Boolean)lookupValue(useMap,IS_DELETE_KEY,Trigger.isDelete);
-                isUndelete = (Boolean)lookupValue(useMap,IS_UNDELETE_KEY,Trigger.isUndelete);
             }
         }
         // our logic for auto-deriving values relies on know values is a precise order
@@ -378,6 +375,12 @@ public without sharing class TriggerArguments {
             this.newMap = Trigger.newMap;
             this.oldList = Trigger.old;
             this.oldMap = Trigger.oldMap;
+        }
+        if(operationType == null) {
+            isInsert = (Boolean)lookupValue(useMap,IS_INSERT_KEY,Trigger.isInsert);
+            isUpdate = (Boolean)lookupValue(useMap,IS_UPDATE_KEY,Trigger.isUpdate);
+            isDelete = (Boolean)lookupValue(useMap,IS_DELETE_KEY,Trigger.isDelete);
+            isUndelete = (Boolean)lookupValue(useMap,IS_UNDELETE_KEY,Trigger.isUndelete);
         }
         this.isUpdate = isUpdate;
         this.isInsert = isInsert;
