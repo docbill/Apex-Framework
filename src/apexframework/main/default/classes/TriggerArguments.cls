@@ -230,10 +230,10 @@ public without sharing class TriggerArguments {
             if(value == null) {
                 if(isBefore) {
                     if(isInsert) {
-                        value = System.TriggerOperation.BEFORE_DELETE;
+                        value = System.TriggerOperation.BEFORE_INSERT;
                     }
                     else if(isUpdate) {
-                        value = System.TriggerOperation.BEFORE_INSERT;
+                        value = System.TriggerOperation.BEFORE_UPDATE;
                     }
                     else if(isDelete) {
                         value = System.TriggerOperation.BEFORE_DELETE;
