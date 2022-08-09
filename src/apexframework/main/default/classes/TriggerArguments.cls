@@ -22,10 +22,14 @@
  * without specifing the IS_BEFORE_KEY or IS_AFTER_KEY.   Never provide NEW_LIST_KEY
  * in an after trigger, without also supplying IS_BEFORE_KEY or IS_AFTER_KEY.
  * 
- * @version 2020-11-12
+ * All memember variables of this class are final.  So if you need to change the values
+ * you should create a new instance with one of the static create methods.
+ * 
+ * @version 2022-08-09
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-11-12 Created
+ * @since 2022-08-09 Support operationType
  */
 public without sharing class TriggerArguments {
     public static final String IS_BEFORE_KEY = 'isBefore';
@@ -38,6 +42,7 @@ public without sharing class TriggerArguments {
     public static final String NEW_MAP_KEY = 'newMap';
     public static final String OLD_LIST_KEY = 'old';
     public static final String OLD_MAP_KEY = 'oldMap';
+    public static final String OPERATION_TYPE_KEY = 'operationType';
     public static final String TARGET_OBJECT_TYPE_KEY = 'targetObjectType';
     public static final String CALLABLE_MAP = 'callableMap';
 
@@ -216,6 +221,44 @@ public without sharing class TriggerArguments {
         }
     }
 
+    /** 
+     * OPERATION_TYPE_KEY value from the callable arguments map.
+     */
+    public final System.TriggerOperation operationType {
+        get;
+        set {
+            if(value == null) {
+                if(isBefore) {
+                    if(isInsert) {
+                        value = System.TriggerOperation.BEFORE_INSERT;
+                    }
+                    else if(isUpdate) {
+                        value = System.TriggerOperation.BEFORE_UPDATE;
+                    }
+                    else if(isDelete) {
+                        value = System.TriggerOperation.BEFORE_DELETE;
+                    }
+                }
+                else if(isAfter) {
+                    if(isInsert) {
+                        value = System.TriggerOperation.AFTER_INSERT;
+                    }
+                    else if(isUpdate) {
+                        value = System.TriggerOperation.AFTER_UPDATE;
+                    }
+                    else if(isDelete) {
+                        value = System.TriggerOperation.AFTER_DELETE;
+                    }
+                    else if(isUndelete) {
+                        value = System.TriggerOperation.AFTER_UNDELETE;
+                    }
+                }
+            }
+            callableArguments.put(OPERATION_TYPE_KEY,value);
+            operationType = value;
+        }
+    }
+
     /**
      * TARGET_OBJECT_KEY value from the callabse arguments map.
      */
@@ -257,15 +300,60 @@ public without sharing class TriggerArguments {
     }
 
     /**
-     * Constructor.  A null or empty value will construct using Trigger values.
+     * Constructor.  A null or empty map will construct using Trigger values.
+     * Any missing values in a non-empty map will be filled in with values determined
+     * in the setter methods.
      * 
      * @param callableArguments map of trigger values, or null
      */
     public TriggerArguments(Map<String,Object> callableArguments) {
         this.callableArguments = callableArguments;
         final Boolean useMap = ! this.callableArguments.isEmpty();
-        this.isBefore = (Boolean)lookupValue(useMap,IS_BEFORE_KEY,Trigger.isBefore);
-        this.isAfter = (Boolean)lookupValue(useMap,IS_AFTER_KEY,Trigger.isAfter);
+
+        // we declare local values, since the member variables are all final.
+        Boolean isAfter = null, isInsert = false, isUpdate = false, 
+            isDelete = false, isUndelete = false;
+        System.TriggerOperation operationType = (System.TriggerOperation)lookupValue(useMap,OPERATION_TYPE_KEY,Trigger.OperationType);
+        switch on operationType {
+            when BEFORE_INSERT {
+                this.isBefore = true;
+                isInsert = true;
+            }
+            when BEFORE_UPDATE {
+                this.isBefore = true;
+                isUpdate = true;
+            }
+            when BEFORE_DELETE {
+                this.isBefore = true;
+                isDelete = true;
+            }
+            when AFTER_INSERT {
+                this.isBefore = false;
+                isInsert = true;
+            }
+            when AFTER_UPDATE {
+                this.isBefore = false;
+                isUpdate = true;
+            }
+            when AFTER_DELETE {
+                this.isBefore = false;
+                isDelete = true;
+            }
+            when AFTER_UNDELETE {
+                this.isBefore = false;
+                isUndelete = true;
+            }
+            when else {
+                this.isBefore = (Boolean)lookupValue(useMap,IS_BEFORE_KEY,Trigger.isBefore);
+                isAfter = (Boolean)lookupValue(useMap,IS_AFTER_KEY,Trigger.isAfter);
+                isInsert = (Boolean)lookupValue(useMap,IS_INSERT_KEY,Trigger.isInsert);
+                isUpdate = (Boolean)lookupValue(useMap,IS_UPDATE_KEY,Trigger.isUpdate);
+                isDelete = (Boolean)lookupValue(useMap,IS_DELETE_KEY,Trigger.isDelete);
+                isUndelete = (Boolean)lookupValue(useMap,IS_UNDELETE_KEY,Trigger.isUndelete);
+            }
+        }
+        // our logic for auto-deriving values relies on know values is a precise order
+        this.isAfter = isAfter;
         if(useMap) {
             // The following is useful for test classes and non-dependent packages.
             // If the caller manually assigned the arguments map, we don't assume it is correct.
@@ -291,19 +379,32 @@ public without sharing class TriggerArguments {
             this.oldList = Trigger.old;
             this.oldMap = Trigger.oldMap;
         }
-        this.isUpdate = (Boolean)lookupValue(useMap,IS_UPDATE_KEY,Trigger.isUpdate);
-        this.isInsert = (Boolean)lookupValue(useMap,IS_INSERT_KEY,Trigger.isInsert);
-        this.isDelete = (Boolean)lookupValue(useMap,IS_DELETE_KEY,Trigger.isDelete);
-        this.isUndelete = (Boolean)lookupValue(useMap,IS_UNDELETE_KEY,Trigger.isUndelete);
+        this.isUpdate = isUpdate;
+        this.isInsert = isInsert;
+        this.isDelete = isDelete;
+        this.isUndelete = isUndelete;
         // obtain the SOBjectType by scanning the lists
         this.targetObjectType = (String)this.callableArguments.get(TARGET_OBJECT_TYPE_KEY);
-        // the triggerTypeType value will allow us to use switch statements
-        this.triggerTypeValue = getTriggerType();
+        
+        // the operationType allows us to use switch statements
+        this.operationType = operationType;
+
+        // I do not remember why we mirror this as a triggerTypeValue
+        this.triggerTypeValue = (new Map<System.TriggerOperation,TriggerType> {
+            System.TriggerOperation.BEFORE_INSERT => TriggerType.BEFORE_INSERT,
+            System.TriggerOperation.BEFORE_UPDATE => TriggerType.BEFORE_UPDATE,
+            System.TriggerOperation.BEFORE_DELETE => TriggerType.BEFORE_DELETE,
+            System.TriggerOperation.AFTER_INSERT => TriggerType.AFTER_INSERT,
+            System.TriggerOperation.AFTER_UPDATE => TriggerType.AFTER_UPDATE,
+            System.TriggerOperation.AFTER_DELETE => TriggerType.AFTER_DELETE,
+            System.TriggerOperation.AFTER_UNDELETE => TriggerType.AFTER_UNDELETE
+        }).get(this.operationType);
+
         this.callableMap = (Map<String,Callable>)this.callableArguments.get(CALLABLE_MAP);
     }
 
     /**
-     * Get the object from the oldMap
+     * Get the object from the oldMap.  Using this method leads to more streamlined code.
      * 
      * @param recordId
      * @return record from oldMap
@@ -316,7 +417,7 @@ public without sharing class TriggerArguments {
     }
 
     /**
-     * Get the object from the newMap
+     * Get the object from the newMap.  Using this method leads to more streamlined code.
      * 
      * @param recordId
      * @return record from newMap
@@ -467,34 +568,6 @@ public without sharing class TriggerArguments {
             else if(value instanceof List<SObject>) {
                 retval = ((List<SObject>)value).size();
             }
-        }
-        return retval;
-    }
-
-    private TriggerType getTriggerType() {
-        TriggerType beforeType = null;
-        TriggerType afterType = null;
-        if( isInsert == true ) {
-            beforeType = TriggerType.BEFORE_INSERT;
-            afterType = TriggerType.AFTER_INSERT;
-        }
-        else if( isUpdate == true ) {
-            beforeType = TriggerType.BEFORE_UPDATE;
-            afterType = TriggerType.AFTER_UPDATE;
-        }
-        else if( isDelete == true ) {
-            beforeType = TriggerType.BEFORE_DELETE;
-            afterType = TriggerType.AFTER_DELETE;
-        }
-        else if( isUndelete == true ) {
-            afterType = TriggerType.AFTER_UNDELETE;
-        }
-        TriggerType retval = null;
-        if( isBefore == true ) {
-            retval = beforeType;
-        }
-        else if( isAfter == true ) {
-            retval = afterType;
         }
         return retval;
     }
