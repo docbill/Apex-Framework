@@ -311,45 +311,48 @@ public without sharing class TriggerArguments {
         final Boolean useMap = ! this.callableArguments.isEmpty();
 
         // we declare local values, since the member variables are all final.
-        Boolean isBefore = false, isAfter = false, isInsert = false, isUpdate = false, 
+        Boolean isAfter = null, isInsert = false, isUpdate = false, 
             isDelete = false, isUndelete = false;
         System.TriggerOperation operationType = (System.TriggerOperation)lookupValue(useMap,OPERATION_TYPE_KEY,Trigger.OperationType);
         switch on operationType {
             when BEFORE_INSERT {
-                isBefore = true;
+                this.isBefore = true;
                 isInsert = true;
             }
             when BEFORE_UPDATE {
-                isBefore = true;
+                this.isBefore = true;
                 isUpdate = true;
             }
             when BEFORE_DELETE {
-                isBefore = true;
+                this.isBefore = true;
                 isDelete = true;
             }
             when AFTER_INSERT {
-                isAfter = true;
+                this.isBefore = false;
                 isInsert = true;
             }
             when AFTER_UPDATE {
-                isAfter = true;
+                this.isBefore = false;
                 isUpdate = true;
             }
             when AFTER_DELETE {
-                isAfter = true;
+                this.isBefore = false;
                 isDelete = true;
             }
             when AFTER_UNDELETE {
-                isAfter = true;
+                this.isBefore = false;
                 isUndelete = true;
             }
             when else {
-                isBefore = (Boolean)lookupValue(useMap,IS_BEFORE_KEY,Trigger.isBefore);
+                this.isBefore = (Boolean)lookupValue(useMap,IS_BEFORE_KEY,Trigger.isBefore);
                 isAfter = (Boolean)lookupValue(useMap,IS_AFTER_KEY,Trigger.isAfter);
+                isInsert = (Boolean)lookupValue(useMap,IS_INSERT_KEY,Trigger.isInsert);
+                isUpdate = (Boolean)lookupValue(useMap,IS_UPDATE_KEY,Trigger.isUpdate);
+                isDelete = (Boolean)lookupValue(useMap,IS_DELETE_KEY,Trigger.isDelete);
+                isUndelete = (Boolean)lookupValue(useMap,IS_UNDELETE_KEY,Trigger.isUndelete);
             }
         }
         // our logic for auto-deriving values relies on know values is a precise order
-        this.isBefore = isBefore;
         this.isAfter = isAfter;
         if(useMap) {
             // The following is useful for test classes and non-dependent packages.
@@ -375,12 +378,6 @@ public without sharing class TriggerArguments {
             this.newMap = Trigger.newMap;
             this.oldList = Trigger.old;
             this.oldMap = Trigger.oldMap;
-        }
-        if(operationType == null) {
-            isInsert = (Boolean)lookupValue(useMap,IS_INSERT_KEY,Trigger.isInsert);
-            isUpdate = (Boolean)lookupValue(useMap,IS_UPDATE_KEY,Trigger.isUpdate);
-            isDelete = (Boolean)lookupValue(useMap,IS_DELETE_KEY,Trigger.isDelete);
-            isUndelete = (Boolean)lookupValue(useMap,IS_UNDELETE_KEY,Trigger.isUndelete);
         }
         this.isUpdate = isUpdate;
         this.isInsert = isInsert;
