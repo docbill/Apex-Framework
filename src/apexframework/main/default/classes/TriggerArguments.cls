@@ -22,15 +22,17 @@
  * without specifing the IS_BEFORE_KEY or IS_AFTER_KEY.   Never provide NEW_LIST_KEY
  * in an after trigger, without also supplying IS_BEFORE_KEY or IS_AFTER_KEY.
  * 
- * All memember variables of this class are final.  So if you need to change the values
+ * Treat all memember variables of this class as final.  If you need to change the values
  * you should create a new instance with one of the static create methods.
  * 
- * @version 2022-08-09
+ * @version 2022-08-10
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-11-12 Created
  * @since 2022-08-09 Support operationType
+ * @since 2022-08-10 Refactored to resolve most PMD warnings
  */
+@SuppressWarnings('PMD.ExcessivePublicCount')
 public without sharing class TriggerArguments {
     public static final String IS_BEFORE_KEY = 'isBefore';
     public static final String IS_AFTER_KEY = 'isAfter';
@@ -53,7 +55,7 @@ public without sharing class TriggerArguments {
      */
     public final Map<String,Object> callableArguments {
         get;
-        set {
+        private set {
             if(value == null) {
                 value = new Map<String,Object>();
             }
@@ -64,197 +66,84 @@ public without sharing class TriggerArguments {
     /** 
      * IS_BEFORE_KEY value from the callable arguments map.
      */
-    public final Boolean isBefore {
-        get;
-        set {
-            if(value == null) {
-                // Before and After update look the same in terms of lists.  So 
-                // our convention is to assume it is a before if a newMap entry not
-                // explicitly supplied.
-                Boolean isAfter = (Boolean)callableArguments.get(IS_AFTER_KEY);
-                Boolean isUndelete = (Boolean)callableArguments.get(IS_UNDELETE_KEY);
-                value = ! (isAfter == true || isUndelete == true);
-                if(isAfter == null && isUndelete != true) {
-                    // It would be better to pass the isBefore value rather than relying on this logic...
-                    Integer newListSizeScore = getSizeScore(NEW_LIST_KEY);
-                    Integer newMapSizeScore = getSizeScore(NEW_MAP_KEY);
-                    value = (newMapSizeScore < newListSizeScore);
-                }
-            }
-            callableArguments.put(IS_BEFORE_KEY,value);
-            isBefore = value;
-        }
-    }
+    public Boolean isBefore { get; private set; }
 
     /** 
      * IS_AFTER_KEY value from the callable arguments map.
      */
-    public final Boolean isAfter {
-        get;
-        set {
-            if(value == null) {
-                value = ! isBefore;
-            }
-            callableArguments.put(IS_AFTER_KEY,value);
-            isAfter = value;
-        }
-    }
+    public Boolean isAfter { get; private set; }
 
     /** 
      * NEW_LIST_KEY value from the callable arguments map.
      */
-    public final List<SObject> newList {
-        get;
-        set {
-            callableArguments.put(NEW_LIST_KEY,value);
-            newList = value;
-        }
-    }
+    public List<SObject> newList { get; private set; }
 
     /** 
      * NEW_MAP_KEY value from the callable arguments map.
      */
-    public final Map<Id,SObject> newMap  {
-        get;
-        set {
-            callableArguments.put(NEW_MAP_KEY,value);
-            newMap = value;
-        }
-    }
+    public Map<Id,SObject> newMap { get; private set; }
 
     /** 
      * OLD_LIST_KEY value from the callable arguments map.
      */
-    public final List<SObject> oldList {
-        get;
-        set {
-            callableArguments.put(OLD_LIST_KEY,value);
-            oldList = value;
-        }
-    }
+    public List<SObject> oldList { get; private set; }
 
     /** 
      * OLD_MAP_KEY value from the callable arguments map.
      */
-    public final Map<Id,SObject> oldMap {
-        get;
-        set {
-            callableArguments.put(OLD_MAP_KEY,value);
-            oldMap = value;
-        }
-    }
+    public Map<Id,SObject> oldMap { get; private set; }
 
-    /** 
+    /**
      * IS_UPDATE_KEY value from the callable arguments map.
      */
-    public final Boolean isUpdate {
-        get;
-        set {
-            if(value == null) {
-                value = (true != (Boolean)callableArguments.get(IS_DELETE_KEY))
-                    && (true != (Boolean)callableArguments.get(IS_UNDELETE_KEY))
-                    && (true != (Boolean)callableArguments.get(IS_INSERT_KEY)) 
-                    && (oldMap != null && ! oldMap.isEmpty())
-                    && (newMap != null && ! newMap.isEmpty());
-            }
-            callableArguments.put(IS_UPDATE_KEY,value);
-            isUpdate = value;
-        }
-    }
-
+    public Boolean isUpdate { get; private set; }
+    
     /** 
      * IS_INSERT_KEY value from the callable arguments map.
      */
-    public final Boolean isInsert {
-        get;
-        set {
-            if(value == null) {
-                // We cannot tell the difference between an after insert
-                // or an after undelete, unless either the isInsert or isUndelete flag
-                // is set.  Our default is to assume insert, as that is more common.
-                value = (! isUpdate)
-                    && (true != (Boolean)callableArguments.get(IS_UNDELETE_KEY))
-                    && (true != (Boolean)callableArguments.get(IS_DELETE_KEY)) 
-                    && (oldList == null || oldList.isEmpty())
-                    && (newList != null && ! newList.isEmpty())
-                    && (isBefore == (newMap == null || newMap.isEmpty()));
-            }
-            callableArguments.put(IS_INSERT_KEY,value);
-            isInsert = value;
-        }
-    }
+    public Boolean isInsert { get; private set; }
 
     /** 
      * IS_DELETE_KEY value from the callable arguments map.
      */
-    public final Boolean isDelete {
-        get;
-        set {
-            if(value == null) {
-                value = (! isUpdate) 
-                    && (! isInsert)
-                    && (true != (Boolean)callableArguments.get(IS_UNDELETE_KEY))
-                    && (newList == null || newList.isEmpty())
-                    && (oldMap != null && ! oldMap.isEmpty());
-            }
-            callableArguments.put(IS_DELETE_KEY,value);
-            isDelete = value;
-        }
-    }
+    public Boolean isDelete { get; private set; }
 
     /** 
      * IS_UNDELETE_KEY value from the callable arguments map.
      */
-    public final Boolean isUndelete {
-        get;
-        set {
-            if(value == null) {
-                value = isAfter
-                    && (! isUpdate)
-                    && (! isInsert)
-                    && (! isDelete)
-                    && (oldList == null || oldList.isEmpty())
-                    && (newMap != null && ! newMap.isEmpty());
-            }
-            callableArguments.put(IS_UNDELETE_KEY,value);
-            isUndelete = value;
-        }
-    }
+    public Boolean isUndelete { get; private set; }
 
     /** 
      * OPERATION_TYPE_KEY value from the callable arguments map.
      */
     public final System.TriggerOperation operationType {
         get;
-        set {
+        private set {
             if(value == null) {
-                if(isBefore) {
-                    if(isInsert) {
+                if(isBefore == true) {
+                    if(isInsert == true) {
                         value = System.TriggerOperation.BEFORE_INSERT;
                     }
-                    else if(isUpdate) {
+                    else if(isUpdate == true) {
                         value = System.TriggerOperation.BEFORE_UPDATE;
                     }
-                    else if(isDelete) {
+                    else if(isDelete == true) {
                         value = System.TriggerOperation.BEFORE_DELETE;
                     }
                 }
-                else if(isAfter) {
-                    if(isInsert) {
-                        value = System.TriggerOperation.AFTER_INSERT;
-                    }
-                    else if(isUpdate) {
-                        value = System.TriggerOperation.AFTER_UPDATE;
-                    }
-                    else if(isDelete) {
-                        value = System.TriggerOperation.AFTER_DELETE;
-                    }
-                    else if(isUndelete) {
-                        value = System.TriggerOperation.AFTER_UNDELETE;
-                    }
+                else if(isInsert == true) {
+                    value = System.TriggerOperation.AFTER_INSERT;
+                }
+                else if(isUpdate == true) {
+                    value = System.TriggerOperation.AFTER_UPDATE;
+                }
+                else if(isDelete == true) {
+                    value = System.TriggerOperation.AFTER_DELETE;
+                }
+                else if(isUndelete == true) {
+                    value = System.TriggerOperation.AFTER_UNDELETE;
                 }
             }
-            callableArguments.put(OPERATION_TYPE_KEY,value);
             operationType = value;
         }
     }
@@ -262,10 +151,10 @@ public without sharing class TriggerArguments {
     /**
      * TARGET_OBJECT_KEY value from the callabse arguments map.
      */
-    public final String targetObjectType {
+    public String targetObjectType {
         get;
-        set {
-            if(value == null) {
+        private set {
+            if(String.isBlank(value)) {
                 List<SObject> objList = newList;
                 if(objList == null || objList.isEmpty()) {
                     objList = oldList;
@@ -274,7 +163,6 @@ public without sharing class TriggerArguments {
                     value = objList[0].getSObjectType().getDescribe().getName();
                 }
             }
-            callableArguments.put(TARGET_OBJECT_TYPE_KEY,value);
             targetObjectType = value;
         }
     }
@@ -282,22 +170,26 @@ public without sharing class TriggerArguments {
     /**
      * The trigger type of this call.
      */
-    public final TriggerType triggerTypeValue;
+    public TriggerType triggerTypeValue {
+        get {
+            // I do not remember why we mirror this as a triggerTypeValue
+            return  (new Map<System.TriggerOperation,TriggerType> {
+                System.TriggerOperation.BEFORE_INSERT => TriggerType.BEFORE_INSERT,
+                System.TriggerOperation.BEFORE_UPDATE => TriggerType.BEFORE_UPDATE,
+                System.TriggerOperation.BEFORE_DELETE => TriggerType.BEFORE_DELETE,
+                System.TriggerOperation.AFTER_INSERT => TriggerType.AFTER_INSERT,
+                System.TriggerOperation.AFTER_UPDATE => TriggerType.AFTER_UPDATE,
+                System.TriggerOperation.AFTER_DELETE => TriggerType.AFTER_DELETE,
+                System.TriggerOperation.AFTER_UNDELETE => TriggerType.AFTER_UNDELETE
+            }).get(this.operationType);
+        }
+    }
 
     /** 
      * The map of all callable triggers called so far as part of the current DML
      * operation.
      */
-    public final Map<String,Callable> callableMap {
-        get;
-        set {
-            if(value == null) {
-                value = new Map<String,Callable>();
-            }
-            callableArguments.put(CALLABLE_MAP,value);
-            callableMap = value;
-        } 
-    }
+    public final Map<String,Callable> callableMap;
 
     /**
      * Constructor.  A null or empty map will construct using Trigger values.
@@ -308,99 +200,37 @@ public without sharing class TriggerArguments {
      */
     public TriggerArguments(Map<String,Object> callableArguments) {
         this.callableArguments = callableArguments;
-        final Boolean useMap = ! this.callableArguments.isEmpty();
-
-        // we declare local values, since the member variables are all final.
-        Boolean isAfter = null, isInsert = false, isUpdate = false, 
-            isDelete = false, isUndelete = false;
-        System.TriggerOperation operationType = (System.TriggerOperation)lookupValue(useMap,OPERATION_TYPE_KEY,Trigger.OperationType);
-        switch on operationType {
-            when BEFORE_INSERT {
-                this.isBefore = true;
-                isInsert = true;
-            }
-            when BEFORE_UPDATE {
-                this.isBefore = true;
-                isUpdate = true;
-            }
-            when BEFORE_DELETE {
-                this.isBefore = true;
-                isDelete = true;
-            }
-            when AFTER_INSERT {
-                this.isBefore = false;
-                isInsert = true;
-            }
-            when AFTER_UPDATE {
-                this.isBefore = false;
-                isUpdate = true;
-            }
-            when AFTER_DELETE {
-                this.isBefore = false;
-                isDelete = true;
-            }
-            when AFTER_UNDELETE {
-                this.isBefore = false;
-                isUndelete = true;
-            }
-            when else {
-                this.isBefore = (Boolean)lookupValue(useMap,IS_BEFORE_KEY,Trigger.isBefore);
-                isAfter = (Boolean)lookupValue(useMap,IS_AFTER_KEY,Trigger.isAfter);
-                isInsert = (Boolean)lookupValue(useMap,IS_INSERT_KEY,Trigger.isInsert);
-                isUpdate = (Boolean)lookupValue(useMap,IS_UPDATE_KEY,Trigger.isUpdate);
-                isDelete = (Boolean)lookupValue(useMap,IS_DELETE_KEY,Trigger.isDelete);
-                isUndelete = (Boolean)lookupValue(useMap,IS_UNDELETE_KEY,Trigger.isUndelete);
-            }
-        }
-        // our logic for auto-deriving values relies on know values is a precise order
-        this.isAfter = isAfter;
-        if(useMap) {
-            // The following is useful for test classes and non-dependent packages.
-            // If the caller manually assigned the arguments map, we don't assume it is correct.
-            // Instead we'll auto derive any missing values and attempt to normalise to consistent
-            // values.
-            Map<Id,SObject> newMap = (Map<Id,SObject>)this.callableArguments.get(NEW_MAP_KEY);
-            Map<Id,SObject> oldMap = (Map<Id,SObject>)this.callableArguments.get(OLD_MAP_KEY);
-
-            // the order of these calls matter
-            // create a newList from the oldMap
-            this.newList = getSObjectList(NEW_LIST_KEY,newMap); // references this.callableArguments
-            // create an oldList from the newMap
-            this.oldList = getSObjectList(OLD_LIST_KEY,oldMap);  // references this.callableArguments
-            // when needed, use the oldMap and newList to create a newMap
-            this.newMap = getSObjectMap(newMap,oldMap,this.newList); 
-            // when needed, use the newMap and oldList to create an oldMap
-            this.oldMap = getSObjectMap(oldMap,newMap,this.oldList);
+        if(this.callableArguments.isEmpty()) {
+            isBefore = Trigger.isBefore;
+            isAfter = Trigger.isAfter;
+            isInsert = Trigger.isInsert;
+            isUpdate = Trigger.isUpdate;
+            isDelete = Trigger.isDelete;
+            isUndelete = Trigger.isUndelete;
+            newList = Trigger.new;
+            newMap = Trigger.newMap;
+            oldList = Trigger.old;
+            oldMap = Trigger.oldMap;
+            operationType = Trigger.operationType;
         }
         else {
-            // 99% of the time this is the code we use from a trigger
-            this.newList = Trigger.new;
-            this.newMap = Trigger.newMap;
-            this.oldList = Trigger.old;
-            this.oldMap = Trigger.oldMap;
+            // Accept a map with very minimal values and populate anything that is missing.
+            System.TriggerOperation operationType = (System.TriggerOperation)this.callableArguments.get(OPERATION_TYPE_KEY);
+            initializeFromOperationType(operationType);
+            assignMaps();
+            assignMissingFlags();
+            this.operationType = operationType;
         }
-        this.isUpdate = isUpdate;
-        this.isInsert = isInsert;
-        this.isDelete = isDelete;
-        this.isUndelete = isUndelete;
+
         // obtain the SOBjectType by scanning the lists
-        this.targetObjectType = (String)this.callableArguments.get(TARGET_OBJECT_TYPE_KEY);
-        
-        // the operationType allows us to use switch statements
-        this.operationType = operationType;
+        targetObjectType = (String)this.callableArguments.get(TARGET_OBJECT_TYPE_KEY);
 
-        // I do not remember why we mirror this as a triggerTypeValue
-        this.triggerTypeValue = (new Map<System.TriggerOperation,TriggerType> {
-            System.TriggerOperation.BEFORE_INSERT => TriggerType.BEFORE_INSERT,
-            System.TriggerOperation.BEFORE_UPDATE => TriggerType.BEFORE_UPDATE,
-            System.TriggerOperation.BEFORE_DELETE => TriggerType.BEFORE_DELETE,
-            System.TriggerOperation.AFTER_INSERT => TriggerType.AFTER_INSERT,
-            System.TriggerOperation.AFTER_UPDATE => TriggerType.AFTER_UPDATE,
-            System.TriggerOperation.AFTER_DELETE => TriggerType.AFTER_DELETE,
-            System.TriggerOperation.AFTER_UNDELETE => TriggerType.AFTER_UNDELETE
-        }).get(this.operationType);
-
-        this.callableMap = (Map<String,Callable>)this.callableArguments.get(CALLABLE_MAP);
+        Map<String,Callable> callableMap = (Map<String,Callable>)this.callableArguments.get(CALLABLE_MAP);
+        if(callableMap == null) {
+            callableMap = new Map<String,Callable>();
+        }
+        this.callableMap = callableMap;
+        syncToMap();
     }
 
     /**
@@ -527,15 +357,8 @@ public without sharing class TriggerArguments {
         return new TriggerArguments(callableArguments);
     }
 
-    Object lookupValue(Boolean useKey,String key,Object retval) {
-        if(useKey) {
-            retval = callableArguments.get(KEY);
-        }
-        return retval;
-    }
-
     @TestVisible
-    static Map<Id,SObject> getSObjectMap(Map<Id,SObject> retval,Map<Id,SObject> mapToClone,List<SObject> values) {
+    private static Map<Id,SObject> getSObjectMap(Map<Id,SObject> retval,Map<Id,SObject> mapToClone,List<SObject> values) {
         if(retval == null && mapToClone != null && values != null) {
             try {
                 retval = mapToClone.clone();
@@ -570,5 +393,117 @@ public without sharing class TriggerArguments {
             }
         }
         return retval;
+    }
+
+    private void initializeFromOperationType(System.TriggerOperation operationType) {
+        isInsert = isUpdate = isDelete = isUndelete = false;
+        switch on operationType {
+            when BEFORE_INSERT {
+                isInsert = true;
+                isBefore = true;
+            }
+            when BEFORE_UPDATE {
+                isUpdate = true;
+                isBefore = true;
+            }
+            when BEFORE_DELETE {
+                isDelete = true;
+                isBefore = true;
+            }
+            when AFTER_INSERT { 
+                isInsert = true;
+                isBefore = false;
+            }
+            when AFTER_UPDATE { 
+                isUpdate = true;
+                isBefore = false;
+            }
+            when AFTER_DELETE { 
+                isDelete = true;
+                isBefore = false;
+            }
+            when AFTER_UNDELETE {
+                isUndelete = true;
+                isBefore = false; 
+            }
+            when else {
+                isInsert = (Boolean)this.callableArguments.get(IS_INSERT_KEY);
+                isUpdate = (Boolean)this.callableArguments.get(IS_UPDATE_KEY);
+                isDelete = (Boolean)this.callableArguments.get(IS_DELETE_KEY);
+                isUndelete = (Boolean)this.callableArguments.get(IS_UNDELETE_KEY);
+                isBefore = (Boolean)this.callableArguments.get(IS_BEFORE_KEY);
+                if(isBefore == null) {
+                    // Before and After update look the same in terms of lists.  So 
+                    // our convention is to assume it is a before if a newMap entry not
+                    // explicitly supplied.
+                    Boolean isAfter = (Boolean)callableArguments.get(IS_AFTER_KEY);
+                    isBefore = ! (isAfter == true || isUndelete == true);
+                    if(isAfter == null && isUndelete != true) {
+                        // It would be better to pass the isBefore value rather than relying on this logic...
+                        Integer newListSizeScore = getSizeScore(NEW_LIST_KEY);
+                        Integer newMapSizeScore = getSizeScore(NEW_MAP_KEY);
+                        isBefore = (newMapSizeScore < newListSizeScore);
+                    }
+                }
+            }
+        }
+        isAfter = ! isBefore;
+    }
+
+    private void assignMissingFlags() {
+        if(isUpdate == null) {
+            isUpdate = ! ( true == isInsert || true == isDelete || true == isUndelete
+                || oldMap == null || newMap == null || oldMap.isEmpty() || newMap.isEmpty() );
+        }
+        // We cannot tell the difference between an after insert
+        // or an after undelete, unless either the isInsert or isUndelete flag
+        // is set.  Our default is to assume insert as that is more common.
+        if(isInsert == null) {
+            isInsert = ! ( isUpdate || true == isDelete || true == isUndelete
+                || newList == null || newList.isEmpty() || (oldList != null && !oldList.isEmpty()));
+        }
+        if(isDelete == null) {
+            isDelete = ! ( isInsert || isUpdate || true == isUndelete 
+                || oldMap == null || oldMap.isEmpty() || (newList != null && ! newList.isEmpty()));
+        }
+        if( isUndelete == null) {
+            isUndelete = ! ( isBefore || isInsert || isUpdate || isDelete 
+                || newMap == null || newMap.isEmpty() || (oldList != null || ! oldList.isEmpty()));
+        }
+    }
+
+    private void assignMaps() {
+        // The following is useful for test classes and non-dependent packages.
+        // If the caller manually assigned the arguments map, we don't assume it is correct.
+        // Instead we'll auto derive any missing values and attempt to normalise to consistent
+        // values.
+        Map<Id,SObject> newMap = (Map<Id,SObject>)this.callableArguments.get(NEW_MAP_KEY);
+        Map<Id,SObject> oldMap = (Map<Id,SObject>)this.callableArguments.get(OLD_MAP_KEY);
+
+        // the order of these calls matter
+        // create a newList from the oldMap
+        newList = getSObjectList(NEW_LIST_KEY,newMap); // references this.callableArguments
+        // create an oldList from the newMap
+        oldList = getSObjectList(OLD_LIST_KEY,oldMap);  // references this.callableArguments
+        // when needed, use the oldMap and newList to create a newMap
+        this.newMap = getSObjectMap(newMap,oldMap,this.newList); 
+        // when needed, use the newMap and oldList to create an oldMap
+        this.oldMap = getSObjectMap(oldMap,newMap,this.oldList);
+    }
+
+    private void syncToMap() {
+        callableArguments.put(IS_BEFORE_KEY,isBefore);
+        callableArguments.put(IS_AFTER_KEY,isAfter);
+        callableArguments.put(IS_INSERT_KEY,isInsert);
+        callableArguments.put(IS_UPDATE_KEY,isUpdate);
+        callableArguments.put(IS_DELETE_KEY,isDelete);
+        callableArguments.put(IS_UNDELETE_KEY,isUndelete);
+        callableArguments.put(NEW_LIST_KEY,newList);
+        callableArguments.put(NEW_MAP_KEY,newMap);
+        callableArguments.put(OLD_LIST_KEY,oldList);
+        callableArguments.put(OLD_MAP_KEY,oldMap);
+        callableArguments.put(TARGET_OBJECT_TYPE_KEY,targetObjectType);
+        callableArguments.put(OPERATION_TYPE_KEY,operationType);
+        callableArguments.put(CALLABLE_MAP,callableMap);
     }
 }
