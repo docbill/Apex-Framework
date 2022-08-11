@@ -3,21 +3,22 @@
 /**
  * Test class for Metadata Values Helper
  * 
- * @version 2021-09-21
+ * @version 2022-08-11
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-12-02 - Created
  * @since 2021-01-29 - Update for allow ignoreMetadata per instance 
  * @since 2021-04-27 US292962 - No longer create missing boolean metadata
  * @since 2021-09-21 - legacyMap test instead of booleanSettingsTest
+ * @since 2022-08-11 apply three parameters for assertEquals
  */
 @IsTest
 private class BooleanValuesHelperTest {
 
-    static final Map<String,Boolean> missingMap = new Map<String,Boolean>();
+    static final Map<String,Boolean> MISSING_MAP = new Map<String,Boolean>();
 
     static {
-        BooleanValuesHelper.missingMap = missingMap;
+        BooleanValuesHelper.missingMap = MISSING_MAP;
     }
 
     static final String DEFAULT_KEY1 = 'DEFAULT-KEY1';
@@ -64,7 +65,7 @@ private class BooleanValuesHelperTest {
 	static void legacyMapTest() {
 		String key='Testing112312';
         System.assertEquals(true,helperGlobal.getValue(key,true),'Failed get default setting');
-        System.assertNotEquals(null,missingMap.get(key),'missingMap='+missingMap);
+        System.assertNotEquals(null,MISSING_MAP.get(key),'missingMap='+MISSING_MAP);
 		System.assertEquals(false,helperGlobal.getValue(key,false),'Failed get default setting');
         System.assertEquals(true,helperTest.getValue(key,true),'Failed get default setting');
 		System.assertEquals(false,helperTest.getValue(key,false),'Failed get default setting');
@@ -102,37 +103,37 @@ private class BooleanValuesHelperTest {
         Test.startTest();
         // test we get true as a default when requested in test classes
         Boolean result = helper.getValue(deactivateAll.MasterLabel,true);
-        System.assertEquals(true,result);
+        System.assertEquals(true,result,'default when requested in test classes');
 
         BooleanValuesHelper.useTestingDefaults = true;
         // test we get false as a default when requested in test classes
         result = helper.getValue(deactivateAll.MasterLabel,false);
-        System.assertEquals(false,result);
+        System.assertEquals(false,result,'default when requested in test classes');
 
         // now test as if this is not a test class
         BooleanValuesHelper.useTestingDefaults = false;
         bh.put(deactivateAll.DeveloperName+'__c',Decimal.valueOf(0));
         result = helper.getValue(deactivateAll.MasterLabel,true);
-        System.assertEquals(false,result);
+        System.assertEquals(false,result,'default when not requested in test classes');
 
         BooleanValuesHelper.useTestingDefaults = false;
         bh.put(deactivateAll.DeveloperName+'__c',Decimal.valueOf(1));
         result = helper.getValue(deactivateAll.MasterLabel,false);
-        System.assertEquals(true,result);
+        System.assertEquals(true,result,'default when not requested in test classes');
 
         BooleanValuesHelper.useTestingDefaults = false;
         bh.put(deactivateAll.DeveloperName+'__c',null);
         result = helper.getValue(deactivateAll.MasterLabel,true);
-        System.assertEquals(true,result);
+        System.assertEquals(true,result,'default when not requested in test classes');
 
         BooleanValuesHelper.useTestingDefaults = false;
         result = helper.getValue('__TESTING__',true);
-        System.assertEquals(true,result);
+        System.assertEquals(true,result,'__TESTING__');
 
         helper = BooleanValuesHelper.getBooleanValuesHelper('TEST');
         System.assertEquals('__TESTING__',BooleanValuesHelper.getKey('TEST.','TEST.__TESTING__'),'getKey failed');
         result = helper.getValue('__TESTING__',true);
-        System.assertEquals(true,result);
+        System.assertEquals(true,result,'__TESTING__');
 
         Test.stopTest();
 	}

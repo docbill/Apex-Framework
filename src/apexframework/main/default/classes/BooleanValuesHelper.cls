@@ -3,7 +3,7 @@
 /**
  * This is a set of utilities for treating boolean metadata a a map.
  * 
- * @version 2022-08-06
+ * @version 2022-08-11
  * 
  * @author Bill Riemers <briemers@redhat.com>
  * @since 2020-12-02 - Created
@@ -12,6 +12,7 @@
  * @since 2021-04-27 US292962 - No longer create missing metadata
  * @since 2021-09-21 - User legacyMap instead of BooleanSetting__c
  * @since 2022-08-06 - Trigger Management Entries Active flags will be treated as Boolean Metadata
+ * @since 2022-08-11 Reduce cognitive complexity
  */
 public without sharing class BooleanValuesHelper {
     private static Map<Boolean,Map<String,BooleanValuesHelper>> booleanValuesHelperMaps = (new Map<Boolean,Map<String,BooleanValuesHelper>>{
@@ -39,11 +40,16 @@ public without sharing class BooleanValuesHelper {
      * This mapping will be automatically populated
      * by use of the getValue method.
      */
+    // suppress the warning because this is actually a method call.
+    @SuppressWarnings('PMD.VariableNamingConventions')
     public static final Map<String,Boolean> booleanSettingMap {
         get { return getBooleanSettingMap( useTestingDefaults ); }
     }
 
     /** This is a mapping of overrides. */
+    // renaming with underscores breaks compatibility with existing classes
+    // without underscores we need cammel case to make this readable
+    @SuppressWarnings('PMD.VariableNamingConventions') 
     public static final Map<String,Boolean> overrideSettingMap = new Map<String,Boolean>();
 
     private final String source;
@@ -98,7 +104,7 @@ public without sharing class BooleanValuesHelper {
      */
     public Map<String,Boolean> booleanMap {
         get {
-            Boolean needsReset = (ignoreMetadata != (! useTestingDefaults) && useTestingDefaultsSaveVersion != useTestingDefaultsVersion);
+            Boolean needsReset = (ignoreMetadata != !useTestingDefaults) && (useTestingDefaultsSaveVersion != useTestingDefaultsVersion);
             if(ignoreMetadata == false || (ignoreMetadata == null && useTestingDefaults == false)) {
                 if(booleanMapFromMetadata == null || needsReset) {
                     booleanMapFromMetadata = getBooleanMap(source,ignoreMetadata);
@@ -106,7 +112,7 @@ public without sharing class BooleanValuesHelper {
                 }
                 return booleanMapFromMetadata;
             }
-            if(booleanMapFromDefaults == null || needsReset) {
+            else if(booleanMapFromDefaults == null || needsReset) {
                 booleanMapFromDefaults = new Map<String,Boolean>();
                 useTestingDefaultsSaveVersion = useTestingDefaultsVersion;
             }
@@ -128,26 +134,17 @@ public without sharing class BooleanValuesHelper {
         String name = sourceWithSuffix+key;
         final Map<String,Boolean> booleanSettingMap = getBooleanSettingMap( ignoreMetadata );
         Boolean retval = booleanSettingMap.get(name);
-        Boolean hasBooleanMetadata = booleanMap.containsKey(key);
         if(retval == null && String.isNotBlank(name) && ! booleanSettingMap.containsKey(name)) {
-            retval = booleanMap.get(key);
-            if(retval == null && legacyMap != null) {
-                retval = legacyMap.get(name);
-            }
+            retval = getFromLegacy(name,booleanMap.get(key));
             booleanSettingMap.put(name,retval);
         }
         if(retval == null) {
-            retval = defaultValue;
-            if(missingMap != null && ! hasBooleanMetadata) {
-                missingMap.put(name,retval);
-            }
+            retval = useDefaultValue(key,name,defaultValue);
         }
         List<String> prefixes = new List<String>(overrideSettingMap.keySet());
         prefixes.sort();
         for(String prefix : prefixes) {
-            if(name.startsWith(prefix)) {
-                retval = overrideSettingMap.get(prefix);
-            }
+            retval = overrideWhenUsingPrefix(name,prefix,retval);
         }
         return retval;
     }
@@ -254,9 +251,85 @@ public without sharing class BooleanValuesHelper {
         }
         Map<String,Boolean> retval = new Map<String,Boolean>();
         final String sourceWithSuffix = suffixWith(source,'.','');
+        for(BooleanMetadata__mdt bm : toUniqueBooleanMetadata(queryMetadata(sourceWithSuffix))) {
+            if(String.isBlank(sourceWithSuffix) || bm.MasterLabel.startsWith(sourceWithSuffix)) {
+                Boolean value = convertToBoolean(bm,ignoreMetadata);
+                if(value != null) {
+                    final String key = getKey(sourceWithSuffix,bm.MasterLabel);
+                    retval.put(key,value);
+                }
+            }
+        }
+        return retval;
+    }
+
+    private static Boolean convertToBoolean(BooleanMetadata__mdt bm,Boolean ignoreMetadata) {
+        Boolean value = null;
+        try {
+            final Decimal d = (Decimal)booleanHierarchyInstance.get(bm.DeveloperName+'__c');
+            if(d != null && d >= 0) {
+                value = (d > 0);
+            }
+        }
+        catch(Exception ignored) {}
+        if(value == null && bm.Value__c != 'Default' && ! ignoreMetadata) {
+            value = (bm.Value__c == 'True');
+        }
+        return value;
+    }
+
+    static String suffixWith(String source,String suffix,String blankValue) {
+        if(String.isBlank(source)) {
+            source = blankValue;
+        }
+        else if( ! source.endsWithIgnoreCase(suffix)) {
+            source += suffix;
+        }
+        return source;
+    }
+
+    private Boolean getFromLegacy(String name,Boolean retval) {
+        if(retval == null && legacyMap != null) {
+            retval = legacyMap.get(name);
+        }
+        return retval;
+    }
+
+    private Boolean useDefaultValue(String key,String name,Boolean retval) {
+        if(missingMap != null && ! booleanMap.containsKey(key)) {
+            missingMap.put(name,retval);
+        }
+        return retval;
+    }
+
+    private static Boolean overrideWhenUsingPrefix(String name,String prefix,Boolean retval) {
+        if(name.startsWith(prefix)) {
+            retval = overrideSettingMap.get(prefix);
+        }
+        return retval;
+    }
+
+    @TestVisible
+    private static String getKey(String sourceWithSuffix,String key) {
+        if(String.isNotblank(key) && String.isNotBlank(sourceWithSuffix) && key.startsWith(sourceWithSuffix)) {
+            key = key.substringAfter(sourceWithSuffix);
+        }
+        return key;
+    }
+
+    private static List<SObject> queryMetadata(final String sourceWithSuffix) {
         List<SObject> queryList = new List<SObject>();
-        Boolean isBlankSourceWithSuffix = String.isBlank(sourceWithSuffix);
-        if(! isBlankSourceWithSuffix) {
+        if(String.isBlank(sourceWithSuffix)) {
+            queryList.addAll([
+                SELECT DeveloperName, MasterLabel, Value__c
+                FROM BooleanMetadata__mdt
+                WHERE NOT MasterLabel LIKE '%.%' ]);
+            queryList.addAll([
+                SELECT DeveloperName, MasterLabel, Active__c
+                FROM Trigger_Management_Entry__mdt
+                WHERE Active__c != null AND ( NOT MasterLabel like '%.%' ) ]);
+        }
+        else {
             final String masterLabelLike = sourceWithSuffix+'%';
             queryList.addAll([
                 SELECT DeveloperName, MasterLabel, Value__c
@@ -267,18 +340,12 @@ public without sharing class BooleanValuesHelper {
                 FROM Trigger_Management_Entry__mdt
                 WHERE Active__c != null AND MasterLabel LIKE :masterLabelLike ]);
         }
-        else {
-            queryList.addAll([
-                SELECT DeveloperName, MasterLabel, Value__c
-                FROM BooleanMetadata__mdt
-                WHERE NOT MasterLabel LIKE '%.%' ]);
-            queryList.addAll([
-                SELECT DeveloperName, MasterLabel, Active__c
-                FROM Trigger_Management_Entry__mdt
-                WHERE Active__c != null AND ( NOT MasterLabel like '%.%' ) ]);
-        }
+        return queryList;
+    }
+
+    private static List<BooleanMetadata__mdt> toUniqueBooleanMetadata(List<SObject> metadataList) {
         Map<String,BooleanMetadata__mdt> bmMap = new Map<String,BooleanMetadata__mdt>();
-        for(SObject value : queryList ) {
+        for(SObject value : metadataList ) {
             switch on value {
                 when BooleanMetadata__mdt bm {
                     bmMap.put(bm.DeveloperName,bm);
@@ -293,43 +360,6 @@ public without sharing class BooleanValuesHelper {
                 }
             }
         }
-        for(BooleanMetadata__mdt bm : bmMap.values()) {
-            if(isBlankSourceWithSuffix || bm.MasterLabel.startsWith(sourceWithSuffix)) {
-                Boolean value = null;
-                try {
-                    final Decimal d = (Decimal)booleanHierarchyInstance.get(bm.DeveloperName+'__c');
-                    if(d != null && d >= 0) {
-                        value = (d > 0);
-                    }
-                }
-                catch(Exception ignored) {}
-                if(value == null && bm.Value__c != 'Default' && ! ignoreMetadata) {
-                    value = (bm.Value__c == 'True');
-                }
-                if(value != null) {
-                    final String key = getKey(sourceWithSuffix,bm.MasterLabel);
-                    retval.put(key,value);
-                }
-            }
-        }
-        return retval;
-    }
-
-    static String suffixWith(String source,String suffix,String blankValue) {
-        if(String.isBlank(source)) {
-            source = blankValue;
-        }
-        else if( ! source.endsWithIgnoreCase(suffix)) {
-            source += suffix;
-        }
-        return source;
-    }
-
-    @TestVisible
-    static String getKey(String sourceWithSuffix,String key) {
-        if(String.isNotblank(key) && String.isNotBlank(sourceWithSuffix) && key.startsWith(sourceWithSuffix)) {
-            key = key.substringAfter(sourceWithSuffix);
-        }
-        return key;
+        return bmMap.values();
     }
 }

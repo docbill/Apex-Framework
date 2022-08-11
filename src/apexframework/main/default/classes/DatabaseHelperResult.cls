@@ -5,10 +5,11 @@
  * That way we can add to this set exceptions that were never actually thrown
  * and such.
  *
- * @version 2021-04-28
+ * @version 2022-08-11
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2021-04-28 - Separated from the DatabaseHelper class
+ * @since 2022-08-11 Reduce cognitive complexity
  */
 public class DatabaseHelperResult implements DatabaseHelper.Result {
     final Object result;
@@ -21,6 +22,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
      * @param result one of Database.SaveResult, Database.UpsertResult,...
      * @param record the message being operated on
      */
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     public DatabaseHelperResult(DatabaseHelper.DMLOperation op,Object result,SObject record,List<Database.Error> errors) {
         this.result = result;
         this.record = record;
@@ -174,95 +176,22 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
         }
     }
 
+    @SuppressWarnings('PMD.ExcessiveParameterList')
     public static List<Object> convertResultType(
         DatabaseHelper.DMLOperation op,
         List<Object> results,
         List<SObject> records,
         Boolean legacyMode
     ) {
-        List<Object> retval = results;
-        System.Type apexType = null;
-        Boolean isResultClass = false;
-        Boolean isSaveResultClass = false;
-        Boolean isUpsertResultClass = false;
-        Boolean isDeleteResultClass = false;
-        Boolean isUndeleteResultClass = false;
+        ConversionHelper helper = null;
         TriggerManagement.lastRethrownException = null;
         if(legacyMode == true) {
-            switch on op {
-                when INSERT_OP, UPDATE_OP {
-                    if(results instanceof List<Database.SaveResult>) {
-                        return results;
-                    }
-                    isSaveResultClass = true;
-                    apexType = Database.SaveResult.class;
-                    retval = new List<Database.SaveResult>();
-                }
-                when UPSERT_OP {
-                    if(results instanceof List<Database.UpsertResult>) {
-                        return results;
-                    }
-                    isUpsertResultClass = true;
-                    apexType = Database.UpsertResult.class;
-                    retval = new List<Database.UpsertResult>();
-                }
-                when DELETE_OP {
-                    if(results instanceof List<Database.DeleteResult>) {
-                        return results;
-                    }
-                    isDeleteResultClass = true;
-                    apexType = Database.DeleteResult.class;
-                    retval = new List<Database.DeleteResult>();
-                }
-                when UNDELETE_OP {
-                    if(results instanceof List<Database.UndeleteResult>) {
-                        return results;
-                    }
-                    isUndeleteResultClass = true;
-                    apexType = Database.UndeleteResult.class;
-                    retval = new List<Database.UndeleteResult>();
-                }
-            }
+            helper = new ConversionHelper(op,results);
         }
         else if(records != null) {
-            if(results instanceof List<DatabaseHelper.Result>) {
-                return results;
-            }
-            apexType = DatabaseHelper.Result.class;
-            isResultClass = true;
-            retval = new List<DatabaseHelper.Result>();
+            helper = new ConversionHelper(results);
         }
-        if(apexType != null) {
-            Iterator<SObject> recordIterator = null;
-            if(records != null) {
-                recordIterator = records.iterator();
-            }
-            for(Object r : results) {
-                SObject record = null;
-                if(recordIterator != null && recordIterator.hasNext()) {
-                    record = recordIterator.next();
-                }
-                for(;;) {
-                    if((! isResultClass) && r instanceof DatabaseHelper.Result ) {
-                        retval.add( ((DatabaseHelper.Result)r).convertResult( apexType ) );
-                    }
-                    else if( r instanceof DatabaseHelper.Result
-                        || (isSaveResultClass && r instanceof Database.SaveResult)
-                        || (isUpsertResultClass && r instanceof Database.UpsertResult)
-                        || (isDeleteResultClass && r instanceof Database.DeleteResult)
-                        || (isUndeleteResultClass && r instanceof Database.UndeleteResult)
-                    ) {
-                        retval.add(r);
-                    }
-                    else {
-                        r = new DatabaseHelperResult(op,r,record,DatabaseHelper.getErrors(r));
-                        continue;
-                    }
-                    break;
-                }
-            }
-        }
-        return retval;
+        return helper.convertResults(op,records);
     }
 
     /**
@@ -272,24 +201,24 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
      * @return id value if assigned
      */
     @TestVisible
+    @SuppressWarnings('PMD.CognitiveComplexity')
     static Id getId(Object result) {
-        Id retval = null;
         if(result instanceof Database.SaveResult) {
-            retval = ((Database.SaveResult)result).getId();
+            return ((Database.SaveResult)result).getId();
         }
         else if(result instanceof Database.UpsertResult) {
-            retval = ((Database.UpsertResult)result).getId();
+            return ((Database.UpsertResult)result).getId();
         }
         else if(result instanceof Database.DeleteResult) {
-            retval = ((Database.DeleteResult)result).getId();
+            return ((Database.DeleteResult)result).getId();
         }
         else if(result instanceof Database.UndeleteResult) {
-            retval = ((Database.UndeleteResult)result).getId();
+            return ((Database.UndeleteResult)result).getId();
         }
         else if(result instanceof DatabaseHelper.Result) {
-            retval = ((DatabaseHelper.Result)result).getId();
+            return ((DatabaseHelper.Result)result).getId();
         }
-        return retval;
+        return null;
     }
 
     // we use this class to convert to json
@@ -302,6 +231,105 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
             id = r.getId();
             errors = r.getErrors();
             success = r.isSuccess();
+        }
+    }
+
+    private class ConversionHelper {
+        List<Object> results;
+        List<Object> convertedList;
+        System.Type apexType = null;
+        Boolean isResultClass = false;
+        Boolean isSaveResultClass = false;
+        Boolean isUpsertResultClass = false;
+        Boolean isDeleteResultClass = false;
+        Boolean isUndeleteResultClass = false;
+
+        // safe mode
+        ConversionHelper(List<Object> results)
+        {
+            this.results = results;
+            apexType = DatabaseHelper.Result.class;
+            isResultClass = true;
+            if(results instanceof List<DatabaseHelper.Result>) {
+                convertedList = results;
+            }
+            else {
+                convertedList = new List<DatabaseHelper.Result>();
+            }
+        }
+
+        // legacy mode
+        ConversionHelper(DatabaseHelper.DMLOperation op,List<Object> results)
+        {
+            this.results = results;
+            Boolean noConvert = false;
+            switch on op {
+                when INSERT_OP, UPDATE_OP {
+                    noConvert = (results instanceof List<Database.SaveResult>);
+                    isSaveResultClass = true;
+                    apexType = Database.SaveResult.class;
+                    convertedList = new List<Database.SaveResult>();
+                }
+                when UPSERT_OP {
+                    noConvert = (results instanceof List<Database.UpsertResult>);
+                    isUpsertResultClass = true;
+                    apexType = Database.UpsertResult.class;
+                    convertedList = new List<Database.UpsertResult>();
+                }
+                when DELETE_OP {
+                    noConvert = (results instanceof List<Database.DeleteResult>);
+                    isDeleteResultClass = true;
+                    apexType = Database.DeleteResult.class;
+                    convertedList = new List<Database.DeleteResult>();
+                }
+                when UNDELETE_OP {
+                    noConvert = (results instanceof List<Database.UndeleteResult>);
+                    isUndeleteResultClass = true;
+                    apexType = Database.UndeleteResult.class;
+                    convertedList = new List<Database.UndeleteResult>();
+                }
+            }
+            if(noConvert) {
+                convertedList = results;
+            }
+        }
+
+
+        List<Object> convertResults(DatabaseHelper.DMLOperation op,List<SObject> records)
+        {
+            if(convertedList != null && convertedList.isEmpty()) {
+                Iterator<SObject> recordIterator = null;
+                if(records != null) {
+                    recordIterator = records.iterator();
+                }
+                for(Object r : results) {
+                    SObject record = null;
+                    if(recordIterator != null && recordIterator.hasNext()) {
+                        record = recordIterator.next();
+                    }
+                    convert(op,r,record);
+                }
+            }
+            return convertedList;
+        }
+
+        void convert(DatabaseHelper.DMLOperation op,Object r,SObject record) {
+            if((! isResultClass) && r instanceof DatabaseHelper.Result ) {
+                convertedList.add( ((DatabaseHelper.Result)r).convertResult( apexType ) );
+            }
+            else if( r instanceof DatabaseHelper.Result
+                || (isSaveResultClass && r instanceof Database.SaveResult)
+                || (isUpsertResultClass && r instanceof Database.UpsertResult)
+                || (isDeleteResultClass && r instanceof Database.DeleteResult)
+                || (isUndeleteResultClass && r instanceof Database.UndeleteResult)
+            ) {
+                convertedList.add(r);
+            }
+            else {
+                convert( op,
+                    new DatabaseHelperResult(op,r,record,DatabaseHelper.getErrors(r)),
+                    record );
+            }
         }
     }
 }

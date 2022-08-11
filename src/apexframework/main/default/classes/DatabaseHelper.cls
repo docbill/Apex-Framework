@@ -15,9 +15,12 @@
  * @since 2021-03-24 remember in queueable instance boolean values
  * @since 2021-04-27 DE26549 - Increment queue counter
  * @since 2021-10-27 US307550 - Fixed enqueueing multiple dml calls
+ * @since 2022-08-11 Reduce PMD warnings
  * 
  * @todo update TestDataFactory to call this class, rather than having a duplicate implementation.
  */
+// reducing the public count would break backwards compatability
+@SuppressWarnings('PMD.ExcessivePublicCount')
 public with sharing class DatabaseHelper {
     /**
      * This is just a wiled guess at the minimum numer of ms we should reserve for a DML
@@ -37,6 +40,7 @@ public with sharing class DatabaseHelper {
     /**
      * Standard Constructor.
      */
+    @SuppressWarnings('PMD.EmptyStatementBlock')
     public DatabaseHelper() {}
 
     private Database.DMLOptions options {
@@ -287,62 +291,18 @@ public with sharing class DatabaseHelper {
             List<List<SObject>> recordsList = split(recordList,-enqueueScope);
             if(recordsList.size() > 1 || enqueueScope > 0) {
                 queueableJobs = 1;
-                if((new LimitHelper()).setQueueableJobs(1).checkLimits(false) == null) {
-                    if(! recordsList.isEmpty()) {
-                        recordList = recordsList.remove(0);
-                    }
-                    new DatabaseHelperQueueable(this,op,recordsList).enqueueJob();
-                }
+                recordList = enqueueFromList(op,recordsList,recordList);
             }
         }
-        Integer requiredDML = 0;
-        if(! recordList.isEmpty()) {
-            requiredDML = 1;
-        }
         Boolean deactivateTriggers = this.deactivateTriggers
-            && (requiredDML > 0)
+            && ! recordList.isEmpty()
             && ! BooleanValuesHelper.getBooleanValue('DeactivateAll',false);
         if(deactivateTriggers) {
             BooleanValuesHelper.setValuesWhichStartWith('DeactivateAll',true);
         }
         List<Object> retval = null;
         try {
-            String limitMessage = null;
-            if(checkLimits == true || (checkLimits == null && LimitHelper.throwsExceptionDefault == true)) {
-                limitMessage = (new LimitHelper())
-                    .setCpuTime(MINIMUM_TIME_PER_DML)
-                    .setDmlStatements(requiredDML)
-                    .setDmlRows(recordList.size())
-                    .setQueueableJobs(queueableJobs)
-                    .checkLimits( (options == null || options.optAllOrNone == true) );
-            }
-            if(limitMessage != null) {
-                retval = convertException(op,new LimitHelper.LimitsException(limitMessage),recordList.iterator());
-            }
-            else {
-                switch on op {
-                    when INSERT_OP {
-                        retval = Database.insert(recordList,options);
-                    }
-                    when UPDATE_OP {
-                        retval = Database.update(recordList,options);
-                    }
-                    when UPSERT_OP {
-                        if(externalIDField != null) {
-                            retval = Database.upsert(recordList,externalIdField,(options == null || options.optAllOrNone == true));
-                        }
-                        else {
-                            retval = Database.upsert(recordList,(options == null || options.optAllOrNone == true));
-                        }
-                    }
-                    when DELETE_OP {
-                        retval = Database.delete(recordList,(options == null || options.optAllOrNone == true));
-                    }
-                    when UNDELETE_OP {
-                        retval = Database.undelete(recordList,(options == null || options.optAllOrNone == true));
-                    }
-                }
-            }
+            retval = dmlStatement(op,recordList,queueableJobs);
         }
         finally {
             if(deactivateTriggers) {
@@ -350,6 +310,63 @@ public with sharing class DatabaseHelper {
             }
         }
         return DatabaseHelperResult.convertResultType(op,retval,recordList,legacyMode);
+    }
+
+    private List<Object> dmlStatement(
+        DMLOperation op,
+        List<SObject> recordList,
+        Integer queueableJobs )
+    {
+        Integer requiredDML = 0;
+        if(! recordList.isEmpty()) {
+            requiredDML = 1;
+        }
+        String limitMessage = null;
+        if(checkLimits == true || (checkLimits == null && LimitHelper.throwsExceptionDefault == true)) {
+            limitMessage = (new LimitHelper())
+                .setCpuTime(MINIMUM_TIME_PER_DML)
+                .setDmlStatements(requiredDML)
+                .setDmlRows(recordList.size())
+                .setQueueableJobs(queueableJobs)
+                .checkLimits( (options == null || options.optAllOrNone == true) );
+        }
+        if(limitMessage != null) {
+            return convertException(op,new LimitHelper.LimitsException(limitMessage),recordList.iterator());
+        }
+        List<Object> retval = null;
+        switch on op {
+            when INSERT_OP {
+                retval = Database.insert(recordList,options);
+            }
+            when UPDATE_OP {
+                retval = Database.update(recordList,options);
+            }
+            when UPSERT_OP {
+                if(externalIDField != null) {
+                    retval = Database.upsert(recordList,externalIdField,(options == null || options.optAllOrNone == true));
+                }
+                else {
+                    retval = Database.upsert(recordList,(options == null || options.optAllOrNone == true));
+                }
+            }
+            when DELETE_OP {
+                retval = Database.delete(recordList,(options == null || options.optAllOrNone == true));
+            }
+            when UNDELETE_OP {
+                retval = Database.undelete(recordList,(options == null || options.optAllOrNone == true));
+            }
+        }
+        return retval;
+    }
+
+    private List<SObject> enqueueFromList(DMLOperation op,List<List<SObject>> recordsList,List<SObject> recordList) {
+        if((new LimitHelper()).setQueueableJobs(1).checkLimits(false) == null) {
+            if(! recordsList.isEmpty()) {
+                recordList = recordsList.remove(0);
+            }
+            new DatabaseHelperQueueable(this,op,recordsList).enqueueJob();
+        }
+        return recordList;
     }
 
     /**
@@ -363,31 +380,31 @@ public with sharing class DatabaseHelper {
     @TestVisible
     static List<List<SObject>> split(List<SObject> records,Integer size) {
         List<List<SObject>> retval = new List<List<SObject>>();
-        if(records != null) {
-            // DE26549 reworked this logic
-            if(size == null || size == 0) {
-                retval.add(records);
-            }
-            else {
-                List<SObject> currentList = new List<SObject>();
-                Integer remaining=size;
-                if(size < 0) {
-                    size = -size;
-                    remaining = 0;
+        if(size == null || size == 0 && records != null) {
+            retval.add(records);
+            records = null;
+        }
+        if(records == null) {
+            return retval;
+        }
+        // DE26549 reworked this logic
+        List<SObject> currentList = new List<SObject>();
+        Integer remaining=size;
+        if(size < 0) {
+            size = -size;
+            remaining = 0;
+        }
+        for(SObject record : records) {
+            if(record != null) {
+                if(remaining-- < 1) {
+                    retval.add(currentList);
+                    currentList = new List<SObject>();
+                    remaining = size-1; // We count this record right away
                 }
-                for(SObject record : records) {
-                    if(record != null) {
-                        if(remaining-- < 1) {
-                            retval.add(currentList);
-                            currentList = new List<SObject>();
-                            remaining = size-1; // We count this record right away
-                        }
-                        currentList.add(record);
-                    }
-                }
-                retval.add(currentList);
+                currentList.add(record);
             }
         }
+        retval.add(currentList);
         return retval;
     }
 
@@ -405,24 +422,24 @@ public with sharing class DatabaseHelper {
      * @param result from a insert,update,upsert,delete,or undelete
      * @return true if success
      */
+    @SuppressWarnings('PMD.CognitiveComplexity')
     public static Boolean isSuccess(Object result) {
-        Boolean retval = false;
         if(result instanceof Database.SaveResult) {
-            retval = ((Database.SaveResult)result).isSuccess();
+            return ((Database.SaveResult)result).isSuccess();
         }
-        else if(result instanceof Database.UpsertResult) {
-            retval = ((Database.UpsertResult)result).isSuccess();
+        if(result instanceof Database.UpsertResult) {
+            return ((Database.UpsertResult)result).isSuccess();
         }
-        else if(result instanceof Database.DeleteResult) {
-            retval = ((Database.DeleteResult)result).isSuccess();
+        if(result instanceof Database.DeleteResult) {
+            return ((Database.DeleteResult)result).isSuccess();
         }
         else if(result instanceof Database.UndeleteResult) {
-            retval = ((Database.UndeleteResult)result).isSuccess();
+            return ((Database.UndeleteResult)result).isSuccess();
         }
         else if(result instanceof Result) {
-            retval = ((Result)result).isSuccess();
+            return ((Result)result).isSuccess();
         }
-        return retval;
+        return false;
     }
 
     /**
@@ -431,6 +448,7 @@ public with sharing class DatabaseHelper {
      * @param result from a insert,update,upsert,delete,or undelete
      * @return a list of database errors
      */
+    @SuppressWarnings('PMD.CognitiveComplexity')
     public static List<Database.Error> getErrors(Object result) {
         if(result instanceof Database.SaveResult) {
             return ((Database.SaveResult)result).getErrors();
@@ -444,11 +462,10 @@ public with sharing class DatabaseHelper {
         if(result instanceof Database.UndeleteResult) {
             return ((Database.UndeleteResult)result).getErrors();
         }
-        List<Database.Error> retval = null;
         if(result == null) { 
-            retval = new List<Database.Error>();
+            return new List<Database.Error>();
         }
-        return retval;
+        return null;
     }
 
     /**
