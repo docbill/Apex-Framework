@@ -1,9 +1,8 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * This is a set of utilities for treating boolean metadata a a map.
- * 
- * @version 2022-08-06
  * 
  * @author Bill Riemers <briemers@redhat.com>
  * @since 2020-12-02 - Created
@@ -12,6 +11,7 @@
  * @since 2021-04-27 US292962 - No longer create missing metadata
  * @since 2021-09-21 - User legacyMap instead of BooleanSetting__c
  * @since 2022-08-06 - Trigger Management Entries Active flags will be treated as Boolean Metadata
+ * @since 2022-09-08 - Support ApexDox
  */
 public without sharing class BooleanValuesHelper {
     private static Map<Boolean,Map<String,BooleanValuesHelper>> booleanValuesHelperMaps = (new Map<Boolean,Map<String,BooleanValuesHelper>>{
@@ -20,8 +20,16 @@ public without sharing class BooleanValuesHelper {
         null => new Map<String,BooleanValuesHelper>() // conditionally use metadata
     } );
 
+    /**
+     * @description
+     * Map used by legacy code to override values from custom settings.
+     */
     public static Map<String,Boolean> legacyMap = null;
 
+    /**
+     * @description
+     * Map of values requested that were missing from the Boolean Metadata
+     */
     public static Map<String,Boolean> missingMap = null;
 
     private static Map<String,Boolean> booleanSettingMapFromDefaults = new Map<String,Boolean>();
@@ -36,6 +44,7 @@ public without sharing class BooleanValuesHelper {
 
 
     /** 
+     * @description
      * This mapping will be automatically populated
      * by use of the getValue method.
      */
@@ -43,7 +52,10 @@ public without sharing class BooleanValuesHelper {
         get { return getBooleanSettingMap( useTestingDefaults ); }
     }
 
-    /** This is a mapping of overrides. */
+    /** 
+     * @description
+     * This is a mapping of manual overrides from the code.
+     */
     public static final Map<String,Boolean> overrideSettingMap = new Map<String,Boolean>();
 
     private final String source;
@@ -54,9 +66,11 @@ public without sharing class BooleanValuesHelper {
     private static Integer useTestingDefaultsVersion = 0;
 
     /**
+     * @description
      * Constructor
      * 
-     * @param source
+     * @param source map name
+     * @param ignoreMetadata causes Boolean Metadata to be ignured when true
      */
     private BooleanValuesHelper(String source,Boolean ignoreMetadata) {
         this.ignoreMetadata = ignoreMetadata;
@@ -65,9 +79,11 @@ public without sharing class BooleanValuesHelper {
     }
 
     /**
+     * @description
      * Factory method to get a boolean values helper.
      * 
-     * @param source
+     * @param source map name
+     * @param ignoreMetadata causes Boolean Metadata to be ignured when true
      * @return the boolean values helper
      */
     public static BooleanValuesHelper getBooleanValuesHelper(String source,Boolean ignoreMetadata) {
@@ -83,7 +99,7 @@ public without sharing class BooleanValuesHelper {
     /**
      * Factory method to get a boolean values helper.
      * 
-     * @param source
+     * @param source map name
      * @return the boolean values helper
      */
     public static BooleanValuesHelper getBooleanValuesHelper(String source) {
@@ -94,6 +110,7 @@ public without sharing class BooleanValuesHelper {
     private Map<String,Boolean> booleanMapFromMetadata = null;
 
     /**
+     * @description
      * This is the map of data obtained from the BooleanMetadata__mdt table with BooleanHierarchy overrides.
      */
     public Map<String,Boolean> booleanMap {
@@ -116,6 +133,7 @@ public without sharing class BooleanValuesHelper {
     }
 
     /**
+     * @description
      * Check if a trigger is active by referencing the
      * booleanSettingMap.  If an entry does not exist in
      * the map, one will be add by referencing legacyMap.
@@ -153,6 +171,7 @@ public without sharing class BooleanValuesHelper {
     }
 
     /**
+     * @description
      * Check if a trigger is active by referencing the
      * booleanSettingMap.  If an entry does not exist in
      * the map, one will be add by referencing legacyMap.
@@ -166,6 +185,7 @@ public without sharing class BooleanValuesHelper {
     }
 
     /**
+     * @description
      * Check if a trigger is active by referencing the
      * booleanSettingMap.  If an entry does not exist in
      * the map, one will be add by referencing legacyMap.
@@ -190,6 +210,7 @@ public without sharing class BooleanValuesHelper {
     }
 
     /**
+     * @description
      * Used to set override for all matching settings is the map to the specified value.
      *
      * @param prefix the names to match. e.g. Account_Before.
@@ -213,6 +234,7 @@ public without sharing class BooleanValuesHelper {
     
 
     /**
+     * @description
      * Setting to deactivate the use of boolean metadata in a test class.
      */
     public static Boolean useTestingDefaults {
@@ -229,7 +251,10 @@ public without sharing class BooleanValuesHelper {
         }
     }
 
-    // Allow resource injection in the test class.
+    /** 
+     * BooleanHierarchy.  We allow resource injection in the test class.
+     */
+    @TestVisible
     public static BooleanHierarchy__c booleanHierarchyInstance {
         get {
             if(booleanHierarchyInstance == null) {
@@ -237,10 +262,11 @@ public without sharing class BooleanValuesHelper {
             }
             return booleanHierarchyInstance;
         }
-        set;
+        private set;
     }
 
     /**
+     * @description
      * Query the map from the BooleanMetadata__mdt table.  Each value maybe overwritten by
      * a BooleanHierarchy__c field with the field name matching the developer name.
      * 

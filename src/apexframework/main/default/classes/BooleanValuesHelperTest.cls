@@ -1,43 +1,43 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * Test class for Metadata Values Helper
- * 
- * @version 2021-09-21
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-12-02 - Created
  * @since 2021-01-29 - Update for allow ignoreMetadata per instance 
  * @since 2021-04-27 US292962 - No longer create missing boolean metadata
  * @since 2021-09-21 - legacyMap test instead of booleanSettingsTest
+ * @since 2022-09-08 - Implement ApexDox comment compliance
  */
 @IsTest
 private class BooleanValuesHelperTest {
 
-    static final Map<String,Boolean> missingMap = new Map<String,Boolean>();
+    private static final Map<String,Boolean> MISSING_MAP = new Map<String,Boolean>();
 
     static {
-        BooleanValuesHelper.missingMap = missingMap;
+        BooleanValuesHelper.missingMap = MISSING_MAP;
     }
 
-    static final String DEFAULT_KEY1 = 'DEFAULT-KEY1';
-    static final String DEFAULT_KEY2 = 'DEFAULT-KEY2';
-    static final String TEST_DEFAULT_KEY1 = 'TEST.'+DEFAULT_KEY1;
-    static final String TEST_DEFAULT_KEY2 = 'TEST.'+DEFAULT_KEY2;
-    static final String FALSE_KEY1 = 'FALSE-KEY1';
-    static final String FALSE_KEY2 = 'FALSE-KEY2';
-    static final String TEST_FALSE_KEY1 = 'TEST.'+FALSE_KEY1;
-    static final String TEST_FALSE_KEY2 = 'TEST.'+FALSE_KEY2;
-    static final String TRUE_KEY1 = 'TRUE-KEY1';
-    static final String TRUE_KEY2 = 'TRUE-KEY2';
-    static final String TEST_TRUE_KEY1 = 'TEST.'+TRUE_KEY1;
-    static final String TEST_TRUE_KEY2 = 'TEST.'+TRUE_KEY2;
+    private static final String DEFAULT_KEY1 = 'DEFAULT-KEY1';
+    private static final String DEFAULT_KEY2 = 'DEFAULT-KEY2';
+    private static final String TEST_DEFAULT_KEY1 = 'TEST.'+DEFAULT_KEY1;
+    private static final String TEST_DEFAULT_KEY2 = 'TEST.'+DEFAULT_KEY2;
+    private static final String FALSE_KEY1 = 'FALSE-KEY1';
+    private static final String FALSE_KEY2 = 'FALSE-KEY2';
+    private static final String TEST_FALSE_KEY1 = 'TEST.'+FALSE_KEY1;
+    private static final String TEST_FALSE_KEY2 = 'TEST.'+FALSE_KEY2;
+    private static final String TRUE_KEY1 = 'TRUE-KEY1';
+    private static final String TRUE_KEY2 = 'TRUE-KEY2';
+    private static final String TEST_TRUE_KEY1 = 'TEST.'+TRUE_KEY1;
+    private static final String TEST_TRUE_KEY2 = 'TEST.'+TRUE_KEY2;
 
-    static BooleanValuesHelper helperGlobal = BooleanValuesHelper.getBooleanValuesHelper('');
-    static BooleanValuesHelper helperTest = BooleanValuesHelper.getBooleanValuesHelper('TEST');
+    private static BooleanValuesHelper helperGlobal = BooleanValuesHelper.getBooleanValuesHelper('');
+    private static BooleanValuesHelper helperTest = BooleanValuesHelper.getBooleanValuesHelper('TEST');
 
     @isTest
-    static void booleanMetadataTest() {
+    private static void booleanMetadataTest() {
         BooleanValuesHelper.useTestingDefaults = false;
         System.assertEquals(null,helperTest.booleanMap.get(DEFAULT_KEY1),'booleanMap.get(DEFAULT_KEY1),booleanMap='+helperTest.booleanMap);
         System.assertEquals(false,helperTest.booleanMap.get(FALSE_KEY1),'booleanMap.get(FALSE_KEY1),booleanMap='+helperTest.booleanMap);
@@ -61,10 +61,10 @@ private class BooleanValuesHelperTest {
     }
 
     @isTest
-	static void legacyMapTest() {
+	private static void legacyMapTest() {
 		String key='Testing112312';
         System.assertEquals(true,helperGlobal.getValue(key,true),'Failed get default setting');
-        System.assertNotEquals(null,missingMap.get(key),'missingMap='+missingMap);
+        System.assertNotEquals(null,MISSING_MAP.get(key),'MISSING_MAP='+MISSING_MAP);
 		System.assertEquals(false,helperGlobal.getValue(key,false),'Failed get default setting');
         System.assertEquals(true,helperTest.getValue(key,true),'Failed get default setting');
 		System.assertEquals(false,helperTest.getValue(key,false),'Failed get default setting');
@@ -90,7 +90,7 @@ private class BooleanValuesHelperTest {
 	}
 
     @isTest
-    static void booleanHierarchyTest() {
+    private static void booleanHierarchyTest() {
         BooleanMetadata__mdt deactivateAll = [
             select DeveloperName, MasterLabel, Value__c 
             from BooleanMetadata__mdt
@@ -138,7 +138,7 @@ private class BooleanValuesHelperTest {
 	}
 
 	@isTest
-	static void getBooleanValueTest() {
+	private static void getBooleanValueTest() {
 		String key='Testing112312';
 		System.assertEquals(true,BooleanValuesHelper.getBooleanValue(key,true),'Failed get default setting');
         System.assertEquals(false,BooleanValuesHelper.getBooleanValue(key,false),'Failed get default setting');

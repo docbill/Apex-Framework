@@ -145,7 +145,7 @@
             <div class="class-container">
 
               <div class="class-description">
-                This is a set of utilities for treating boolean metadata a a map. @version 2022-08-06
+                This is a set of utilities for treating boolean metadata a a map.
               </div>
               <div class="class-subtitle">
                 Signature
@@ -153,7 +153,7 @@
 
               <div class="class-signature">
                 public without sharing class BooleanValuesHelper
-              </div><br />Bill Riemers &lt;briemers@redhat.com&gt;<br />2020-12-02 - Created 2021-01-29 - Allow ignoreMetadata per instance 2021-02-13 DE25830 - Fix to make sure maps are per helper instance 2021-04-27 US292962 - No longer create missing metadata 2021-09-21 - User legacyMap instead of BooleanSetting__c 2022-08-06 - Trigger Management Entries Active flags will be treated as Boolean Metadata
+              </div><br />Bill Riemers &lt;briemers@redhat.com&gt;<br />2020-12-02 - Created 2021-01-29 - Allow ignoreMetadata per instance 2021-02-13 DE25830 - Fix to make sure maps are per helper instance 2021-04-27 US292962 - No longer create missing metadata 2021-09-21 - User legacyMap instead of BooleanSetting__c 2022-08-06 - Trigger Management Entries Active flags will be treated as Boolean Metadata 2022-09-08 - Support ApexDox
             </div>
             <div class="subsection properties BooleanValuesHelper">
               <h3 class="subsection-title properties">BooleanValuesHelper Properties</h3>
@@ -162,7 +162,7 @@
                 <tr>
                   <th>Name</th>
                   <th>Signature</th>
-
+                  <th>Annotations</th>
                   <th>Description</th>
                 </tr>
                 <tr class="property ">
@@ -172,10 +172,12 @@
                       public static BooleanHierarchy__c booleanHierarchyInstance
                     </div>
                   </td>
-
+                  <td>
+                    <div class="prop-annotations">@TestVisible</div>
+                  </td>
 
                   <td class="attribute-description">
-
+                    BooleanHierarchy. We allow resource injection in the test class.
                   </td>
                 </tr>
                 <tr class="property ">
@@ -185,7 +187,7 @@
                       public Map&lt;String,Boolean&gt; booleanMap
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
                     This is the map of data obtained from the BooleanMetadata__mdt table with BooleanHierarchy overrides.
@@ -198,7 +200,7 @@
                       private Map&lt;String,Boolean&gt; booleanMapFromDefaults
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
 
@@ -211,7 +213,7 @@
                       private Map&lt;String,Boolean&gt; booleanMapFromMetadata
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
 
@@ -224,7 +226,7 @@
                       public static final Map&lt;String,Boolean&gt; booleanSettingMap
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
                     This mapping will be automatically populated by use of the getValue method.
@@ -237,7 +239,7 @@
                       private static Map&lt;String,Boolean&gt; booleanSettingMapFromDefaults
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
 
@@ -250,7 +252,7 @@
                       private static Map&lt;String,Boolean&gt; booleanSettingMapFromMetadata
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
 
@@ -263,7 +265,7 @@
                       private static Map&lt;Boolean,Map&lt;String,BooleanValuesHelper&gt;&gt; booleanValuesHelperMaps
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
 
@@ -276,7 +278,7 @@
                       private final Boolean ignoreMetadata
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
 
@@ -289,10 +291,10 @@
                       public static Map&lt;String,Boolean&gt; legacyMap
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
-
+                    Map used by legacy code to override values from custom settings.
                   </td>
                 </tr>
                 <tr class="property ">
@@ -302,10 +304,10 @@
                       public static Map&lt;String,Boolean&gt; missingMap
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
-
+                    Map of values requested that were missing from the Boolean Metadata
                   </td>
                 </tr>
                 <tr class="property ">
@@ -315,10 +317,10 @@
                       public static final Map&lt;String,Boolean&gt; overrideSettingMap
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
-                    This is a mapping of overrides.
+                    This is a mapping of manual overrides from the code.
                   </td>
                 </tr>
                 <tr class="property ">
@@ -328,7 +330,20 @@
                       private set
                     </div>
                   </td>
+                  <td></td>
 
+                  <td class="attribute-description">
+
+                  </td>
+                </tr>
+                <tr class="property ">
+                  <td class="attribute-name"><span>set</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      private set
+                    </div>
+                  </td>
+                  <td></td>
 
                   <td class="attribute-description">
 
@@ -341,7 +356,7 @@
                       private final String source
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
 
@@ -354,7 +369,7 @@
                       private final String sourceWithSuffix
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
 
@@ -367,7 +382,7 @@
                       public static Boolean useTestingDefaults
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
                     Setting to deactivate the use of boolean metadata in a test class.
@@ -380,7 +395,7 @@
                       private Integer useTestingDefaultsSaveVersion
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
 
@@ -393,7 +408,7 @@
                       private static Integer useTestingDefaultsVersion
                     </div>
                   </td>
-
+                  <td></td>
 
                   <td class="attribute-description">
 
@@ -434,6 +449,9 @@
                   <div class="param-type">
                     Type: <code class="code-inline">String</code>
                   </div>
+                  <div class="param-description">map name</div>
+                  <div class="param-name">ignoreMetadata</div>
+                  <div class="param-description">causes Boolean Metadata to be ignured when true</div>
                 </div>
               </div>
             </div>
@@ -642,6 +660,9 @@
                   <div class="param-type">
                     Type: <code class="code-inline">String</code>
                   </div>
+                  <div class="param-description">map name</div>
+                  <div class="param-name">ignoreMetadata</div>
+                  <div class="param-description">causes Boolean Metadata to be ignured when true</div>
                   <div class="method-subtitle">
                     Returns
                   </div>
@@ -668,6 +689,7 @@
                   <div class="param-type">
                     Type: <code class="code-inline">String</code>
                   </div>
+                  <div class="param-description">map name</div>
                   <div class="method-subtitle">
                     Returns
                   </div>

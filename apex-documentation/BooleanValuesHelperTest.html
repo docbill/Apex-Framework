@@ -145,7 +145,7 @@
             <div class="class-container">
 
               <div class="class-description">
-                Test class for Metadata Values Helper @version 2021-09-21
+                Test class for Metadata Values Helper
               </div>
               <div class="class-subtitle">
                 Signature
@@ -153,7 +153,7 @@
               <div class="class-annotations">@IsTest</div>
               <div class="class-signature">
                 private class BooleanValuesHelperTest
-              </div><br />Bill C Riemers &lt;briemers@redhat.com&gt;<br />2020-12-02 - Created 2021-01-29 - Update for allow ignoreMetadata per instance 2021-04-27 US292962 - No longer create missing boolean metadata 2021-09-21 - legacyMap test instead of booleanSettingsTest
+              </div><br />Bill C Riemers &lt;briemers@redhat.com&gt;<br />2020-12-02 - Created 2021-01-29 - Update for allow ignoreMetadata per instance 2021-04-27 US292962 - No longer create missing boolean metadata 2021-09-21 - legacyMap test instead of booleanSettingsTest 2022-09-08 - Implement ApexDox comment compliance
             </div>
             <div class="subsection properties BooleanValuesHelperTest">
               <h3 class="subsection-title properties">BooleanValuesHelperTest Properties</h3>
@@ -169,7 +169,7 @@
                   <td class="attribute-name"><span>DEFAULT_KEY1</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final String DEFAULT_KEY1
+                      private static final String DEFAULT_KEY1
                     </div>
                   </td>
 
@@ -179,7 +179,7 @@
                   <td class="attribute-name"><span>DEFAULT_KEY2</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final String DEFAULT_KEY2
+                      private static final String DEFAULT_KEY2
                     </div>
                   </td>
 
@@ -189,7 +189,7 @@
                   <td class="attribute-name"><span>FALSE_KEY1</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final String FALSE_KEY1
+                      private static final String FALSE_KEY1
                     </div>
                   </td>
 
@@ -199,7 +199,7 @@
                   <td class="attribute-name"><span>FALSE_KEY2</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final String FALSE_KEY2
+                      private static final String FALSE_KEY2
                     </div>
                   </td>
 
@@ -209,7 +209,7 @@
                   <td class="attribute-name"><span>helperGlobal</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static BooleanValuesHelper helperGlobal
+                      private static BooleanValuesHelper helperGlobal
                     </div>
                   </td>
 
@@ -219,17 +219,17 @@
                   <td class="attribute-name"><span>helperTest</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static BooleanValuesHelper helperTest
+                      private static BooleanValuesHelper helperTest
                     </div>
                   </td>
 
 
                 </tr>
                 <tr class="property ">
-                  <td class="attribute-name"><span>missingMap</span></td>
+                  <td class="attribute-name"><span>MISSING_MAP</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final Map&lt;String,Boolean&gt; missingMap
+                      private static final Map&lt;String,Boolean&gt; MISSING_MAP
                     </div>
                   </td>
 
@@ -239,7 +239,7 @@
                   <td class="attribute-name"><span>TEST_DEFAULT_KEY1</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final String TEST_DEFAULT_KEY1
+                      private static final String TEST_DEFAULT_KEY1
                     </div>
                   </td>
 
@@ -249,7 +249,7 @@
                   <td class="attribute-name"><span>TEST_DEFAULT_KEY2</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final String TEST_DEFAULT_KEY2
+                      private static final String TEST_DEFAULT_KEY2
                     </div>
                   </td>
 
@@ -259,7 +259,7 @@
                   <td class="attribute-name"><span>TEST_FALSE_KEY1</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final String TEST_FALSE_KEY1
+                      private static final String TEST_FALSE_KEY1
                     </div>
                   </td>
 
@@ -269,7 +269,7 @@
                   <td class="attribute-name"><span>TEST_FALSE_KEY2</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final String TEST_FALSE_KEY2
+                      private static final String TEST_FALSE_KEY2
                     </div>
                   </td>
 
@@ -279,7 +279,7 @@
                   <td class="attribute-name"><span>TEST_TRUE_KEY1</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final String TEST_TRUE_KEY1
+                      private static final String TEST_TRUE_KEY1
                     </div>
                   </td>
 
@@ -289,7 +289,7 @@
                   <td class="attribute-name"><span>TEST_TRUE_KEY2</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final String TEST_TRUE_KEY2
+                      private static final String TEST_TRUE_KEY2
                     </div>
                   </td>
 
@@ -299,7 +299,7 @@
                   <td class="attribute-name"><span>TRUE_KEY1</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final String TRUE_KEY1
+                      private static final String TRUE_KEY1
                     </div>
                   </td>
 
@@ -309,7 +309,7 @@
                   <td class="attribute-name"><span>TRUE_KEY2</span></td>
                   <td>
                     <div class="attribute-signature">
-                      static final String TRUE_KEY2
+                      private static final String TRUE_KEY2
                     </div>
                   </td>
 
@@ -355,7 +355,7 @@
                   </div>
                   <div class="method-annotations">@isTest</div>
                   <div class="method-signature">
-                    static void booleanHierarchyTest()
+                    private static void booleanHierarchyTest()
                   </div>
                 </div>
                 <div class="method testmethod">
@@ -367,7 +367,7 @@
                   </div>
                   <div class="method-annotations">@isTest</div>
                   <div class="method-signature">
-                    static void booleanMetadataTest()
+                    private static void booleanMetadataTest()
                   </div>
                 </div>
                 <div class="method testmethod">
@@ -379,7 +379,7 @@
                   </div>
                   <div class="method-annotations">@isTest</div>
                   <div class="method-signature">
-                    static void getBooleanValueTest()
+                    private static void getBooleanValueTest()
                   </div>
                 </div>
                 <div class="method testmethod">
@@ -391,7 +391,7 @@
                   </div>
                   <div class="method-annotations">@isTest</div>
                   <div class="method-signature">
-                    static void legacyMapTest()
+                    private static void legacyMapTest()
                   </div>
                 </div>
               </div>
