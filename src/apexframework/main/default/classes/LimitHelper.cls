@@ -3,9 +3,9 @@
 /**
  * @description
  * This Class implements some useful limit utilities.  One example on how to use this
- * call is you write your trigger methods to look something like:
- * 
- * @example
+ * call is you write your trigger methods to look something like (example 1):
+ * <br /><br />
+ * @example Example 1
  * <pre>
  *    public void salesAccountUpdate() {
  *        try {
@@ -33,9 +33,10 @@
  * metadata type record that defines what how much time you reserving.
  * 
  * Then in order for this code to work there needs to be calls to the LimitHepler class to
- * check the limits periodically.  For example, immediately before a query you could call:
- * 
- * @example
+ * check the limits periodically.  For example, immediately before a query you could call (example 2):
+ * <br /><br />
+
+ * @example Example 2
  * <pre>
  * (new LimitHelper()).setQueries(1).checkLimits( null);
  * </pre>
@@ -45,18 +46,20 @@
  * reserve.  If we do not either return an Exception or throw an exception.  The null
  * argument is the boolean that tells the helper if it should throw the exception.  If you
  * pass true, it will throw the exception.  If you pass false, it will return the exception.
- * Using a null value is equivalent to:
+ * Using a null value is equivalent to (Example 3):
+ * <br /><br />
  * 
- * @example
+ * @example Example 3
  * <pre>
  * (new LimitHelper()).setQueries(1).checkLimits( LimitHelper.throwsExceptionDefault );
  * </pre>
  * 
  * @description
  * There are a series of DatabaseHelper.safe* methods that can be used to automatically
- * check the limits when performing DML operations.  e.g.
+ * check the limits when performing DML operations.  e.g. (Example 4)
+ * <br /><br />
  * 
- * @example
+ * @example Example 4
  * <pre>
  * for(DatabaseHelper.Result r : new DatabaseHelper().safeInsert(insertList)) {
  *     if(r.isSuccess()) {

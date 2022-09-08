@@ -145,7 +145,7 @@
             <div class="class-container">
 
               <div class="class-description">
-                This Class implements some useful limit utilities. One example on how to use this call is you write your trigger methods to look something like: The catch exception or an after trigger is where you can add code to use deferred processing to handle one record at the time so you do not hit the limits. The LimitHelper name you are pushing and poping is the master label of the Limit Reserves metadata type record that defines what how much time you reserving. Then in order for this code to work there needs to be calls to the LimitHepler class to check the limits periodically. For example, immediately before a query you could call: This is saying check the limits and make sure we have one query available beyound the reserve. If we do not either return an Exception or throw an exception. The null argument is the boolean that tells the helper if it should throw the exception. If you pass true, it will throw the exception. If you pass false, it will return the exception. Using a null value is equivalent to: There are a series of DatabaseHelper.safe* methods that can be used to automatically check the limits when performing DML operations. e.g. By default we are checking a whole bunch of limits each time, but there are static methods in the LimitHelper class for checking individual limits.
+                This Class implements some useful limit utilities. One example on how to use this call is you write your trigger methods to look something like (example 1): <br><br> The catch exception or an after trigger is where you can add code to use deferred processing to handle one record at the time so you do not hit the limits. The LimitHelper name you are pushing and poping is the master label of the Limit Reserves metadata type record that defines what how much time you reserving. Then in order for this code to work there needs to be calls to the LimitHepler class to check the limits periodically. For example, immediately before a query you could call (example 2): <br><br> This is saying check the limits and make sure we have one query available beyound the reserve. If we do not either return an Exception or throw an exception. The null argument is the boolean that tells the helper if it should throw the exception. If you pass true, it will throw the exception. If you pass false, it will return the exception. Using a null value is equivalent to (Example 3): <br><br> There are a series of DatabaseHelper.safe* methods that can be used to automatically check the limits when performing DML operations. e.g. (Example 4) <br><br> By default we are checking a whole bunch of limits each time, but there are static methods in the LimitHelper class for checking individual limits.
               </div>
               <div class="class-subtitle">
                 Signature
@@ -157,7 +157,8 @@
               <div class="class-subtitle">
                 Example
               </div>
-              <pre class="code-example"><code> &lt;pre&gt; 
+              <pre class="code-example"><code> Example 1 
+ &lt;pre&gt; 
     public void salesAccountUpdate() { 
         try { 
            if(newList.size() &gt; 1) { 
@@ -176,17 +177,17 @@
     } 
  &lt;/pre&gt; 
  
- 
+ Example 2 
  &lt;pre&gt; 
  (new LimitHelper()).setQueries(1).checkLimits( null); 
  &lt;/pre&gt; 
  
- 
+ Example 3 
  &lt;pre&gt; 
  (new LimitHelper()).setQueries(1).checkLimits( LimitHelper.throwsExceptionDefault ); 
  &lt;/pre&gt; 
  
- 
+ Example 4 
  &lt;pre&gt; 
  for(DatabaseHelper.Result r : new DatabaseHelper().safeInsert(insertList)) { 
      if(r.isSuccess()) { 
