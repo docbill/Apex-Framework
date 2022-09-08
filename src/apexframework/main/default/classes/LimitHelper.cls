@@ -1,9 +1,11 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * This Class implements some useful limit utilities.  One example on how to use this
  * call is you write your trigger methods to look something like:
  * 
+ * @example
  * <pre>
  *    public void salesAccountUpdate() {
  *        try {
@@ -23,6 +25,7 @@
  *    }
  * </pre>
  * 
+ * @description
  * The catch exception or an after trigger is where you can add code to use deferred
  * processing to handle one record at the time so you do not hit the limits.
  * 
@@ -32,23 +35,28 @@
  * Then in order for this code to work there needs to be calls to the LimitHepler class to
  * check the limits periodically.  For example, immediately before a query you could call:
  * 
+ * @example
  * <pre>
  * (new LimitHelper()).setQueries(1).checkLimits( null);
  * </pre>
  * 
+ * @description
  * This is saying check the limits and make sure we have one query available beyound the
  * reserve.  If we do not either return an Exception or throw an exception.  The null
  * argument is the boolean that tells the helper if it should throw the exception.  If you
  * pass true, it will throw the exception.  If you pass false, it will return the exception.
  * Using a null value is equivalent to:
  * 
+ * @example
  * <pre>
  * (new LimitHelper()).setQueries(1).checkLimits( LimitHelper.throwsExceptionDefault );
  * </pre>
  * 
+ * @description
  * There are a series of DatabaseHelper.safe* methods that can be used to automatically
  * check the limits when performing DML operations.  e.g.
  * 
+ * @example
  * <pre>
  * for(DatabaseHelper.Result r : new DatabaseHelper().safeInsert(insertList)) {
  *     if(r.isSuccess()) {
@@ -57,17 +65,18 @@
  * }
  * </pre>
  * 
+ * @description
  * By default we are checking a whole bunch of limits each time, but there are static
  * methods in the LimitHelper class for checking individual limits.
- * 
- * @version 2020-08-13
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-08-13 US266008 - Created
  * @since 2021-04-28 - Add queueable jobs limits check
+ * @since 2022-09-08 - Attempt to follow ApexDox standard
  */
 public without sharing class LimitHelper {
     /**
+     * @description
      * This is basically a setting to determine if checks will throw an exception
      * when the throwsException flag is null.  We initialise this to false so the
      * checks can safely be added to triggers that cannot properly deal with the exception
@@ -87,6 +96,7 @@ public without sharing class LimitHelper {
     private static List<Object> reservedList = (new List<Object>{ null });
 
     /**
+     * @description
      * Reserve the values specified by Limit_Reserve__mdt givin my the masterLabel
      * 
      * @param masterLabel
@@ -126,6 +136,7 @@ public without sharing class LimitHelper {
     }
 
     /**
+     * @description
      * Unreserve the values specified by Limit_Reserve__mdt givin my the masterLabel.  If
      * other values have been reserved as well afterwards, pop those values as well.
      * 
@@ -167,6 +178,7 @@ public without sharing class LimitHelper {
     private Integer cpuTime = 0;
 
     /**
+     * @description
      * Set how much cpu time is needed for the next call.
      * 
      * @param value
@@ -181,6 +193,7 @@ public without sharing class LimitHelper {
     private Integer dmlStatements = 0;
 
     /**
+     * @description
      * Set how many dml statements are needed for the next call?
      * 
      * @param value
@@ -195,6 +208,7 @@ public without sharing class LimitHelper {
     private Integer dmlRows = 0;
 
     /**
+     * @description
      * Set how many dml rows are needed for the next call?
      * 
      * @param value
@@ -209,6 +223,7 @@ public without sharing class LimitHelper {
     private Integer queries = 0;
 
     /**
+     * @description
      * Set how many queries are needed for the next call?
      * 
      * @param value
@@ -223,6 +238,7 @@ public without sharing class LimitHelper {
     private Integer queueableJobs = 0;
 
     /**
+     * @description
      * Set how many queueableJobs are needed for the next call?
      * 
      * @param value
@@ -235,6 +251,7 @@ public without sharing class LimitHelper {
 
 
     /**
+     * @description
      * Check all the assigned limit values.
      * 
      * @param throwsException a null is equivalent to throwsExceptionDefault 
@@ -260,16 +277,19 @@ public without sharing class LimitHelper {
     }
 
     /**
+     * @description
      * Since CPU checks are not regularly called you should probably reserve at least
      * 100 ms in order for this to work.  A negative value deactivates this check.
      */
     public static Integer cpuTimeReserved=-1;
 
     /**
+     * @description
      * Called to check just the cpu time limit.
      * 
      * @param cpuTimeRequired
      * @param throwsException a null is equivalent to throwsExceptionDefault
+     * @return null or String indicating limit error
      */
     public static String checkLimitCPUTime(Integer cpuTimeRequired,Boolean throwsException) {
         if(cpuTimeRequired != null && cpuTimeReserved >= 0) {
@@ -284,16 +304,19 @@ public without sharing class LimitHelper {
     }
 
     /** 
+     * @description
      * You can specify exactly the number of rows you want to reserve.  A negative value
      * will deactivate this check.
      */
     public static Integer dmlRowsReserved = 0;
 
     /**
+     * @description
      * Called to check just the dml row limit.
      * 
      * @param dmlRowsRequired
      * @param throwsException a null is equivalent to throwsExceptionDefault
+     * @return null or String indicating limit error
      */
     public static String checkLimitDMLRows(Integer dmlRowsRequired,Boolean throwsException) {
         if(dmlRowsRequired != null && dmlRowsReserved >= 0) {
@@ -308,16 +331,19 @@ public without sharing class LimitHelper {
     }
 
     /** 
+     * @description
      * You can specify exactly the number of statements you want to reserve.  A negative value
      * will deactivate this check.
      */
     public static Integer dmlStatementsReserved = 0;
 
     /**
+     * @description
      * Called to check just the dml statements limit.
      * 
      * @param dmlStatementsRequired
      * @param throwsException a null is equivalent to throwsExceptionDefault
+     * @return null or a String indicating the limit error
      */
     public static String checkLimitDMLStatements(Integer dmlStatementsRequired,Boolean throwsException) {
         if(dmlStatementsRequired != null && dmlStatementsReserved >= 0) {
@@ -332,16 +358,19 @@ public without sharing class LimitHelper {
     }
 
     /** 
+     * @description
      * You can specify exactly the number of queries you want to reserve.  A negative value
      * will deactivate this check.
      */
     public static Integer queriesReserved = 0;
 
     /**
+     * @description
      * Called to check just the dml statements limit.
      * 
      * @param queriesRequired
      * @param throwsException a null is equivalent to throwsExceptionDefault
+     * @return null or String indicating limit error
      */
     public static String checkLimitQueries(Integer queriesRequired,Boolean throwsException) {
         if(queriesRequired != null && queriesReserved > 0) {
@@ -356,16 +385,19 @@ public without sharing class LimitHelper {
     }
 
     /** 
+     * @description
      * You can specify exactly the number of queueableJobs you want to reserve.  A negative value
      * will deactivate this check.
      */
     public static Integer queueableJobsReserved = 0;
 
     /**
+     * @description
      * Called to check just the queueable jobs limit.
      * 
      * @param queueableJobsRequired
      * @param throwsException a null is equivalent to throwsExceptionDefault
+     * @return null or String indicating error
      */
     public static String checkLimitQueueableJobs(Integer queueableJobsRequired,Boolean throwsException) {
         if(queueableJobsRequired != null && queueableJobsReserved >= 0) {
@@ -400,6 +432,7 @@ public without sharing class LimitHelper {
     }
 
     /**
+     * @description
      * Exception for a limit check failure.
      */
     public class LimitsException extends Exception {}
