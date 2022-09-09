@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /**
  * @description
- * This is a set of utilities for treating boolean metadata a a map.
+ * This is a set of utilities for treating boolean metadata as a map.
  * 
  * @group ApexFramework
  * 
