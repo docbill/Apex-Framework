@@ -1,30 +1,32 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * Test class for DatabaseHelper.
- * 
- * @version 2021-04-27
+ *
+ * @group ApexFrameworkTest
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-08-18 US268650 - Created
  * @since 2021-01-07 US281262 - Added setEnqueueScope for Queuable splitting of dml
  * @since 2021-03-30 - Increase test coverage
  * @since 2021-04-27 DE26549 - Added split test
+ * @since 2022-09-09 update for ApexDox commenting
  */
 @IsTest
 private class DatabaseHelperTest {
 
-    static final String CPU_TIME_RE = 'Limits: CPU Time: [0-9]* out of 0';
-    static final Pattern CPU_TIME_PATTERN = Pattern.compile(CPU_TIME_RE);
+    private static final String CPU_TIME_RE = 'Limits: CPU Time: [0-9]* out of 0';
+    private static final Pattern CPU_TIME_PATTERN = Pattern.compile(CPU_TIME_RE);
 
-    static void cpuTimeCheck(String actual,String message) {
+    private static void cpuTimeCheck(String actual,String message) {
         if(! CPU_TIME_PATTERN.matcher(actual).matches()) {
             System.assertEquals(CPU_TIME_RE,actual,message);
         }
     }
 
     @isTest
-    static void safeTest() {
+    private static void safeTest() {
         LimitHelper.throwsExceptionDefault = true;
         List<Contact> contacts = ( new List<Contact>{
             new Contact(LastName='Fudge'),
@@ -273,7 +275,7 @@ private class DatabaseHelperTest {
     }
 
     @isTest
-    static void dmlOptionsTest() {
+    private static void dmlOptionsTest() {
         List<Contact> contacts = ( new List<Contact>{
             new Contact(LastName='Fudge'),
             new Contact(LastName='Chocolate')} );
@@ -377,12 +379,12 @@ private class DatabaseHelperTest {
     }
 
     @isTest
-    static void getErrorsTest() {
+    private static void getErrorsTest() {
         System.assertEquals(true,DatabaseHelper.getErrors(null).isEmpty());
     }
 
     @isTest
-    static void dmlExceptionTest() {
+    private static void dmlExceptionTest() {
         User currentUser = new User(Id=UserInfo.getUserId());
         DatabaseHelper.Result result;
         try {
@@ -411,7 +413,7 @@ private class DatabaseHelperTest {
     }
 
     @isTest
-    static void enqueueScopeTest() {
+    private static void enqueueScopeTest() {
         Account account1 = new Account(Name='enqueueScopeTest1');
 
         Test.startTest();
@@ -436,7 +438,7 @@ private class DatabaseHelperTest {
     }
 
     @isTest
-    static void enqueueScopeTest2() {
+    private static void enqueueScopeTest2() {
         User currentUser = new User(Id=UserInfo.getUserId(),FirstName='enqueueScopeTest');
         Test.startTest();
         List<User> userList = (new List<User>{currentUser});
@@ -449,7 +451,7 @@ private class DatabaseHelperTest {
     }
 
     @IsTest
-    static void enqueueJobTest() {
+    private static void enqueueJobTest() {
         List<DatabaseHelperQueueable> queueableList = (
             new List<DatabaseHelperQueueable>{
                 new DatabaseHelperQueueable(
@@ -465,7 +467,7 @@ private class DatabaseHelperTest {
     }
 
     @isTest
-    static void splitTest() {
+    private static void splitTest() {
         List<Account> accounts = (new List<Account>{
             new Account(Name='1'),
             new Account(Name='2'),

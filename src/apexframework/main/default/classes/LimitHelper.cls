@@ -35,7 +35,7 @@
  * Then in order for this code to work there needs to be calls to the LimitHepler class to
  * check the limits periodically.  For example, immediately before a query you could call (example 2):
  * <br /><br />
-
+ * 
  * @example Example 2
  * <pre>
  * (new LimitHelper()).setQueries(1).checkLimits( null);
@@ -72,10 +72,12 @@
  * By default we are checking a whole bunch of limits each time, but there are static
  * methods in the LimitHelper class for checking individual limits.
  * 
+ * @group ApexFramework
+ * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-08-13 US266008 - Created
  * @since 2021-04-28 - Add queueable jobs limits check
- * @since 2022-09-08 - Attempt to follow ApexDox standard
+ * @since 2022-09-09 update for ApexDox commenting
  */
 public without sharing class LimitHelper {
     /**

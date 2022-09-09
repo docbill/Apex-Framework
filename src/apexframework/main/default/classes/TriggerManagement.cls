@@ -1,24 +1,30 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
- * This is a class to invoke triggers in the specified order.  This is intended to be called from a trigger.  A simple implementation
- * would be:
+ * @description
+ * This is a class to invoke triggers in the specified order.  Example 1 shows a typical trigger for 
+ * invoking the TriggerManagement class.
+ * <br /><br />
  * 
+ * @example Example 1
  * <pre>
  * trigger MyTrigger on MyObject (before insert, before update, before delete, after insert, after update, after delete, after undelete) {
  *     new TriggerManagement().call('MyTrigger',null);
  * }
  * </pre>
  * 
+ * @description
  * Note: The depreciated AbstractTrigger method will make this type of call automatically when invoked from a trigger, so there is no need to add this 
  * trigger to standard objects using an AbstractTrigger method calling all the trigger event types you need.
+ * <br /><br />
  * 
  * An SObjectCallableTrigger can be referenced as an example of how to write your callable trigger.
+ * <br /><br />
  * 
  * If instead you are invoke this from an unlocked package that does not have a depency to include the TriggerManagement class, you can
  * use reflection to implement your trigger and trigger class.   An example of this will be added to the DailyScheduler package.
  * 
- * @version 2021-03-30
+ * @group ApexFramework
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-11-12 - Created
@@ -30,18 +36,27 @@
  * @since 2021-02-14 DE25830 - Read the Boolean Metadata from the correct helper
  * @since 2021-03-03 US286760 - Add support for multiple listeners on a platform event
  * @since 2021-03-30 - Increase test coverage
+ * @since 2022-09-09 Support operationType
  */
 public without sharing class TriggerManagement implements Callable {
-    /** This is a way to reach in and grab the exception from the last DML operation. */
+    /** 
+     * @description
+     * This is a way to reach in and grab the exception from the last DML operation.
+     */
     public static Exception lastRethrownException = null;
 
     /**
+     * @description
      * Standard constructor.
      */
     public TriggerManagement() {}
 
     /**
+     * @description
      * Method to invoke all trigger methods on an object.
+     * 
+     * @param action the name of the trigger method to invoke
+     * @param args maybe null, a map constructed for use with the TriggerArguments class
      */
     public Object call(String action, Map<String, Object> args) {
         lastRethrownException = null;
@@ -75,7 +90,7 @@ public without sharing class TriggerManagement implements Callable {
     // So we use the stack trace to determine a unique action name, based on where
     // we were called from.
     @TestVisible
-    static String getUniqueTriggerString(String retval) {
+    private static String getUniqueTriggerString(String retval) {
         try {
             Integer.valueOf('false');
         }
@@ -91,7 +106,7 @@ public without sharing class TriggerManagement implements Callable {
     }
 
     // For each entry, create the callable class, and invoke it with the specified MasterLabel as the action.
-    static void callTriggerMethods(List<Trigger_Management_Entry__mdt> entries,TriggerArguments localTrigger) {
+    private static void callTriggerMethods(List<Trigger_Management_Entry__mdt> entries,TriggerArguments localTrigger) {
         //System.debug('TriggerManagement entries='+entries);
         if(entries != null) {
             Map<String,Object> callableArguments = localTrigger.callableArguments;
@@ -106,7 +121,7 @@ public without sharing class TriggerManagement implements Callable {
     }
 
     @TestVisible
-    static Boolean getValueFromMetadata(String name,Boolean defaultValue) {
+    private static Boolean getValueFromMetadata(String name,Boolean defaultValue) {
         // clear any previous settings to make sure we read metadata
         BooleanValuesHelper.booleanSettingMap.remove(name);
         BooleanValuesHelper.overrideSettingMap.remove(name);
@@ -114,7 +129,7 @@ public without sharing class TriggerManagement implements Callable {
     }
 
     @TestVisible
-    static void callTrigger(
+    private static void callTrigger(
         Map<String,Callable> callableMap,
         Trigger_Management_Entry__mdt entry,
         Map<String,Object> callableArguments
@@ -136,7 +151,7 @@ public without sharing class TriggerManagement implements Callable {
     }
 
     @TestVisible
-    static void callTrigger(
+    private static void callTrigger(
         Callable c, 
         String action, 
         Map<String,Object> callableArguments
@@ -167,13 +182,13 @@ public without sharing class TriggerManagement implements Callable {
     // Once we invoke triggers, we keep track of that action and only repeat the same set of trigger methods
     // for the same action.  This way we can have many triggers on the same object, and still only fire each trigger
     // once.
-    static Map<String,String> lastActionMap = new Map<String,String>();
+    private static Map<String,String> lastActionMap = new Map<String,String>();
 
     // Once we query the metadata, we put it into a list based on query string and target object name.
-    static Map<String,Map<String,List<Trigger_Management_Entry__mdt>>> entriesMapMap = new Map<String,Map<String,List<Trigger_Management_Entry__mdt>>>();
+    private static Map<String,Map<String,List<Trigger_Management_Entry__mdt>>> entriesMapMap = new Map<String,Map<String,List<Trigger_Management_Entry__mdt>>>();
 
     // query all the entries and return the ones relevant to the target object.
-    static List<Trigger_Management_Entry__mdt> queryEntriesByEntity(String queryString,String targetObjectType) {
+    private static List<Trigger_Management_Entry__mdt> queryEntriesByEntity(String queryString,String targetObjectType) {
         //System.debug('TriggerManagement targetObjectType='+targetObjectType);
         Map<String,List<Trigger_Management_Entry__mdt>> entriesMap = entriesMapMap.get(queryString);
         if(entriesMap == null) {
@@ -200,7 +215,7 @@ public without sharing class TriggerManagement implements Callable {
     }
 
     @TestVisible
-    static Map<TriggerArguments.TriggerType,Schema.SObjectField> triggerFieldMap = (new Map<TriggerArguments.TriggerType,Schema.SObjectField>{
+    private static Map<TriggerArguments.TriggerType,Schema.SObjectField> triggerFieldMap = (new Map<TriggerArguments.TriggerType,Schema.SObjectField>{
         TriggerArguments.TriggerType.BEFORE_INSERT => Trigger_Management_Entry__mdt.Before_Insert__c,
         TriggerArguments.TriggerType.AFTER_INSERT => Trigger_Management_Entry__mdt.After_Insert__c,
         TriggerArguments.TriggerType.BEFORE_UPDATE => Trigger_Management_Entry__mdt.Before_Update__c,
@@ -213,7 +228,7 @@ public without sharing class TriggerManagement implements Callable {
 
     // dynamically generate the query string based on the trigger arguments
     @TestVisible
-    static String createQueryString(String action,TriggerArguments localTrigger) {
+    private static String createQueryString(String action,TriggerArguments localTrigger) {
         String queryString = null;
         //System.debug('localTrigger.targetObjectType='+localTrigger.targetObjectType);
         if(String.isNotBlank(localTrigger.targetObjectType)) {
@@ -245,7 +260,7 @@ public without sharing class TriggerManagement implements Callable {
     }
 
     @TestVisible
-    static String getEntityBasedCondition(
+    private static String getEntityBasedCondition(
         String nonEntityValue,
         String targetObjectType,
         String entityObjectFieldName,
@@ -272,14 +287,14 @@ public without sharing class TriggerManagement implements Callable {
         return entityBasedCondition;
     }
 
-    static String quoteValue(String value) {
+    private static String quoteValue(String value) {
         if(value != null) {
             value = '\''+String.escapeSingleQuotes(value)+'\'';
         }
         return value;
     }
 
-    static Set<String> nonEntities {
+    private static Set<String> nonEntities {
         get {
             if(nonEntities == null) {
                 nonEntities = new Set<String>();
@@ -297,7 +312,7 @@ public without sharing class TriggerManagement implements Callable {
     }
 
     @TestVisible
-    static String getNonEntityValue(String objectType) {
+    private static String getNonEntityValue(String objectType) {
         String retval = objectType.toUpperCase();
         if(! nonEntities.contains(retval)) {
             retval = null;
@@ -305,5 +320,9 @@ public without sharing class TriggerManagement implements Callable {
         return retval;
     }
 
+    /**
+     * @description
+     * Exception used to indicate a failure of the call method.
+     */
     public class ExtensionMalformedCallException extends Exception {}
 }

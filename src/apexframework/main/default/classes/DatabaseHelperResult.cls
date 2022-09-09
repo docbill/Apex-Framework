@@ -1,22 +1,26 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * This is a class that can use to in leiu of the Database.*Result objects.
  * That way we can add to this set exceptions that were never actually thrown
  * and such.
  *
- * @version 2021-04-28
+ * @group ApexFramework
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2021-04-28 - Separated from the DatabaseHelper class
+ * @since 2022-09-09 update for ApexDox commenting
  */
 public class DatabaseHelperResult implements DatabaseHelper.Result {
-    final Object result;
-    final SObject record;
-    final Boolean insertFlag;
+    private final Object result;
+    private final SObject record;
+    private final Boolean insertFlag;
 
     /**
+     * @description
      * Constructor
+     * 
      * @param op the dml statement that was performed
      * @param result one of Database.SaveResult, Database.UpsertResult,...
      * @param record the message being operated on
@@ -31,6 +35,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     }
 
     /**
+     * @description
      * Constructor
      * 
      * @param op the dml statement that was performed
@@ -52,6 +57,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     }
 
     /**
+     * @description
      * Find the record we operated on.
      * 
      * @return record
@@ -72,6 +78,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     }
 
     /**
+     * @description
      * This returns all errors as Database.Error type.
      * 
      * @return list of all errors
@@ -96,6 +103,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     }
 
     /**
+     * @description
      * This returns all errors as DatabaseHelper.ResultException type.
      * 
      * @return list of all errors
@@ -103,6 +111,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     public List<DatabaseHelper.ResultException> getExceptions() { return exceptions; }
 
     /**
+     * @description
      * Return just the first exception as DatabaseHelper.ResultException type.
      * 
      * @return the first exception or null if there were none
@@ -115,6 +124,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     }
 
     /**
+     * @description
      * What is the id value we operated on?
      * 
      * @return id value
@@ -122,6 +132,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     public Id getId() { return getId(result); }
 
     /**
+     * @description
      * Was the DML successful?
      * 
      * @return true if success
@@ -129,6 +140,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     public Boolean isSuccess() { return DatabaseHelper.isSuccess(result); }
 
     /**
+     * @description
      * Test this was an insert or an upsert that created a record.
      * 
      * @return true if a new record was created
@@ -141,6 +153,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     }
 
     /**
+     * @description
      * Query a list of stack traces for each exception.
      * 
      * @return list of stack traces 
@@ -153,6 +166,15 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
         return retval;
     }
 
+    /**
+     * @description 
+     * Called to convert the result to Database.SaveResult, Database.UpsertResult,
+     * Database.DeleteResult, Database.UndeteleResult, or DatabaseHelper.Result
+     * as specified by the apexType. 
+     * 
+     * @param apexType the desired result type
+     * @return the converted result
+     */
     public Object convertResult(System.Type apexType) {
         if(
             (result instanceof Database.SaveResult && Database.SaveResult.class.equals(apexType))
@@ -168,12 +190,23 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     }
 
     @TestVisible
-    static void initCause(Exception ex) {
+    private static void initCause(Exception ex) {
         if(TriggerManagement.lastRethrownException != null) {
             ex.initCause(TriggerManagement.lastRethrownException);
         }
     }
 
+    /**
+     * @description 
+     *
+     * Convert the list of results to the type of result we need.
+     * 
+     * @param op database operation that was performed
+     * @param results the list of results from the database operation
+     * @param records the records that the DML was performed on
+     * @param legacyMode true if we don't want DatabaseHelper.Result as output
+     * @return the list of converted results
+     */
     public static List<Object> convertResultType(
         DatabaseHelper.DMLOperation op,
         List<Object> results,
@@ -266,13 +299,14 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     }
 
     /**
+     * @description
      * Method to check success with out depending on the type of database results.
      * 
      * @param result from a insert,update,upsert,delete,or undelete
      * @return id value if assigned
      */
     @TestVisible
-    static Id getId(Object result) {
+    private static Id getId(Object result) {
         Id retval = null;
         if(result instanceof Database.SaveResult) {
             retval = ((Database.SaveResult)result).getId();

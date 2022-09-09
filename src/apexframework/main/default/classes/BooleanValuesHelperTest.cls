@@ -4,12 +4,14 @@
  * @description
  * Test class for Metadata Values Helper
  * 
+ * @group ApexFrameworkTest
+ * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-12-02 - Created
  * @since 2021-01-29 - Update for allow ignoreMetadata per instance 
  * @since 2021-04-27 US292962 - No longer create missing boolean metadata
  * @since 2021-09-21 - legacyMap test instead of booleanSettingsTest
- * @since 2022-09-08 - Implement ApexDox comment compliance
+ * @since 2022-09-09 update for ApexDox commenting
  */
 @IsTest
 private class BooleanValuesHelperTest {

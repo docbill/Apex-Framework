@@ -4,6 +4,8 @@
  * @description
  * This is a set of utilities for treating boolean metadata a a map.
  * 
+ * @group ApexFramework
+ * 
  * @author Bill Riemers <briemers@redhat.com>
  * @since 2020-12-02 - Created
  * @since 2021-01-29 - Allow ignoreMetadata per instance 
@@ -11,7 +13,7 @@
  * @since 2021-04-27 US292962 - No longer create missing metadata
  * @since 2021-09-21 - User legacyMap instead of BooleanSetting__c
  * @since 2022-08-06 - Trigger Management Entries Active flags will be treated as Boolean Metadata
- * @since 2022-09-08 - Support ApexDox
+ * @since 2022-09-09 update for ApexDox commenting
  */
 public without sharing class BooleanValuesHelper {
     private static Map<Boolean,Map<String,BooleanValuesHelper>> booleanValuesHelperMaps = (new Map<Boolean,Map<String,BooleanValuesHelper>>{

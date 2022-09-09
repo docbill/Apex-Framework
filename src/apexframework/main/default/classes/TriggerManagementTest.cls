@@ -1,29 +1,33 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * This is a test class for TriggerManagement.
  * 
- * @version 2021-03-30
+ * @group ApexFrameworkTest
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-11-15 Created
  * @since 2021-01-29 Added callTriggerTest
  * @since 2021-02-14 DE25830 - Test with actual boolean metadata
  * @since 2021-03-30 - Increase test coverage
+ * @since 2022-09-09 update for ApexDox commenting
  */
 @isTest
 public class TriggerManagementTest implements Callable {
-    static TriggerArguments triggerArgumentsValue = null;
+    private static TriggerArguments triggerArgumentsValue = null;
 
     /**
+     * @description
      * Standard constructor.
      */
     public TriggerManagementTest() {}
 
 
-    static Integer malformedCount = 0;
+    private static Integer malformedCount = 0;
 
     /**
+     * @description
      * Method to invoke all trigger methods on an object.
      */
     public Object call(String action, Map<String, Object> args) {
@@ -46,7 +50,7 @@ public class TriggerManagementTest implements Callable {
     }
 
     @isTest
-    static void callTriggerTest() {
+    private static void callTriggerTest() {
         BooleanValuesHelper.missingMap = new Map<String,Boolean>();
         System.assertEquals(true,BooleanValuesHelper.getBooleanValue('malformed',true),'BooleanValuesHelper.getBooleanValue(malformed,true)');
         System.assertEquals(true,BooleanValuesHelper.getBooleanValue('TEST.FALSE-KEY1',true),'BooleanValuesHelper.getBooleanValue(TEST.FALSE-KEY1,true)');
@@ -89,7 +93,7 @@ public class TriggerManagementTest implements Callable {
     }
 
     @isTest
-    static void callTriggerTest2() {
+    private static void callTriggerTest2() {
         Trigger_Management_Entry__mdt entry = (Trigger_Management_Entry__mdt)JSON.deserialize(
             '{"Class_Name__c":"'+TriggerManagement.class.getName()+'"}',
             Trigger_Management_Entry__mdt.class
@@ -104,7 +108,7 @@ public class TriggerManagementTest implements Callable {
     }
 
     @isTest
-    static void callTest() {
+    private static void callTest() {
         for(TriggerArguments.TriggerType triggerTypeValue : TriggerManagement.triggerFieldMap.keySet() ) {
             triggerArgumentsValue = null;
             Map<String,Object> args = TriggerArgumentsTest.createArgs( triggerTypeValue );
@@ -130,19 +134,19 @@ public class TriggerManagementTest implements Callable {
     }
 
     @isTest
-    static void getUniqueTriggerString() {
+    private static void getUniqueTriggerString() {
         System.assertEquals('AbstractTrigger',TriggerManagement.getUniqueTriggerString('AbstractTrigger'),'AbstractTrigger');
         System.assertEquals(null,TriggerManagement.getUniqueTriggerString(null),'Using null arguments');
     }
 
     @isTest
-    static void getNonEntityValueTest() {
+    private static void getNonEntityValueTest() {
         System.assertEquals('TEST',TriggerManagement.getNonEntityValue('Test'),'getNonEntityValue(\'Test\')');
         System.assertEquals(null,TriggerManagement.getNonEntityValue('Opportunity'),'getNonEntityValue(\'Opportunity\')');
     }
 
     @isTest
-    static void attachmentTest() {
+    private static void attachmentTest() {
         Account acc = new Account(Name='TestAccount');
         insert acc;
         Attachment attach = new Attachment(Body = Blob.valueOf('anything'),Name='TestAttachment',ParentId=acc.Id);
@@ -151,7 +155,7 @@ public class TriggerManagementTest implements Callable {
     }
 
     @isTest
-    static void getEntityBaseConditionTest() {
+    private static void getEntityBaseConditionTest() {
         Test.startTest();
         System.assertEquals( '',
             TriggerManagement.getEntityBasedCondition('catDog',null,null,null),
@@ -168,5 +172,8 @@ public class TriggerManagementTest implements Callable {
         Test.stopTest();
     }
 
+    /**
+     * Class specified by best practices for Callable. 
+     */
     public class ExtensionMalformedCallException extends Exception {}
 }
