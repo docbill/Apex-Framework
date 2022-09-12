@@ -2,9 +2,9 @@
 
 This is a package of framework entities used by Apex coding standards, that should make it easier to follow best practices.  It is expected that most unlocked packages will have access to this framework by either a direct package dependency, or by org based dependency.   If for some reason neither is appropriate for your project, some of the components in this package may still be accessed by reflection and salesforce interfaces.
 
-## Release 1.2
+## Release 1.3
 
-This is the initial open source release of this package.  This is based on code in Red Hat's production org.  Depreciated code has been removed from this release.  Everything remaining is believed to be of interest for the open source community.
+This is the current open source release of this package.  This is based on code in Red Hat's production org.  Depreciated code has been removed from this release.  Everything remaining is believed to be of interest for the open source community.
 
 ## Build/Deploy Instructions
 
@@ -130,3 +130,9 @@ One could also deploy unpackaged data by specifing the folder. e.g.
 ```./scripts/bash/mdapi-deploy src-temp -u dev1```
 
 The folder name must be declared in the sfdx-project.json file for this to work.
+
+## ApexDox
+
+The ApexDox documentation maybe viewed at:
+
+[ApexDox GitHack](https://rawcdn.githack.com/docbill/Apex-Framework/fa902f06019c43b72c59c41058599421daca5111/apex-documentation/index.html)

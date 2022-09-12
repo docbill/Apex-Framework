@@ -1,14 +1,17 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * This is a class for TriggerArguments
+ * <br /><br />
  * 
  * All values are assigned in the constructor as final.
  * 
- * @version 2020-11-12
+ * @group ApexFrameworkTest
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-11-12 Created
+ * @since 2022-09-09 update for ApexDox commenting
  */
 @isTest
 public class TriggerArgumentsTest {
@@ -18,6 +21,15 @@ public class TriggerArgumentsTest {
     static Map<Id,User> newMap = new Map<Id,User>(newList);
     static Map<Id,User> oldMap = new Map<Id,User>(oldList);
 
+    /**
+     * @description 
+     * This is a means to method to return a test set of arguments for your desired trigger type.
+     * 
+     * @todo replace trigger type with operation type
+     *  
+     * @param trigType 
+     * @return  `Map<String,Object>`
+     */
     public static Map<String,Object> createArgs(TriggerArguments.TriggerType trigType ) {
         Map<String,Object> args = null;
         switch on trigType {
@@ -47,7 +59,7 @@ public class TriggerArgumentsTest {
     }
 
     @isTest
-    static void beforeInsertTest() {
+    private static void beforeInsertTest() {
         TriggerArguments ta = TriggerArguments.createBeforeInsert(users.clone());
         System.assertEquals(TriggerArguments.TriggerType.BEFORE_INSERT,ta.triggerTypeValue,'triggerTypeValue');
 
@@ -82,7 +94,7 @@ public class TriggerArgumentsTest {
     } 
 
     @isTest
-    static void afterInsertTest() {
+    private static void afterInsertTest() {
         TriggerArguments ta = TriggerArguments.createAfterInsert(newMap.clone());
         System.assertEquals(TriggerArguments.TriggerType.AFTER_INSERT,ta.triggerTypeValue,'triggerTypeValue');
 
@@ -116,7 +128,7 @@ public class TriggerArgumentsTest {
     } 
 
     @isTest
-    static void beforeUpdateTest() {
+    private static void beforeUpdateTest() {
         TriggerArguments ta = TriggerArguments.createBeforeUpdate(oldMap.clone(),newList.clone());
         System.assertEquals(TriggerArguments.TriggerType.BEFORE_UPDATE,ta.triggerTypeValue,'triggerTypeValue');
 
@@ -151,7 +163,7 @@ public class TriggerArgumentsTest {
     } 
 
     @isTest
-    static void beforeUpdateTest2() {
+    private static void beforeUpdateTest2() {
         Map<String,Object> args = ( new Map<String,Object>{
             TriggerArguments.OLD_MAP_KEY => oldMap,
             TriggerArguments.NEW_LIST_KEY => newList,
@@ -192,7 +204,7 @@ public class TriggerArgumentsTest {
     } 
 
     @isTest
-    static void afterUpdateTest() {
+    private static void afterUpdateTest() {
         TriggerArguments ta = TriggerArguments.createAfterUpdate(oldMap.clone(),newMap.clone());
         System.assertEquals(TriggerArguments.TriggerType.AFTER_UPDATE,ta.triggerTypeValue,'triggerTypeValue');
 
@@ -227,7 +239,7 @@ public class TriggerArgumentsTest {
     } 
 
     @isTest
-    static void afterUpdateTest2() {
+    private static void afterUpdateTest2() {
         Map<String,Object> args = new Map<String,Object>{
             TriggerArguments.OLD_LIST_KEY => oldList,
             TriggerArguments.NEW_MAP_KEY => newMap
@@ -266,7 +278,7 @@ public class TriggerArgumentsTest {
     } 
 
     @isTest
-    static void beforeDeleteTest() {
+    private static void beforeDeleteTest() {
         TriggerArguments ta = TriggerArguments.createBeforeDelete(oldMap.clone());
         System.assertEquals(TriggerArguments.TriggerType.BEFORE_DELETE,ta.triggerTypeValue,'triggerTypeValue');
 
@@ -301,7 +313,7 @@ public class TriggerArgumentsTest {
     } 
 
     @isTest
-    static void afterDeleteTest() {
+    private static void afterDeleteTest() {
         TriggerArguments ta = TriggerArguments.createAfterDelete(oldMap.clone());
         System.assertEquals(TriggerArguments.TriggerType.AFTER_DELETE,ta.triggerTypeValue,'triggerTypeValue');
 
@@ -336,7 +348,7 @@ public class TriggerArgumentsTest {
     } 
 
     @isTest
-    static void afterUndeleteTest() {
+    private static void afterUndeleteTest() {
         TriggerArguments ta = TriggerArguments.createAfterUndelete(newMap.clone());
         System.assertEquals(TriggerArguments.TriggerType.AFTER_UNDELETE,ta.triggerTypeValue,'triggerTypeValue');
 
@@ -371,7 +383,7 @@ public class TriggerArgumentsTest {
     } 
 
     @isTest
-    static void dummyTriggerTest() {
+    private static void dummyTriggerTest() {
         try {
             TriggerArguments ta = new TriggerArguments(null);
             System.assert(true,'one should never reach this line');
@@ -382,7 +394,7 @@ public class TriggerArgumentsTest {
     }
 
     @isTest
-    static void getSObjectMapTest() {
+    private static void getSObjectMapTest() {
         List<SObject> values = (new List<User>{new User(Id=UserInfo.getUserId())});
         Map<Id,SObject> mapToClone = new Map<Id,User>();
 

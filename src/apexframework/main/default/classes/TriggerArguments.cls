@@ -1,12 +1,17 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
- * This is a class to convert callable arguments into trigger values.
+ * @description
+ * This is a class to convert callable arguments into trigger values.  As you should
+ * not reference System.Trigger from your callable trigger classes, as that will limit you
+ * unit testing to be inside a DML operation, where your unit test can fail as a result of
+ * other triggers unrelated to what you are testing.
+ * <br /><br />
  * 
- * All values are assigned in the constructor as final.
+ * In table 1, we see minimum arguments key sets for the arguments of the triggers.
+ * <br /><br />
  * 
- * The following are minimum arguments key sets for the arguments of the triggers:
- * 
+ * @example Table 1
  * <pre>
  * before insert : { NEW_LIST_KEY }
  * before update : { OLD_MAP_KEY, NEW_LIST_KEY }
@@ -17,19 +22,21 @@
  * after undelete : { NEW_MAP_KEY, IS_UNDELETE_KEY }
  * </pre>
  * 
+ * @description
  * Given the minimal sets, the rest of the values will be populated for each of
  * the trigger types.  In general never supply NEW_MAP_KEY for a before trigger
  * without specifing the IS_BEFORE_KEY or IS_AFTER_KEY.   Never provide NEW_LIST_KEY
  * in an after trigger, without also supplying IS_BEFORE_KEY or IS_AFTER_KEY.
+ * <br /><br />
  * 
  * All memember variables of this class are final.  So if you need to change the values
  * you should create a new instance with one of the static create methods.
  * 
- * @version 2022-08-09
+ * @group ApexFramework
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-11-12 Created
- * @since 2022-08-09 Support operationType
+ * @since 2022-09-09 Support operationType
  */
 public without sharing class TriggerArguments {
     public static final String IS_BEFORE_KEY = 'isBefore';
@@ -46,14 +53,20 @@ public without sharing class TriggerArguments {
     public static final String TARGET_OBJECT_TYPE_KEY = 'targetObjectType';
     public static final String CALLABLE_MAP = 'callableMap';
 
+    /**
+     * @description
+     * Use System.TriggerOperation instead
+     * @deprecated superceeded by System.TriggerOperation
+     */
     public Enum TriggerType { BEFORE_INSERT, AFTER_INSERT, BEFORE_UPDATE, AFTER_UPDATE, BEFORE_DELETE, AFTER_DELETE, AFTER_UNDELETE }
 
     /** 
+     * @description
      * The map of arguments representing Trigger that can be passed to a Callable trigger class.
      */
     public final Map<String,Object> callableArguments {
         get;
-        set {
+        private set {
             if(value == null) {
                 value = new Map<String,Object>();
             }
@@ -62,11 +75,12 @@ public without sharing class TriggerArguments {
     }
 
     /** 
+     * @description
      * IS_BEFORE_KEY value from the callable arguments map.
      */
     public final Boolean isBefore {
         get;
-        set {
+        private set {
             if(value == null) {
                 // Before and After update look the same in terms of lists.  So 
                 // our convention is to assume it is a before if a newMap entry not
@@ -87,11 +101,12 @@ public without sharing class TriggerArguments {
     }
 
     /** 
+     * @description
      * IS_AFTER_KEY value from the callable arguments map.
      */
     public final Boolean isAfter {
         get;
-        set {
+        private set {
             if(value == null) {
                 value = ! isBefore;
             }
@@ -101,55 +116,60 @@ public without sharing class TriggerArguments {
     }
 
     /** 
+     * @description
      * NEW_LIST_KEY value from the callable arguments map.
      */
     public final List<SObject> newList {
         get;
-        set {
+        private set {
             callableArguments.put(NEW_LIST_KEY,value);
             newList = value;
         }
     }
 
     /** 
+     * @description
      * NEW_MAP_KEY value from the callable arguments map.
      */
     public final Map<Id,SObject> newMap  {
         get;
-        set {
+        private set {
             callableArguments.put(NEW_MAP_KEY,value);
             newMap = value;
         }
     }
 
     /** 
+     * @description
      * OLD_LIST_KEY value from the callable arguments map.
      */
     public final List<SObject> oldList {
         get;
-        set {
+        private set {
             callableArguments.put(OLD_LIST_KEY,value);
             oldList = value;
         }
     }
 
     /** 
+     * @description
      * OLD_MAP_KEY value from the callable arguments map.
      */
     public final Map<Id,SObject> oldMap {
         get;
-        set {
+        private set {
             callableArguments.put(OLD_MAP_KEY,value);
             oldMap = value;
         }
     }
 
     /** 
+     * @description
      * IS_UPDATE_KEY value from the callable arguments map.
      */
     public final Boolean isUpdate {
         get;
-        set {
+        private set {
             if(value == null) {
                 value = (true != (Boolean)callableArguments.get(IS_DELETE_KEY))
                     && (true != (Boolean)callableArguments.get(IS_UNDELETE_KEY))
@@ -163,11 +183,12 @@ public without sharing class TriggerArguments {
     }
 
     /** 
+     * @description
      * IS_INSERT_KEY value from the callable arguments map.
      */
     public final Boolean isInsert {
         get;
-        set {
+        private set {
             if(value == null) {
                 // We cannot tell the difference between an after insert
                 // or an after undelete, unless either the isInsert or isUndelete flag
@@ -185,11 +206,12 @@ public without sharing class TriggerArguments {
     }
 
     /** 
+     * @description
      * IS_DELETE_KEY value from the callable arguments map.
      */
     public final Boolean isDelete {
         get;
-        set {
+        private set {
             if(value == null) {
                 value = (! isUpdate) 
                     && (! isInsert)
@@ -203,11 +225,12 @@ public without sharing class TriggerArguments {
     }
 
     /** 
+     * @description
      * IS_UNDELETE_KEY value from the callable arguments map.
      */
     public final Boolean isUndelete {
         get;
-        set {
+        private set {
             if(value == null) {
                 value = isAfter
                     && (! isUpdate)
@@ -222,11 +245,12 @@ public without sharing class TriggerArguments {
     }
 
     /** 
+     * @description
      * OPERATION_TYPE_KEY value from the callable arguments map.
      */
     public final System.TriggerOperation operationType {
         get;
-        set {
+        private set {
             if(value == null) {
                 if(isBefore) {
                     if(isInsert) {
@@ -260,11 +284,12 @@ public without sharing class TriggerArguments {
     }
 
     /**
+     * @description
      * TARGET_OBJECT_KEY value from the callabse arguments map.
      */
     public final String targetObjectType {
         get;
-        set {
+        private set {
             if(value == null) {
                 List<SObject> objList = newList;
                 if(objList == null || objList.isEmpty()) {
@@ -280,17 +305,19 @@ public without sharing class TriggerArguments {
     }
 
     /**
+     * @description
      * The trigger type of this call.
      */
     public final TriggerType triggerTypeValue;
 
     /** 
+     * @description
      * The map of all callable triggers called so far as part of the current DML
      * operation.
      */
     public final Map<String,Callable> callableMap {
         get;
-        set {
+        private set {
             if(value == null) {
                 value = new Map<String,Callable>();
             }
@@ -300,6 +327,7 @@ public without sharing class TriggerArguments {
     }
 
     /**
+     * @description
      * Constructor.  A null or empty map will construct using Trigger values.
      * Any missing values in a non-empty map will be filled in with values determined
      * in the setter methods.
@@ -404,6 +432,7 @@ public without sharing class TriggerArguments {
     }
 
     /**
+     * @description
      * Get the object from the oldMap.  Using this method leads to more streamlined code.
      * 
      * @param recordId
@@ -417,6 +446,7 @@ public without sharing class TriggerArguments {
     }
 
     /**
+     * @description
      * Get the object from the newMap.  Using this method leads to more streamlined code.
      * 
      * @param recordId
@@ -430,6 +460,7 @@ public without sharing class TriggerArguments {
     }
 
     /**
+     * @description
      * Create trigger arguments for a before insert trigger event.
      * 
      * @param newList
@@ -443,6 +474,7 @@ public without sharing class TriggerArguments {
     }
 
     /**
+     * @description
      * Create trigger arguments for aafter insert trigger event.
      * 
      * @param newMap
@@ -456,6 +488,7 @@ public without sharing class TriggerArguments {
     }
 
     /**
+     * @description
      * Create trigger arguments for before update trigger event.
      * 
      * @param oldMap
@@ -471,6 +504,7 @@ public without sharing class TriggerArguments {
     }
 
     /**
+     * @description
      * Create trigger arguments for after update trigger event.
      * 
      * @param oldMap
@@ -486,6 +520,7 @@ public without sharing class TriggerArguments {
     }
 
     /**
+     * @description
      * Create trigger arguments for before delete event.
      * 
      * @param oldMap
@@ -500,6 +535,7 @@ public without sharing class TriggerArguments {
     }
 
     /**
+     * @description
      * Create trigger arguments for after delete event.
      * 
      * @param oldMap
@@ -514,6 +550,7 @@ public without sharing class TriggerArguments {
     }
 
     /**
+     * @description
      * Create trigger arguments for after undelete event.
      * 
      * @param newMap
@@ -527,7 +564,7 @@ public without sharing class TriggerArguments {
         return new TriggerArguments(callableArguments);
     }
 
-    Object lookupValue(Boolean useKey,String key,Object retval) {
+    private Object lookupValue(Boolean useKey,String key,Object retval) {
         if(useKey) {
             retval = callableArguments.get(KEY);
         }
@@ -535,7 +572,7 @@ public without sharing class TriggerArguments {
     }
 
     @TestVisible
-    static Map<Id,SObject> getSObjectMap(Map<Id,SObject> retval,Map<Id,SObject> mapToClone,List<SObject> values) {
+    private static Map<Id,SObject> getSObjectMap(Map<Id,SObject> retval,Map<Id,SObject> mapToClone,List<SObject> values) {
         if(retval == null && mapToClone != null && values != null) {
             try {
                 retval = mapToClone.clone();

@@ -1,9 +1,10 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * This class used to copy data from one object to another using Field_Map_Entry__mdt and User_Field_Map_Entry__mdt values
  *
- * @version 2022-08-04
+ * @group ApexFramework
  * 
  * @author  Bill C Riemers <briemers@redhat.com>
  * @since 2019-11-21 - Created
@@ -13,16 +14,32 @@
  * @since 2021-04-06 - Increase test coverage
  * @since 2021-04-27 - Changes towards depreciated Map_Name__c (picklists are not handled well by unlocked packages)
  * @since 2022-08-04 SPP-4116 - Added getDestinationEntityMap method
+ * @since 2022-09-09 update for ApexDox commenting
  */
 public class Field_Map {
+    /**
+     * @description
+     * Name of the boolean metadata that activates debugging logs
+     */
     public static final String DEBUG_SETTING = 'Field_Map.debug';
+
     private final Boolean isDebugging;
+
+    /**
+     * @description
+     * Name of the map we are using
+     */
     public final String mapName;
+
     @TestVisible
     private Map<String,List<FieldMapEntry>> fieldEntriesMap = new Map<String,List<FieldMapEntry>>();
 
     private Map<String,List<FieldMapEntry>> fieldEntriesBySourceMap = new Map<String,List<FieldMapEntry>>();
 
+    /**
+     * @description
+     * This gives us a way to inject Field_Map_Entry__mdt.
+     */
     public List<Field_Map_Entry__mdt> fieldEntriesForTesting {
         get;
         set {
@@ -41,7 +58,9 @@ public class Field_Map {
     private List<FieldMapEntry> fieldEntriesForTesting2 = null;
 
     /**
+     * @description
      * Standard constructor.
+     * 
      * @param name of the field map
      */
     public Field_Map(String name) {
@@ -50,10 +69,12 @@ public class Field_Map {
     }
 
     /**
+     * @description
      * Implements special rules for copying fields.
+     * 
      * @param src to copy from
      * @param dest to copy to
-     * returns list s Error Messages
+     * @return list of Error Messages
      */
     public List<String> copyFields(SObject src,SObject dest)
     {
@@ -66,7 +87,7 @@ public class Field_Map {
     }
 
     @TestVisible
-    static Object convertText(String value,SObject dest,String fieldApiName) {
+    private static Object convertText(String value,SObject dest,String fieldApiName) {
         Object retval = value;
         if(value != null) {
             // allow default values for booleans and decimals
@@ -85,6 +106,7 @@ public class Field_Map {
     }
 
     /**
+     * @description
      * Implements special rules for copying fields.
      * 
      * @param entityNameMap to use to field values
@@ -129,6 +151,7 @@ public class Field_Map {
     }
 
     /**
+     * @description
      * Obtain all the field names for the specified source, prefixed with the specified string.
      * 
      * @param prefix string to prefix to field names, useful when generating a subquery
@@ -158,6 +181,7 @@ public class Field_Map {
     }
 
     /**
+     * @description
      * Create a map of entities we can copy to.  This is useful, if we are 
      * planning on inserting brand new objects, or there is a field we can use
      * for upserts.
@@ -191,7 +215,7 @@ public class Field_Map {
         return destinationEntityMap;
     }
 
-    static void addAll(List<FieldMapEntry> targetList, final String mapName, List<User_Field_Map_Entry__mdt> sourceList) {
+    private static void addAll(List<FieldMapEntry> targetList, final String mapName, List<User_Field_Map_Entry__mdt> sourceList) {
         for(User_Field_Map_Entry__mdt fme : sourceList) {
             if( ( fme.Map_Name__c == null && fme.MasterLabel.startsWithIgnoreCase(mapName+'.'))
                 || mapName == fme.Map_Name__c )
@@ -201,7 +225,7 @@ public class Field_Map {
         }
     }
 
-    static void addAll(List<FieldMapEntry> targetList, final String mapName, List<Field_Map_Entry__mdt> sourceList) {
+    private static void addAll(List<FieldMapEntry> targetList, final String mapName, List<Field_Map_Entry__mdt> sourceList) {
         for(Field_Map_Entry__mdt fme : sourceList) {
             if( ( fme.Map_Name__c == null && fme.MasterLabel.startsWithIgnoreCase(mapName+'.'))
                 || mapName == fme.Map_Name__c )
@@ -211,6 +235,14 @@ public class Field_Map {
         }
     }
 
+    /**
+     * @description 
+     * Get a list of field names for the specified destination
+     * 
+     * @param prefix to add to the field name, like 'Account.'
+     * @param destinationSObjectType the object type of the destinatior
+     * @return the list of fieldnames with the prefix applied
+     */
     public Set<String> getDestinationFieldNames(String prefix,SObjectType destinationSObjectType) {
         final String destEntityName = destinationSObjectType.getDescribe().getName();
         Set<String> destFieldNames = new Set<String>();

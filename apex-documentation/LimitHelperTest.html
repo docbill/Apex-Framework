@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <title>Apex Documentation</title>
+    <meta charset="UTF-8">
+    <script type="module" src="./assets/index.js"></script>
+    <script type="module" src="./assets/search-idx.js"></script>
+    <script type="module" src="./assets/search.js"></script>
+    <script charset="UTF-8" src="./assets/highlight.js"></script>
+    <script charset="UTF-8" src="./assets/mark.js"></script>
+    <script charset="UTF-8" src="./assets/lunr.js"></script>
+    <link rel="stylesheet" href="./assets/highlight.css" />
+    <link rel="stylesheet" type="text/css" href="./assets/index.css" />
+    <link rel="shortcut icon" type="image/png" href="./assets/favicon.png" />
+  </head>
+
+  <body>
+    <div id="side-bar">
+
+      <div id="logo-container">
+        <div class="title">
+          Apex Documentation
+        </div>
+        <img src="assets/logo.png" />
+        <div class="subtitle">
+          Powered by <a target="_blank" rel="noopener noreferrer" href="https://github.com/no-stack-dub-sack/apexdox-vs-code">ApexDox VS Code</a>
+        </div>
+      </div>
+      <div id="search-wrapper">
+        <div class="search-icon"></div>
+        <input id="search-input" type="text" autocomplete="off" placeholder="Search...">
+      </div>
+      <ul id="search-results" class=""></ul>
+      <div class="navbar">
+        <nav role="navigation">
+          <a class="nav-header" id="home" href="javascript:void(0)" onclick="goToLocation('index.html');">
+            Home
+          </a>
+          <details id="ApexFramework" class="group-name">
+            <summary id="header-ApexFramework" class="nav-header">
+              <span>ApexFramework</span>
+            </summary>
+            <ul>
+              <!-- menu items -->
+              <li title="BooleanValuesHelper" id="item-BooleanValuesHelper" class="nav-item class " onclick="goToLocation('BooleanValuesHelper.html');">
+                <a tabindex="1" href="javascript:void(0)">BooleanValuesHelper</a>
+              </li>
+              <li title="DatabaseHelper" id="item-DatabaseHelper" class="nav-item class " onclick="goToLocation('DatabaseHelper.html');">
+                <a tabindex="1" href="javascript:void(0)">DatabaseHelper</a>
+              </li>
+              <li title="DatabaseHelperQueueable" id="item-DatabaseHelperQueueable" class="nav-item class " onclick="goToLocation('DatabaseHelperQueueable.html');">
+                <a tabindex="1" href="javascript:void(0)">DatabaseHelperQueueable</a>
+              </li>
+              <li title="DatabaseHelperResult" id="item-DatabaseHelperResult" class="nav-item class " onclick="goToLocation('DatabaseHelperResult.html');">
+                <a tabindex="1" href="javascript:void(0)">DatabaseHelperResult</a>
+              </li>
+              <li title="Field_Map" id="item-Field_Map" class="nav-item class " onclick="goToLocation('Field_Map.html');">
+                <a tabindex="1" href="javascript:void(0)">Field_Map</a>
+              </li>
+              <li title="LimitHelper" id="item-LimitHelper" class="nav-item class " onclick="goToLocation('LimitHelper.html');">
+                <a tabindex="1" href="javascript:void(0)">LimitHelper</a>
+              </li>
+              <li title="Metadata_Values_Helper" id="item-Metadata_Values_Helper" class="nav-item class " onclick="goToLocation('Metadata_Values_Helper.html');">
+                <a tabindex="1" href="javascript:void(0)">Metadata_Values_Helper</a>
+              </li>
+              <li title="Metadata_Values_HelperTest" id="item-Metadata_Values_HelperTest" class="nav-item class " onclick="goToLocation('Metadata_Values_HelperTest.html');">
+                <a tabindex="1" href="javascript:void(0)">Metadata_Values_HelperTest</a>
+              </li>
+              <li title="SObjectCallableTrigger" id="item-SObjectCallableTrigger" class="nav-item class " onclick="goToLocation('SObjectCallableTrigger.html');">
+                <a tabindex="1" href="javascript:void(0)">SObjectCallableTrigger</a>
+              </li>
+              <li title="ThreadLock" id="item-ThreadLock" class="nav-item class " onclick="goToLocation('ThreadLock.html');">
+                <a tabindex="1" href="javascript:void(0)">ThreadLock</a>
+              </li>
+              <li title="TriggerArguments" id="item-TriggerArguments" class="nav-item class " onclick="goToLocation('TriggerArguments.html');">
+                <a tabindex="1" href="javascript:void(0)">TriggerArguments</a>
+              </li>
+              <li title="TriggerManagement" id="item-TriggerManagement" class="nav-item class " onclick="goToLocation('TriggerManagement.html');">
+                <a tabindex="1" href="javascript:void(0)">TriggerManagement</a>
+              </li>
+            </ul>
+          </details>
+          <details id="ApexFrameworkTest" class="group-name">
+            <summary id="header-ApexFrameworkTest" class="nav-header">
+              <span>ApexFrameworkTest</span>
+            </summary>
+            <ul>
+              <!-- menu items -->
+              <li title="BooleanValuesHelperTest" id="item-BooleanValuesHelperTest" class="nav-item class " onclick="goToLocation('BooleanValuesHelperTest.html');">
+                <a tabindex="1" href="javascript:void(0)">BooleanValuesHelperTest</a>
+              </li>
+              <li title="DatabaseHelperTest" id="item-DatabaseHelperTest" class="nav-item class " onclick="goToLocation('DatabaseHelperTest.html');">
+                <a tabindex="1" href="javascript:void(0)">DatabaseHelperTest</a>
+              </li>
+              <li title="Field_MapTest" id="item-Field_MapTest" class="nav-item class " onclick="goToLocation('Field_MapTest.html');">
+                <a tabindex="1" href="javascript:void(0)">Field_MapTest</a>
+              </li>
+              <li title="LimitHelperTest" id="item-LimitHelperTest" class="nav-item class " onclick="goToLocation('LimitHelperTest.html');">
+                <a tabindex="1" href="javascript:void(0)">LimitHelperTest</a>
+              </li>
+              <li title="SObjectCallableTriggerTest" id="item-SObjectCallableTriggerTest" class="nav-item class " onclick="goToLocation('SObjectCallableTriggerTest.html');">
+                <a tabindex="1" href="javascript:void(0)">SObjectCallableTriggerTest</a>
+              </li>
+              <li title="ThreadLockTest" id="item-ThreadLockTest" class="nav-item class " onclick="goToLocation('ThreadLockTest.html');">
+                <a tabindex="1" href="javascript:void(0)">ThreadLockTest</a>
+              </li>
+              <li title="TriggerArgumentsTest" id="item-TriggerArgumentsTest" class="nav-item class " onclick="goToLocation('TriggerArgumentsTest.html');">
+                <a tabindex="1" href="javascript:void(0)">TriggerArgumentsTest</a>
+              </li>
+              <li title="TriggerManagementTest" id="item-TriggerManagementTest" class="nav-item class " onclick="goToLocation('TriggerManagementTest.html');">
+                <a tabindex="1" href="javascript:void(0)">TriggerManagementTest</a>
+              </li>
+            </ul>
+          </details>
+        </nav>
+      </div>
+    </div>
+    <table id="content">
+      <tr>
+        <td class="scoping-panel">
+          Show: <input type="checkbox" checked="true" id="cbx-all" onclick="toggleAllScopes(this.checked);" />
+          <label for="cbx-all">All</label>&nbsp;&nbsp;
+          <input type="checkbox" checked="true" id="cbx-global" onclick="toggleScope('global', this.checked);" />
+          <label for="cbx-global">
+            global
+          </label>&nbsp;&nbsp;<input type="checkbox" checked="true" id="cbx-public" onclick="toggleScope('public', this.checked);" />
+          <label for="cbx-public">
+            public
+          </label>&nbsp;&nbsp;<input type="checkbox" checked="true" id="cbx-protected" onclick="toggleScope('protected', this.checked);" />
+          <label for="cbx-protected">
+            protected
+          </label>&nbsp;&nbsp;<input type="checkbox" checked="true" id="cbx-private" onclick="toggleScope('private', this.checked);" />
+          <label for="cbx-private">
+            private
+          </label>&nbsp;&nbsp;<input type="checkbox" checked="true" id="cbx-testmethod" onclick="toggleScope('testmethod', this.checked);" />
+          <label for="cbx-testmethod">
+            testMethod
+          </label>&nbsp;&nbsp;<input type="checkbox" checked="true" id="cbx-webservice" onclick="toggleScope('webservice', this.checked);" />
+          <label for="cbx-webservice">
+            webService
+          </label>
+        </td>
+      </tr>
+      <tr>
+        <td class="doc-page">
+
+          <div class="section">
+
+            <h2 class="class-title top-level-type" id="LimitHelperTest">
+              <span>LimitHelperTest</span>
+            </h2>
+            <div class="class-container">
+
+              <div class="class-description">
+                This is a test class for LimitHelper.
+              </div>
+              <div class="class-subtitle">
+                Signature
+              </div>
+              <div class="class-annotations">@IsTest</div>
+              <div class="class-signature">
+                private class LimitHelperTest
+              </div><br />Bill C Riemers &lt;briemers@redhat.com&gt;<br />2020-08-18 US268650 - Created 2021-04-28 - Add queueableJobs limits check 2022-09-09 update for ApexDox commenting
+            </div>
+            <div class="subsection properties LimitHelperTest">
+              <h3 class="subsection-title properties">LimitHelperTest Properties</h3>
+              <table class="attributes-table properties">
+
+                <tr>
+                  <th>Name</th>
+                  <th>Signature</th>
+
+
+                </tr>
+                <tr class="property ">
+                  <td class="attribute-name"><span>limitReserveMap</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      private static Map&lt;String,Limit_Reserve__mdt&gt; limitReserveMap
+                    </div>
+                  </td>
+
+
+                </tr>
+              </table>
+            </div>
+            <div class="subsection methods">
+              <h3 class="subsection-title methods">LimitHelperTest Methods</h3>
+              <div class="methods-container">
+                <ul class="methods-toc">
+                  <li class="method testmethod">
+                    <a class="methods-toc__entry " href="#LimitHelperTest.checkLimitsCpuTimeTest">
+                      checkLimitsCpuTimeTest ()
+                    </a>
+
+                  </li>
+                  <li class="method testmethod">
+                    <a class="methods-toc__entry " href="#LimitHelperTest.checkLimitsDmlRowsTest">
+                      checkLimitsDmlRowsTest ()
+                    </a>
+
+                  </li>
+                  <li class="method testmethod">
+                    <a class="methods-toc__entry " href="#LimitHelperTest.checkLimitsDmlStatementsTest">
+                      checkLimitsDmlStatementsTest ()
+                    </a>
+
+                  </li>
+                  <li class="method testmethod">
+                    <a class="methods-toc__entry " href="#LimitHelperTest.checkLimitsQueriesTest">
+                      checkLimitsQueriesTest ()
+                    </a>
+
+                  </li>
+                  <li class="method testmethod">
+                    <a class="methods-toc__entry " href="#LimitHelperTest.checkLimitsQueueableJobsTest">
+                      checkLimitsQueueableJobsTest ()
+                    </a>
+
+                  </li>
+                  <li class="method testmethod">
+                    <a class="methods-toc__entry " href="#LimitHelperTest.cpuTimeTest">
+                      cpuTimeTest ()
+                    </a>
+
+                  </li>
+                  <li class="method testmethod">
+                    <a class="methods-toc__entry " href="#LimitHelperTest.dmlRowsTest">
+                      dmlRowsTest ()
+                    </a>
+
+                  </li>
+                  <li class="method testmethod">
+                    <a class="methods-toc__entry " href="#LimitHelperTest.dmlStatementsTest">
+                      dmlStatementsTest ()
+                    </a>
+
+                  </li>
+                  <li class="method testmethod">
+                    <a class="methods-toc__entry " href="#LimitHelperTest.pushPopTest">
+                      pushPopTest ()
+                    </a>
+
+                  </li>
+                  <li class="method testmethod">
+                    <a class="methods-toc__entry " href="#LimitHelperTest.queriesTest">
+                      queriesTest ()
+                    </a>
+
+                  </li>
+                  <li class="method testmethod">
+                    <a class="methods-toc__entry " href="#LimitHelperTest.queueableJobsTest">
+                      queueableJobsTest ()
+                    </a>
+
+                  </li>
+                </ul>
+                <div class="method testmethod">
+                  <h4 class="method-title " id="LimitHelperTest.checkLimitsCpuTimeTest">
+                    <span>checkLimitsCpuTimeTest()</span>
+                  </h4>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
+                  <div class="method-annotations">@isTest</div>
+                  <div class="method-signature">
+                    private static void checkLimitsCpuTimeTest()
+                  </div>
+                </div>
+                <div class="method testmethod">
+                  <h4 class="method-title " id="LimitHelperTest.checkLimitsDmlRowsTest">
+                    <span>checkLimitsDmlRowsTest()</span>
+                  </h4>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
+                  <div class="method-annotations">@isTest</div>
+                  <div class="method-signature">
+                    private static void checkLimitsDmlRowsTest()
+                  </div>
+                </div>
+                <div class="method testmethod">
+                  <h4 class="method-title " id="LimitHelperTest.checkLimitsDmlStatementsTest">
+                    <span>checkLimitsDmlStatementsTest()</span>
+                  </h4>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
+                  <div class="method-annotations">@isTest</div>
+                  <div class="method-signature">
+                    private static void checkLimitsDmlStatementsTest()
+                  </div>
+                </div>
+                <div class="method testmethod">
+                  <h4 class="method-title " id="LimitHelperTest.checkLimitsQueriesTest">
+                    <span>checkLimitsQueriesTest()</span>
+                  </h4>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
+                  <div class="method-annotations">@isTest</div>
+                  <div class="method-signature">
+                    private static void checkLimitsQueriesTest()
+                  </div>
+                </div>
+                <div class="method testmethod">
+                  <h4 class="method-title " id="LimitHelperTest.checkLimitsQueueableJobsTest">
+                    <span>checkLimitsQueueableJobsTest()</span>
+                  </h4>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
+                  <div class="method-annotations">@isTest</div>
+                  <div class="method-signature">
+                    private static void checkLimitsQueueableJobsTest()
+                  </div>
+                </div>
+                <div class="method testmethod">
+                  <h4 class="method-title " id="LimitHelperTest.cpuTimeTest">
+                    <span>cpuTimeTest()</span>
+                  </h4>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
+                  <div class="method-annotations">@isTest</div>
+                  <div class="method-signature">
+                    private static void cpuTimeTest()
+                  </div>
+                </div>
+                <div class="method testmethod">
+                  <h4 class="method-title " id="LimitHelperTest.dmlRowsTest">
+                    <span>dmlRowsTest()</span>
+                  </h4>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
+                  <div class="method-annotations">@isTest</div>
+                  <div class="method-signature">
+                    private static void dmlRowsTest()
+                  </div>
+                </div>
+                <div class="method testmethod">
+                  <h4 class="method-title " id="LimitHelperTest.dmlStatementsTest">
+                    <span>dmlStatementsTest()</span>
+                  </h4>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
+                  <div class="method-annotations">@isTest</div>
+                  <div class="method-signature">
+                    private static void dmlStatementsTest()
+                  </div>
+                </div>
+                <div class="method testmethod">
+                  <h4 class="method-title " id="LimitHelperTest.pushPopTest">
+                    <span>pushPopTest()</span>
+                  </h4>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
+                  <div class="method-annotations">@isTest</div>
+                  <div class="method-signature">
+                    private static void pushPopTest()
+                  </div>
+                </div>
+                <div class="method testmethod">
+                  <h4 class="method-title " id="LimitHelperTest.queriesTest">
+                    <span>queriesTest()</span>
+                  </h4>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
+                  <div class="method-annotations">@isTest</div>
+                  <div class="method-signature">
+                    private static void queriesTest()
+                  </div>
+                </div>
+                <div class="method testmethod">
+                  <h4 class="method-title " id="LimitHelperTest.queueableJobsTest">
+                    <span>queueableJobsTest()</span>
+                  </h4>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
+                  <div class="method-annotations">@isTest</div>
+                  <div class="method-signature">
+                    private static void queueableJobsTest()
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </td>
+      </tr>
+      <tr>
+        <td class="footer">
+
+          <div>
+            <a href="https://github.com/no-stack-dub-sack/apexdox-vs-code" target="_blank" rel="noopener noreferrer">
+              Powered By ApexDox VS Code
+            </a>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+
+</html>

@@ -1,25 +1,37 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * This Class allows recursive dml updates via the queueable interface.
  *
- * @version 2021-10-27
+ * @group ApexFramework
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2021-04-28 - Separated from the DatabaseHelper class
  * @since 2021-10-27 US307550 - Fixed enqueueing multiple dml calls
+ * @since 2022-09-09 update for ApexDox commenting
+ * 
+ * @todo Add a callback mechanism for errors
  */
 public class DatabaseHelperQueueable implements Queueable {
-    static List<DatabaseHelperQueueable> databaseHelperQueueableList = null;
+    private static List<DatabaseHelperQueueable> databaseHelperQueueableList = null;
 
-    DatabaseHelper helper;
-    DatabaseHelper.DMLOperation op;
-    List<List<SObject>> recordsList = new List<List<SObject>>();
-    List<DatabaseHelperQueueable> queueableList;
-    Integer enqueueScope;
-    Map<String,Boolean> booleanSettingMap;
-    Map<String,Boolean> overrideSettingMap;
+    private DatabaseHelper helper;
+    private DatabaseHelper.DMLOperation op;
+    private List<List<SObject>> recordsList = new List<List<SObject>>();
+    private List<DatabaseHelperQueueable> queueableList;
+    private Integer enqueueScope;
+    private Map<String,Boolean> booleanSettingMap;
+    private Map<String,Boolean> overrideSettingMap;
 
+    /**
+     * @description 
+     * Constructor used by the DatabaseHelper
+     * 
+     * @param helper the helper class using this queueable instance
+     * @param op the dml operation being performed
+     * @param recordsList list of records lists being daisychained
+     */
     public DatabaseHelperQueueable(
         DatabaseHelper helper,
         DatabaseHelper.DMLOperation op,
@@ -36,7 +48,7 @@ public class DatabaseHelperQueueable implements Queueable {
     }
 
     @TestVisible
-    static List<DatabaseHelperQueueable> enqueueJob(List<DatabaseHelperQueueable> queueableList) {
+    private static List<DatabaseHelperQueueable> enqueueJob(List<DatabaseHelperQueueable> queueableList) {
         if(! queueableList.isEmpty()) {
             queueableList[0].queueableList = queueableList;
             queueableList[0].booleanSettingMap = BooleanValuesHelper.booleanSettingMap;
@@ -50,6 +62,10 @@ public class DatabaseHelperQueueable implements Queueable {
         return queueableList;
     }
 
+    /**
+     * @description 
+     * Enqueue the list of daisy chained jobs.
+     */
     public void enqueueJob() {
         if(databaseHelperQueueableList == null) {
             databaseHelperQueueableList = new List<DatabaseHelperQueueable>();
@@ -82,6 +98,13 @@ public class DatabaseHelperQueueable implements Queueable {
         }
     }
 
+    /**
+     * @description 
+     * Part of the Queueable interface. Pull off the first list of records
+     * for dml, enqueue the remaining records, and then actually perform the dml.
+     *
+     * @param context ignored
+     */
     public void execute(QueueableContext context) {
         List<SObject> currentList = recordsList.remove(0);
         if(recordsList.isEmpty()) {

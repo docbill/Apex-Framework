@@ -1,13 +1,15 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * This is a set of utilities for treating simple metadata a a map.
  * 
- * @version 2020-12-03
+ * @group ApexFramework
  * 
  * @author Bill Riemers <briemers@redhat.com>
  * @since 2020-08-26 US268900 - Created as part of PQI approval implementation
  * @since 2020-12-03 - Added factory method
+ * @since 2022-09-09 update for ApexDox commenting
  */
 public without sharing class Metadata_Values_Helper {
 
@@ -16,6 +18,7 @@ public without sharing class Metadata_Values_Helper {
     private final String source;
 
     /**
+     * @description
      * Constructor
      * 
      * @param source
@@ -25,7 +28,9 @@ public without sharing class Metadata_Values_Helper {
     }
 
     /**
+     * @description
      * Factory method to get a metadata value helper.
+     * 
      * @param source
      * @return the metadata value helper
      */
@@ -39,6 +44,7 @@ public without sharing class Metadata_Values_Helper {
     }
 
     /**
+     * @description
      * This is the map of data obtained from the Decimal2_Values__mdt table.
      */
     public Map<String,Decimal> decimal2Map {
@@ -52,6 +58,7 @@ public without sharing class Metadata_Values_Helper {
     }
 
     /**
+     * @description
      * This is the map of data obtained from the String_Values__mdt table.
      */
     public Map<String,String> stringMap {
@@ -65,6 +72,7 @@ public without sharing class Metadata_Values_Helper {
     }
 
     /**
+     * @description
      * Query the map from the Decimal2_Values__mdt table.
      * 
      * @param source
@@ -85,6 +93,7 @@ public without sharing class Metadata_Values_Helper {
     }
 
     /**
+     * @description
      * Query the map from the String_Values__mdt table.
      * 
      * @param source

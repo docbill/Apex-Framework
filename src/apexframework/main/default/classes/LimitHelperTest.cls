@@ -1,18 +1,20 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * This is a test class for LimitHelper.
  * 
- * @version 2021-04-28
+ * @group ApexFrameworkTest
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-08-18 US268650 - Created
  * @since 2021-04-28 - Add queueableJobs limits check
+ * @since 2022-09-09 update for ApexDox commenting
  */
 @IsTest
 private class LimitHelperTest {
 
-    static Map<String,Limit_Reserve__mdt> limitReserveMap {
+    private static Map<String,Limit_Reserve__mdt> limitReserveMap {
         get {
             if(limitReserveMap == null) {
                 limitReserveMap = new Map<String,Limit_Reserve__mdt>();
@@ -29,7 +31,7 @@ private class LimitHelperTest {
     }
 
     @isTest
-    static void pushPopTest() {
+    private static void pushPopTest() {
         System.assertEquals(false,LimitHelper.throwsExceptionDefault,'No value should have been assigned');
         List<String> masterLabels = new List<String>{'MasterLabel value that definitely does not exist'};
         masterLabels.addAll(limitReserveMap.keySet());
@@ -102,7 +104,7 @@ private class LimitHelperTest {
     }
 
     @isTest 
-    static void cpuTimeTest() {
+    private static void cpuTimeTest() {
         LimitHelper.cpuTimeReserved = Limits.getLimitCpuTime() - 200;
         String message = LimitHelper.checkLimitCPUTime(0,false);
         System.assertEquals(null,message,'Unexpected Limit');
@@ -142,7 +144,7 @@ private class LimitHelperTest {
     }
 
     @isTest 
-    static void checkLimitsCpuTimeTest() {
+    private static void checkLimitsCpuTimeTest() {
         LimitHelper.cpuTimeReserved = Limits.getLimitCpuTime() - 200;
         String message = (new LimitHelper()).setCpuTime(0).checkLimits(false);
         System.assertEquals(null,message,'Unexpected Limit');
@@ -182,7 +184,7 @@ private class LimitHelperTest {
     }
 
     @isTest 
-    static void dmlStatementsTest() {
+    private static void dmlStatementsTest() {
         LimitHelper.dmlStatementsReserved = Limits.getLimitDmlStatements();
         String message = LimitHelper.checkLimitDmlStatements(0,false);
         System.assertEquals(null,message,'Unexpected Limit');
@@ -222,7 +224,7 @@ private class LimitHelperTest {
     }
 
     @isTest 
-    static void checkLimitsDmlStatementsTest() {
+    private static void checkLimitsDmlStatementsTest() {
         LimitHelper.dmlStatementsReserved = Limits.getLimitDmlStatements();
         String message = (new LimitHelper()).setDmlStatements(0).checkLimits(false);
         System.assertEquals(null,message,'Unexpected Limit');
@@ -262,7 +264,7 @@ private class LimitHelperTest {
     }
 
     @isTest 
-    static void dmlRowsTest() {
+    private static void dmlRowsTest() {
         LimitHelper.dmlRowsReserved = Limits.getLimitDmlRows();
         String message = LimitHelper.checkLimitDmlRows(0,false);
         System.assertEquals(null,message,'Unexpected Limit');
@@ -302,7 +304,7 @@ private class LimitHelperTest {
     }
 
     @isTest 
-    static void checkLimitsDmlRowsTest() {
+    private static void checkLimitsDmlRowsTest() {
         LimitHelper.dmlRowsReserved = Limits.getLimitDmlRows();
         String message = (new LimitHelper()).setDmlRows(0).checkLimits(false);
         System.assertEquals(null,message,'Unexpected Limit');
@@ -342,7 +344,7 @@ private class LimitHelperTest {
     }
 
     @isTest 
-    static void queriesTest() {
+    private static void queriesTest() {
         LimitHelper.queriesReserved = Limits.getLimitQueries();
         String message = LimitHelper.checkLimitQueries(0,false);
         System.assertEquals(null,message,'Unexpected Limit');
@@ -382,7 +384,7 @@ private class LimitHelperTest {
     }
 
     @isTest 
-    static void checkLimitsQueriesTest() {
+    private static void checkLimitsQueriesTest() {
         LimitHelper.queriesReserved = Limits.getLimitQueries();
         String message = (new LimitHelper()).setQueries(0).checkLimits(false);
         System.assertEquals(null,message,'Unexpected Limit');
@@ -422,7 +424,7 @@ private class LimitHelperTest {
     }
 
     @isTest 
-    static void queueableJobsTest() {
+    private static void queueableJobsTest() {
         LimitHelper.queueableJobsReserved = Limits.getLimitQueueableJobs();
         String message = LimitHelper.checkLimitQueueableJobs(0,false);
         System.assertEquals(null,message,'Unexpected Limit');
@@ -462,7 +464,7 @@ private class LimitHelperTest {
     }
 
     @isTest 
-    static void checkLimitsQueueableJobsTest() {
+    private static void checkLimitsQueueableJobsTest() {
         LimitHelper.queueableJobsReserved = Limits.getLimitQueueableJobs();
         String message = (new LimitHelper()).setQueueableJobs(0).checkLimits(false);
         System.assertEquals(null,message,'Unexpected Limit');

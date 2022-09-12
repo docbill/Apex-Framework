@@ -1,21 +1,23 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * This is mainly intended as a sample callable trigger class.
  * 
  * If we have core trigger functionality we want to span across many SObject types,
  * this the the class to implement it in. 
- *
- * @version 2020-11-17
+ * 
+ * @group ApexFrameworkTest
  * 
  * @author Bill Riemers <briemers@redhat.com>
  * @since 2020-11-17 - Created
+ * @since 2022-09-09 update for ApexDox commenting
  */
 @isTest
 private class SObjectCallableTriggerTest
 {
     @isTest
-    static void assignLegacyTest() {
+    private static void assignLegacyTest() {
         SObjectCallableTrigger callableTrigger = new SObjectCallableTrigger();
         List<Opportunity> newList = ( new List<Opportunity>{
             new Opportunity(OwnerId=UserInfo.getUserId())
@@ -35,7 +37,7 @@ private class SObjectCallableTriggerTest
     }
 
     @isTest
-    static void assignLegacyNegativeTest() {
+    private static void assignLegacyNegativeTest() {
         SObjectCallableTrigger callableTrigger = new SObjectCallableTrigger();
         List<User> newList = ( new List<User>{
             new User()
@@ -47,7 +49,7 @@ private class SObjectCallableTriggerTest
     }
 
     @isTest
-    static void callExceptionTest() {
+    private static void callExceptionTest() {
         SObjectCallableTrigger callableTrigger = new SObjectCallableTrigger();
         List<User> newList = ( new List<User>{
             new User()

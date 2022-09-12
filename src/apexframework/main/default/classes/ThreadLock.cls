@@ -1,8 +1,10 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
- * This is a class for thread locking.   The normal usage is:
+ * @description
+ * This is a class for thread locking.
  * 
+ * @example
  * <pre>
  * 	final String MY_THREAD_KEY = '<<<This is a unique value.>>>';
  *  if(ThreadLock.lock(MY_THREAD_KEY)) {
@@ -14,20 +16,25 @@
  *  	}
  *  }
  * </pre>
- * 
- * @version 2020-09-04
+ *
+ * @group ApexFramework
  * 
  * @author Mark Smith <masmith@redhat.com>
  * @since 2013-01-04 Created
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-09-04 US270544 - Added comments, switched to a private set from a public map
+ * @since 2022-09-09 update for ApexDox commenting
  */
 public class ThreadLock {
-	/** We just us a set for our resource locking... */
+	/** 
+	 * @description
+	 * We just us a set for our resource locking...
+	 */
 	private static Set<String> resourceLocks = new Set<String>();
 
 	/**
+	 * @description
 	 * Check to see if the lock has been obtained somewhere.
 	 * 
 	 * @param key
@@ -38,6 +45,7 @@ public class ThreadLock {
 	}	
 
 	/**
+	 * @description
 	 * Attempt to establish the lock.
 	 * 
 	 * @param key
@@ -52,6 +60,7 @@ public class ThreadLock {
 	}
 
 	/**
+	 * @description
 	 * Unlock a thread.
 	 * 
 	 * @param key

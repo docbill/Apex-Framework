@@ -1,10 +1,11 @@
 // Copyright Red Hat
 // SPDX-License-Identifier: GPL-3.0-only
 /**
+ * @description
  * This Class implements some useful database utilities.  Many copied from TestDataFactory.  It is pretty dangerious to use these in code, but
  * sometimes you need to deactivate triggers to repair or migrate data.   So these are available to call from anonymous apex...
  *
- * @version 2021-10-27
+ * @group ApexFramework
  * 
  * @author Bill C Riemers <briemers@redhat.com>
  * @since 2020-08-19 US266008 - Added governor limit checks
@@ -15,17 +16,22 @@
  * @since 2021-03-24 remember in queueable instance boolean values
  * @since 2021-04-27 DE26549 - Increment queue counter
  * @since 2021-10-27 US307550 - Fixed enqueueing multiple dml calls
+ * @since 2022-09-09 update for ApexDox commenting
  * 
- * @todo update TestDataFactory to call this class, rather than having a duplicate implementation.
+ * @todo Add a callback mechanism for errors
  */
 public with sharing class DatabaseHelper {
     /**
+     * @description
      * This is just a wiled guess at the minimum numer of ms we should reserve for a DML
      * Statement.
      */
     private static final Integer MINIMUM_TIME_PER_DML = 10;
 
-    /** Used internally. */
+    /**
+     * @description 
+     * Used internally.
+     */
     public enum DMLOperation { INSERT_OP, UPDATE_OP, UPSERT_OP, DELETE_OP, UNDELETE_OP }
 
     private Boolean checkLimits = null;
@@ -35,6 +41,7 @@ public with sharing class DatabaseHelper {
     private Schema.SObjectField externalIDField = null;
     
     /**
+     * @description
      * Standard Constructor.
      */
     public DatabaseHelper() {}
@@ -51,6 +58,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * We cannot pass the options to an upsert operation, so a workaround
      * is to assign the options to all the records.
      * 
@@ -65,6 +73,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Setting this value causes the dml operation to be performed as
      * a chain of queueable jobs.  Each job performing the dml on the
      * number of records specified.
@@ -81,6 +90,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Retrieve value set for enqueueScope.
      * @return enqueueScope
      */
@@ -89,6 +99,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Set the OptAllOrNone flag on the dmlOptions.
      * 
      * @param value
@@ -100,6 +111,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Set the allowFieldTruncation flag on the dmlOptions.
      * 
      * @param value
@@ -111,6 +123,7 @@ public with sharing class DatabaseHelper {
     }
     
     /**
+     * @description
      * Set the dmlOptions.
      * 
      * @param value
@@ -122,6 +135,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Set to disable all triggers that use the Deactivate all triggers
      * that use an isActive check on the DeactivateAll boolean metadata.
      * 
@@ -134,6 +148,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Set the external id field to use in an upsert.
      * 
      * @param value
@@ -145,6 +160,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Called to change the check limits property.
      * A setCheckLimits(null) is equivalent to the 
      * setCheckLimits(LimitHelper.throwsExceptionDefault)
@@ -162,6 +178,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Called to insert the recordList.
      * 
      * @param recordList
@@ -173,6 +190,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Called to insert the recordList.
      * 
      * @param recordList
@@ -184,6 +202,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Called to update the recordList.
      * 
      * @param recordList
@@ -195,6 +214,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Called to update the recordList.
      * 
      * @param recordList
@@ -206,6 +226,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Called to upsert the recordList.
      * 
      * @param recordList
@@ -217,6 +238,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Called to upsert the recordList.
      * 
      * @param recordList
@@ -228,6 +250,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Called to delete the recordList.
      * 
      * @param recordList
@@ -239,6 +262,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Called to delete the recordList.
      * 
      * @param recordList
@@ -250,6 +274,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Called to undelete the recordList.
      * 
      * @param recordList
@@ -261,6 +286,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Called to undelete the recordList.
      * 
      * @param recordList
@@ -272,11 +298,13 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * This performs a database operation, with optional limit checks.  If a limit is hit
      * a custom LimitException is thrown.
      * 
      * @param op dml operation to perform
      * @param recordList to insert
+     * @return the results list
      */
     public List<Object> dmlStatement(
         DMLOperation op,
@@ -353,12 +381,14 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Splits a list into smaller lists no greate than size.
      * If size is negative the first list in the returned array
      * will be empty.
      * 
      * @param records list to split
      * @param size the number of records per list
+     * @return a list of records lists of the appropriate size
      */
     @TestVisible
     static List<List<SObject>> split(List<SObject> records,Integer size) {
@@ -400,6 +430,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Method to check success with out depending on the type of database results.
      * 
      * @param result from a insert,update,upsert,delete,or undelete
@@ -426,6 +457,7 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * Method to get errors with out depending on the type of database results.
      * 
      * @param result from a insert,update,upsert,delete,or undelete
@@ -452,18 +484,23 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * This is a class that can use to in leiu of the Database.*Result objects.
      * That way we can add to this set exceptions that were never actually thrown
      * and such.
      */
     public interface Result {
+
         /**
+         * @description
          * Find the record we operated on.
          * 
          * @return record
          */
         SObject getSObject();
+
         /**
+         * @description
          * This returns all errors as Database.Error type.
          * 
          * @return list of all errors
@@ -471,6 +508,7 @@ public with sharing class DatabaseHelper {
         List<Database.Error> getErrors();
 
         /**
+         * @description
          * This returns all errors as DatabaseHelper.ResultException type.
          * 
          * @return list of all errors
@@ -478,6 +516,7 @@ public with sharing class DatabaseHelper {
         List<ResultException> getExceptions();
 
         /**
+         * @description
          * Return just the first exception as DatabaseHelper.ResultException type.
          * 
          * @return the first exception or null if there were none
@@ -485,6 +524,7 @@ public with sharing class DatabaseHelper {
         ResultException getException();
 
         /**
+         * @description
          * What is the id value we operated on?
          * 
          * @return id value
@@ -492,6 +532,7 @@ public with sharing class DatabaseHelper {
         Id getId();
 
         /**
+         * @description
          * Was the DML successful?
          * 
          * @return true if success
@@ -499,6 +540,7 @@ public with sharing class DatabaseHelper {
         Boolean isSuccess();
 
         /**
+         * @description
          * Test this was an insert or an upsert that created a record.
          * 
          * @return true if a new record was created
@@ -506,6 +548,7 @@ public with sharing class DatabaseHelper {
         Boolean isCreated();
 
         /**
+         * @description
          * Query a list of stack traces for each exception.
          * 
          * @return list of stack traces 
@@ -513,6 +556,7 @@ public with sharing class DatabaseHelper {
         List<String> getStackTraceStrings();
 
         /**
+         * @description
          * Convert the result to a different type.
          * 
          * @param apexType
@@ -530,12 +574,21 @@ public with sharing class DatabaseHelper {
     }
 
     /**
+     * @description
      * We use an exception class for error, so we can throw if we want and we can
      * get a stack trace.
+     * 
+     * In order for the getError method to work, this class must have the same memembers 
+     * as the Database.Error class.
      */
     public class ResultException extends Exception {
         private transient Boolean ignoreStackTraceString = false;
 
+        /**
+         * @description
+         * Generate a stack trace string for the result.
+         * @return stack trace
+         */
         public String stackTraceString {
             get {
                 if(ignoreStackTraceString == true) {
@@ -545,6 +598,9 @@ public with sharing class DatabaseHelper {
             }
             set {
                 if(value == null || value == '()') {
+                    // stack traces only seem to be complete if we actually
+                    // catch an exception.  So throw anytype of exception
+                    // and then we have a stack trace.
                     try {
                         Integer.valueOf('catdog');
                     }
@@ -552,7 +608,7 @@ public with sharing class DatabaseHelper {
                         List<String> results = addStackTraceString(
                             new List<String>(),
                             ex.getCause() );
-
+                        
                         for(String v : ex.getStackTraceString().split('\n',3)) {
                             results.add(v);
                         }
@@ -564,11 +620,19 @@ public with sharing class DatabaseHelper {
             }
         }
 
+        /**
+         * @description 
+         * Respective message for this exception
+         */
         public String message {
             get{ return getMessage(); }
             set{ setMessage(value); }
         }
 
+        /**
+         * @description 
+         * If not assigned, the DmlType of the getCause exception
+         */
         public StatusCode statusCode {
             get {
                 if(statusCode == null) {
@@ -582,6 +646,10 @@ public with sharing class DatabaseHelper {
             set;
         }
 
+        /**
+         * @description
+         * List of DmlFieldNames associated with this result.
+         */
         public String [] fields {
             get {
                 if(fields == null) {
@@ -596,6 +664,11 @@ public with sharing class DatabaseHelper {
             set;
         }
 
+        /**
+         * @description 
+         * Get this result as a Database.Error
+         * @return a Database.Error copy of this result
+         */
         public Database.Error getError() {
             ignoreStackTraceString = true;
             String s = JSON.serialize(this,true);
@@ -603,6 +676,11 @@ public with sharing class DatabaseHelper {
             return (Database.Error)JSON.deserialize(s,Database.Error.class);
         }
 
+        /**
+         * @description 
+         * Get method for stack trace string
+         * @return the stack trace
+         */
         public override String getStackTraceString() {
             return stackTraceString;
         }
