@@ -41,3 +41,5 @@ config/project-scratch-def.json
 
 **.mdapi/
 .sf/config.json
+
+.pmdCache
