@@ -393,9 +393,7 @@ private class DatabaseHelperTest {
         catch(DMLException ex) {
             TriggerManagement.lastRethrownException = ex;
             result = new DatabaseHelperResult(DatabaseHelper.DMLOperation.INSERT_OP,ex,currentUser);
-            List<String> resultStrings = DatabaseHelper.addStackTraceString(
-                new List<String>(),
-                ex );
+            List<String> resultStrings = ex.getStackTraceString().split('\n');
             System.assertNotEquals(0,resultStrings.size(),'Expected a stack trace string');
         }
         // this will be null because we created the result from an exception

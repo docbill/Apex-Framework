@@ -17,8 +17,7 @@
  * @since 2021-04-27 DE26549 - Increment queue counter
  * @since 2021-10-27 US307550 - Fixed enqueueing multiple dml calls
  * @since 2022-09-09 update for ApexDox commenting
- * 
- * @todo Add a callback mechanism for errors
+ * @since 2022-11-09 support async callbacks
  */
 public with sharing class DatabaseHelper {
     /**
@@ -39,6 +38,21 @@ public with sharing class DatabaseHelper {
     private Boolean deactivateTriggers = false;
     private Integer enqueueScope = null;
     private Schema.SObjectField externalIDField = null;
+
+    /**
+     * @description asynchronous callback for delete operations
+     */
+    public DataSource.AsyncDeleteCallback deleteCallback;
+
+    /**
+     * @description asynchronous callback for all operations
+     */
+    public AsyncSafeCallback safeCallback;
+
+    /**
+     * @description asynchronous callback for save operations
+     */
+    public DataSource.AsyncSaveCallback saveCallback;
     
     /**
      * @description
@@ -74,12 +88,27 @@ public with sharing class DatabaseHelper {
 
     /**
      * @description
+     * Assign the setting for callbacks during asynchronous operations.
+     * 
+     * @param value
+     * @return this
+     */
+    public DatabaseHelper setAsyncSafeCallback(AsyncSafeCallback value) {
+        this.safeCallback = value;
+        return this;
+    }
+
+    /**
+     * @description
      * Setting this value causes the dml operation to be performed as
      * a chain of queueable jobs.  Each job performing the dml on the
-     * number of records specified.
+     * number of records specified.  For example, a value of 1 means each record
+     * will be processed in a different queueable job.
      * 
      * A negative value means only the overflow records of
-     * the first grouping will be processed in a queueable job.
+     * the first grouping will be processed in a queueable job.  For example,
+     * a value of -200 means the first two hundred records are processed 
+     * synchronously, then the remaining records are processed in batches of 200.
      * 
      * @param value
      * @return this
@@ -92,6 +121,7 @@ public with sharing class DatabaseHelper {
     /**
      * @description
      * Retrieve value set for enqueueScope.
+     * 
      * @return enqueueScope
      */
     public Integer getEnqueueScope() {
@@ -112,7 +142,8 @@ public with sharing class DatabaseHelper {
 
     /**
      * @description
-     * Set the allowFieldTruncation flag on the dmlOptions.
+     * Set the allowFieldTruncation flag on the dmlOptions.  
+     * WARNING: This option is ignored when doing an upsert call.
      * 
      * @param value
      * @return this
@@ -125,6 +156,7 @@ public with sharing class DatabaseHelper {
     /**
      * @description
      * Set the dmlOptions.
+     * WARNING: Only the `OptAllOrNone` option is used by upsert calls.
      * 
      * @param value
      * @return this
@@ -208,9 +240,9 @@ public with sharing class DatabaseHelper {
      * @param recordList
      * @return result list
      */
-    public List<Database.SaveResult> legacyUpdate(List<SObject> recordList) {
-        legacyMode = true;
-        return (List<Database.SaveResult>)dmlStatement(DMLOperation.UPDATE_OP, recordList);
+    public List<Result> safeUpdate(List<SObject> recordList) {
+        legacyMode = false;
+        return (List<Result>)dmlStatement(DMLOperation.UPDATE_OP, recordList);
     }
 
     /**
@@ -220,21 +252,9 @@ public with sharing class DatabaseHelper {
      * @param recordList
      * @return result list
      */
-    public List<Result> safeUpdate(List<SObject> recordList) {
-        legacyMode = false;
-        return (List<Result>)dmlStatement(DMLOperation.UPDATE_OP, recordList);
-    }
-
-    /**
-     * @description
-     * Called to upsert the recordList.
-     * 
-     * @param recordList
-     * @return result list
-     */
-    public List<Database.UpsertResult> legacyUpsert(List<SObject> recordList) {
+    public List<Database.SaveResult> legacyUpdate(List<SObject> recordList) {
         legacyMode = true;
-        return (List<Database.UpsertResult>)dmlStatement(DMLOperation.UPSERT_OP, recordList);
+        return (List<Database.SaveResult>)dmlStatement(DMLOperation.UPDATE_OP, recordList);
     }
 
     /**
@@ -251,14 +271,14 @@ public with sharing class DatabaseHelper {
 
     /**
      * @description
-     * Called to delete the recordList.
+     * Called to upsert the recordList.
      * 
      * @param recordList
      * @return result list
      */
-    public List<Database.DeleteResult> legacyDelete(List<SObject> recordList) {
+    public List<Database.UpsertResult> legacyUpsert(List<SObject> recordList) {
         legacyMode = true;
-        return (List<Database.DeleteResult>)dmlStatement(DMLOperation.DELETE_OP, recordList);
+        return (List<Database.UpsertResult>)dmlStatement(DMLOperation.UPSERT_OP, recordList);
     }
 
     /**
@@ -271,6 +291,18 @@ public with sharing class DatabaseHelper {
     public List<Result> safeDelete(List<SObject> recordList) {
         legacyMode = false;
         return (List<Result>)dmlStatement(DMLOperation.DELETE_OP, recordList);
+    }
+
+    /**
+     * @description
+     * Called to delete the recordList.
+     * 
+     * @param recordList
+     * @return result list
+     */
+    public List<Database.DeleteResult> legacyDelete(List<SObject> recordList) {
+        legacyMode = true;
+        return (List<Database.DeleteResult>)dmlStatement(DMLOperation.DELETE_OP, recordList);
     }
 
     /**
@@ -391,7 +423,7 @@ public with sharing class DatabaseHelper {
      * @return a list of records lists of the appropriate size
      */
     @TestVisible
-    static List<List<SObject>> split(List<SObject> records,Integer size) {
+    private static List<List<SObject>> split(List<SObject> records,Integer size) {
         List<List<SObject>> retval = new List<List<SObject>>();
         if(records != null) {
             // DE26549 reworked this logic
@@ -417,14 +449,6 @@ public with sharing class DatabaseHelper {
                 }
                 retval.add(currentList);
             }
-        }
-        return retval;
-    }
-
-    private List<Object> convertException(DMLOperation op,Exception ex,Iterator<SObject> recordIterator) {
-        List<Result> retval = new List<Result>();
-        while(recordIterator.hasNext()) {
-            retval.add(new DatabaseHelperResult(op,ex,recordIterator.next()));
         }
         return retval;
     }
@@ -482,6 +506,24 @@ public with sharing class DatabaseHelper {
         }
         return retval;
     }
+
+    private List<Object> convertException(DMLOperation op,Exception ex,Iterator<SObject> recordIterator) {
+        List<Result> retval = new List<Result>();
+        while(recordIterator.hasNext()) {
+            retval.add(new DatabaseHelperResult(op,ex,recordIterator.next()));
+        }
+        return retval;
+    }
+
+    /**
+     * @description
+     * We use an exception class for error, so we can throw if we want and we can
+     * get a stack trace.
+     * 
+     * In order for the getError method to work, this class must have the same memembers 
+     * as the Database.Error class.
+     */
+    public class ResultException extends DatabaseHelperResultException {}
 
     /**
      * @description
@@ -565,124 +607,12 @@ public with sharing class DatabaseHelper {
         Object convertResult(System.Type apexType);
     }
 
-    @TestVisible
-    static List<String> addStackTraceString(List<String> results,Exception cause) {
-        if(cause != null) {
-            results.add(cause.getStackTraceString());
-        }
-        return results;
-    }
-
     /**
      * @description
-     * We use an exception class for error, so we can throw if we want and we can
-     * get a stack trace.
-     * 
-     * In order for the getError method to work, this class must have the same memembers 
-     * as the Database.Error class.
+     * Similar interface to the `DataSource.AsyncSaveCallback` and `DataSource.AsyncDeleteCallback`.
+     * Used to return results from asynchronous updates.
      */
-    public class ResultException extends Exception {
-        private transient Boolean ignoreStackTraceString = false;
-
-        /**
-         * @description
-         * Generate a stack trace string for the result.
-         * @return stack trace
-         */
-        public String stackTraceString {
-            get {
-                if(ignoreStackTraceString == true) {
-                    return null;
-                }
-                return stackTraceString;
-            }
-            set {
-                if(value == null || value == '()') {
-                    // stack traces only seem to be complete if we actually
-                    // catch an exception.  So throw anytype of exception
-                    // and then we have a stack trace.
-                    try {
-                        Integer.valueOf('catdog');
-                    }
-                    catch(Exception ex) {
-                        List<String> results = addStackTraceString(
-                            new List<String>(),
-                            ex.getCause() );
-                        
-                        for(String v : ex.getStackTraceString().split('\n',3)) {
-                            results.add(v);
-                        }
-
-                        value = String.join(results,'\n');
-                    }
-                }
-                stackTraceString = value;
-            }
-        }
-
-        /**
-         * @description 
-         * Respective message for this exception
-         */
-        public String message {
-            get{ return getMessage(); }
-            set{ setMessage(value); }
-        }
-
-        /**
-         * @description 
-         * If not assigned, the DmlType of the getCause exception
-         */
-        public StatusCode statusCode {
-            get {
-                if(statusCode == null) {
-                    Exception ex = getCause();
-                    if(ex instanceof DmlException) {
-                        statusCode = ((DmlException)ex).getDmlType(0);
-                    }
-                }
-                return statusCode;
-            }
-            set;
-        }
-
-        /**
-         * @description
-         * List of DmlFieldNames associated with this result.
-         */
-        public String [] fields {
-            get {
-                if(fields == null) {
-                    fields = new List<String>();
-                    Exception ex = getCause();
-                    if(ex instanceof DmlException) {
-                        fields = ((DmlException)ex).getDmlFieldNames(0);
-                    }
-                }
-                return fields;
-            }
-            set;
-        }
-
-        /**
-         * @description 
-         * Get this result as a Database.Error
-         * @return a Database.Error copy of this result
-         */
-        public Database.Error getError() {
-            ignoreStackTraceString = true;
-            String s = JSON.serialize(this,true);
-            ignoreStackTraceString = false;
-            return (Database.Error)JSON.deserialize(s,Database.Error.class);
-        }
-
-        /**
-         * @description 
-         * Get method for stack trace string
-         * @return the stack trace
-         */
-        public override String getStackTraceString() {
-            return stackTraceString;
-        }
+    public interface AsyncSafeCallback {
+        void processResult(DatabaseHelper.DMLOperation op,DatabaseHelper.Result result);
     }
 }

@@ -16,6 +16,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     private final Object result;
     private final SObject record;
     private final Boolean insertFlag;
+    private final DatabaseHelper.DMLOperation op;
 
     /**
      * @description
@@ -24,8 +25,15 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
      * @param op the dml statement that was performed
      * @param result one of Database.SaveResult, Database.UpsertResult,...
      * @param record the message being operated on
+     * @param errors
      */
-    public DatabaseHelperResult(DatabaseHelper.DMLOperation op,Object result,SObject record,List<Database.Error> errors) {
+    public DatabaseHelperResult(
+        DatabaseHelper.DMLOperation op,
+        Object result,
+        SObject record,
+        List<Database.Error> errors
+    ) {
+        this.op = op;
         this.result = result;
         this.record = record;
         this.insertFlag = (op == DatabaseHelper.DMLOperation.INSERT_OP);

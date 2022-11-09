@@ -4,8 +4,10 @@
         <members>BooleanValuesHelper</members>
         <members>BooleanValuesHelperTest</members>
         <members>DatabaseHelper</members>
+        <members>DatabaseHelperAsyncHelper</members>
         <members>DatabaseHelperQueueable</members>
         <members>DatabaseHelperResult</members>
+        <members>DatabaseHelperResultException</members>
         <members>DatabaseHelperTest</members>
         <members>Field_Map</members>
         <members>Field_MapTest</members>
