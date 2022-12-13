@@ -61,19 +61,17 @@ public without sharing class DatabaseHelperAsyncHelper {
      * @param results of the database operation
      */
     private void processResults(DatabaseHelper.DMLOperation op,List<Object> results) {
-        for(Object result : results) {
-            if(result instanceof List<DatabaseHelper.Result>) {
-                helper.safeCallback?.processResult(op,(DatabaseHelper.Result)result);
+        if(results instanceof List<DatabaseHelper.Result>) {
+            helper.safeCallback?.processResults(op,(List<DatabaseHelper.Result>)results);
+        }
+        else if(results instanceof List<Database.SaveResult>) {
+            for(Database.SaveResult result : (List<Database.SaveResult>)results) {
+                helper.saveCallback?.processSave(result);
             }
-            else {
-                switch on op {
-                    when INSERT_OP, UPDATE_OP, UPSERT_OP {
-                        helper.saveCallback?.processSave((Database.SaveResult)result);
-                    }
-                    when DELETE_OP {
-                        helper.deleteCallback?.processDelete((Database.DeleteResult)result);                        
-                    }
-                }
+        }
+        else if(results instanceof List<Database.DeleteResult>) {
+            for(Database.DeleteResult result : (List<Database.DeleteResult>)results) {
+                helper.deleteCallback?.processDelete(result);                        
             }
         }
     }

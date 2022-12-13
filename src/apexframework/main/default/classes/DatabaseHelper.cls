@@ -613,6 +613,12 @@ public with sharing class DatabaseHelper {
      * Used to return results from asynchronous updates.
      */
     public interface AsyncSafeCallback {
-        void processResult(DatabaseHelper.DMLOperation op,DatabaseHelper.Result result);
+        /**
+         * @description 
+         *
+         * @param op the dml operation which was performed
+         * @param results from all the records at once
+         */
+        void processResults(DatabaseHelper.DMLOperation op,List<DatabaseHelper.Result> results);
     }
 }

@@ -12,6 +12,7 @@
  * @since 2021-03-30 - Increase test coverage
  * @since 2021-04-27 DE26549 - Added split test
  * @since 2022-09-09 update for ApexDox commenting
+ * @since 2022-12-13 update to test async callbacks
  */
 @IsTest
 private class DatabaseHelperTest {
@@ -25,6 +26,10 @@ private class DatabaseHelperTest {
         }
     }
 
+    /**
+     * @description 
+     * Test all the safe method calls.
+     */
     @isTest
     private static void safeTest() {
         LimitHelper.throwsExceptionDefault = true;
@@ -274,6 +279,10 @@ private class DatabaseHelperTest {
         Test.stopTest();
     }
 
+    /**
+     * @description 
+     * Test dmlOptions work as expected.
+     */
     @isTest
     private static void dmlOptionsTest() {
         List<Contact> contacts = ( new List<Contact>{
@@ -378,11 +387,19 @@ private class DatabaseHelperTest {
         Test.stopTest();
     }
 
+    /**
+     * @description 
+     * Check that getErrors returns an empty set with a null argument.
+     */
     @isTest
     private static void getErrorsTest() {
-        System.assertEquals(true,DatabaseHelper.getErrors(null).isEmpty());
+        System.assertEquals(true,DatabaseHelper.getErrors(null)?.isEmpty());
     }
 
+    /**
+     * @description 
+     * Test dml exceptions work as expected.
+     */
     @isTest
     private static void dmlExceptionTest() {
         User currentUser = new User(Id=UserInfo.getUserId());
@@ -410,6 +427,10 @@ private class DatabaseHelperTest {
         System.assertNotEquals(null,typeEx,'typeEx');
     }
 
+    /**
+     * @description
+     * Check enqueue scope values work as expected. 
+     */
     @isTest
     private static void enqueueScopeTest() {
         Account account1 = new Account(Name='enqueueScopeTest1');
@@ -435,6 +456,10 @@ private class DatabaseHelperTest {
         a = [select Id,Name from Account where Name = :account2.Name];
     }
 
+    /**
+     * @description
+     * Check enqueue scope values work as expected. 
+     */
     @isTest
     private static void enqueueScopeTest2() {
         User currentUser = new User(Id=UserInfo.getUserId(),FirstName='enqueueScopeTest');
@@ -448,6 +473,10 @@ private class DatabaseHelperTest {
         // System.assertEquals(currentUser.FirstName,u.FirstName,'Failed to assign FirstName');
     }
 
+    /**
+     * @description
+     * Check enqueue jobs are processed. 
+     */
     @IsTest
     private static void enqueueJobTest() {
         List<DatabaseHelperQueueable> queueableList = (
@@ -464,6 +493,10 @@ private class DatabaseHelperTest {
         System.assertEquals(null,queueableList,'queueableList');
     }
 
+    /**
+     * @description 
+     * Check we correctly split lists.
+     */
     @isTest
     private static void splitTest() {
         List<Account> accounts = (new List<Account>{
@@ -513,4 +546,120 @@ private class DatabaseHelperTest {
         System.assertEquals(4,results[1].size());
         System.assertEquals(4,results[2].size());
     }
+
+    /**
+     * @description 
+     * Test the safe callback by assigning firstname to `'Success'`
+     */
+    @isTest
+    private static void safeCallbackTest() {
+        List<Contact> contacts = ( new List<Contact>{
+            new Contact(LastName='Fudge'),
+            new Contact(LastName='Chocolate')} );
+        DatabaseHelper helper = new DatabaseHelper();
+        helper.setAsyncSafeCallback(new AsyncSafeCallback());
+        helper.setEnqueueScope(contacts.size());
+    
+        Test.startTest();
+        List<DatabaseHelper.Result> results = helper.safeInsert(contacts);
+        System.assertEquals(0,results.size());
+        Test.stopTest();
+
+        Contact fudge = [SELECT LastName,FirstName FROM Contact WHERE LastName='Fudge'];
+        System.assertEquals('Success',fudge.FirstName,'Callback should have set Firstname');
+        Contact chocolate = [SELECT LastName,FirstName FROM Contact WHERE LastName='Chocolate'];
+        System.assertEquals('Success',chocolate.FirstName,'Callback should have set Firstname');
+    }
+
+    /**
+     * @description 
+     * Test the save callback by assigning firstname to `'Success'`
+     */
+    @isTest
+    private static void saveCallbackTest() {
+        List<Contact> contacts = ( new List<Contact>{
+            new Contact(LastName='Fudge'),
+            new Contact(LastName='Chocolate')} );
+        DatabaseHelper helper = new DatabaseHelper();
+        helper.saveCallback = new AsyncSaveCallback();
+        helper.setEnqueueScope(contacts.size());
+    
+        Test.startTest();
+        List<Database.SaveResult> results = helper.legacyInsert(contacts);
+        System.assertEquals(0,results.size());
+        Test.stopTest();
+
+        Contact fudge = [SELECT LastName,FirstName FROM Contact WHERE LastName='Fudge'];
+        System.assertEquals('Success',fudge.FirstName,'Callback should have set Firstname');
+        Contact chocolate = [SELECT LastName,FirstName FROM Contact WHERE LastName='Chocolate'];
+        System.assertEquals('Success',chocolate.FirstName,'Callback should have set Firstname');
+    }
+
+    /**
+     * @description 
+     * Test the delete callback by undeleting and assigning firstname to `'Success'`
+     */
+    @isTest
+    private static void deleteCallbackTest() {
+        List<Contact> contacts = ( new List<Contact>{
+            new Contact(LastName='Fudge'),
+            new Contact(LastName='Chocolate')} );
+        insert contacts;
+        DatabaseHelper helper = new DatabaseHelper();
+        helper.deleteCallback = new AsyncDeleteCallback();
+        helper.setEnqueueScope(contacts.size());
+
+        Test.startTest();
+        List<Database.DeleteResult> results = helper.legacyDelete(contacts);
+        System.assertEquals(0,results.size());
+        Test.stopTest();
+
+        Contact fudge = [SELECT LastName,FirstName FROM Contact WHERE LastName='Fudge'];
+        System.assertEquals('Success',fudge.FirstName,'Callback should have set Firstname');
+        Contact chocolate = [SELECT LastName,FirstName FROM Contact WHERE LastName='Chocolate'];
+        System.assertEquals('Success',chocolate.FirstName,'Callback should have set Firstname');
+    }
+
+    /**
+     * @description
+     * Similar interface to the `DataSource.AsyncSaveCallback` and `DataSource.AsyncDeleteCallback`.
+     * Used to return results from asynchronous updates.
+     */
+    public class AsyncSafeCallback implements DatabaseHelper.AsyncSafeCallback {
+        public void processResults(DatabaseHelper.DMLOperation op,List<DatabaseHelper.Result> results) {
+            System.assertEquals(DatabaseHelper.DMLOperation.INSERT_OP,op,'Expected insert');
+            List<Contact> contacts = new List<Contact>();
+            for(DatabaseHelper.Result result : results) {
+                Contact c = (Contact)result.getSObject();
+                c.FirstName='Success';
+                contacts.add(c);
+            }
+            update contacts;
+        }
+    }
+
+    /**
+     * @description
+     * Implement the `DataSource.AsyncSaveCallback`.
+     */
+    public class AsyncSaveCallback extends DataSource.AsyncSaveCallback {
+        public override void processSave(Database.SaveResult result) {
+            Contact c = new Contact(Id = result.getId(),FirstName='Success');
+            update c;
+        }
+    }
+
+    /**
+     * @description
+     * Implement the `DataSource.AsyncDeleteCallback`.
+     */
+    public class AsyncDeleteCallback extends DataSource.AsyncDeleteCallback {
+        public override void processDelete(Database.DeleteResult result) {
+            Contact c = new Contact(Id = result.getId());
+            undelete c;
+            c.FirstName='Success';
+            update c;
+        }
+    }
+
 }
