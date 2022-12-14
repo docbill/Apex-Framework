@@ -1,32 +1,33 @@
 {
-    "packageDirectories": [
-        {
-            "path": "src-temp",
-            "default": true
-        },
-        {
-            "path": "src/apexframework",
-            "default": false,
-            "package": "ApexFramework",
-            "versionName": "ver 1.3.1",
-            "versionNumber": "1.3.1.NEXT"
-        }
-    ],
-    "namespace": "",
-    "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "55.0",
-    "packageAliases": {
-        "ApexFramework": "0Ho3a000000k9bwCAA",
-        "ApexFramework@1.0.0-3": "04t3a000000LcyfAAC",
-        "ApexFramework@1.1.0-2": "04t3a000001enUIAAY",
-        "ApexFramework@1.1.1-1": "04t3a000001enVfAAI",
-        "ApexFramework@1.1.2-2": "04t3a000001enXWAAY",
-        "ApexFramework@1.1.3-1": "04t3a000001iPu7AAE",
-        "ApexFramework@1.2.0-2": "04t3a000001iQBDAA2",
-        "ApexFramework@1.3.0-3": "04t3a0000000cBrAAI",
-        "ApexFramework@1.3.0-4": "04t3a0000000cC6AAI",
-        "ApexFramework@1.3.0-5": "04t3a0000000cCaAAI",
-        "ApexFramework@1.3.0-6": "04t3a0000000cCfAAI",
-        "ApexFramework@1.3.0-7": "04t3a00000238WyAAI"
+  "packageDirectories": [
+    {
+      "path": "src-temp",
+      "default": true
+    },
+    {
+      "path": "src/apexframework",
+      "default": false,
+      "package": "ApexFramework",
+      "versionName": "ver 1.4.0",
+      "versionNumber": "1.4.0.NEXT"
     }
+  ],
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "55.0",
+  "packageAliases": {
+    "ApexFramework": "0Ho3a000000k9bwCAA",
+    "ApexFramework@1.0.0-3": "04t3a000000LcyfAAC",
+    "ApexFramework@1.1.0-2": "04t3a000001enUIAAY",
+    "ApexFramework@1.1.1-1": "04t3a000001enVfAAI",
+    "ApexFramework@1.1.2-2": "04t3a000001enXWAAY",
+    "ApexFramework@1.1.3-1": "04t3a000001iPu7AAE",
+    "ApexFramework@1.2.0-2": "04t3a000001iQBDAA2",
+    "ApexFramework@1.3.0-3": "04t3a0000000cBrAAI",
+    "ApexFramework@1.3.0-4": "04t3a0000000cC6AAI",
+    "ApexFramework@1.3.0-5": "04t3a0000000cCaAAI",
+    "ApexFramework@1.3.0-6": "04t3a0000000cCfAAI",
+    "ApexFramework@1.3.0-7": "04t3a00000238WyAAI",
+    "ApexFramework@1.4.0-1": "04t3a000001qXiBAAU"
+  }
 }

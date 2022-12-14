@@ -40,7 +40,7 @@ You should now create the package on your devhub.
 
 Assuming you have the branch checked out for your submodule you want to build, you can create the new version:
 
-```sfdx force:package:version:create -x -d submodules/Apex-Framework/src/apexframework/ -c -p ApexFramework --wait 1000```
+```sfdx force:package:beta:version:create -x -c -p ApexFramework --wait 1000```
 
 Note the install link.  You can modify that link and use it to install your version on the respective sandbox, if you have the appropriate permissions.  Otherwise you will need to give the link to devops.   You can also use the ```sfdx force:package:install``` command.  For example to install to merge:
 

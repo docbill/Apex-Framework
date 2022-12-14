@@ -18,10 +18,6 @@
     </customMetadataTypeAccesses>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
-        <name>Scheduled_Apex__mdt</name>
-    </customMetadataTypeAccesses>
-    <customMetadataTypeAccesses>
-        <enabled>true</enabled>
         <name>String_Values__mdt</name>
     </customMetadataTypeAccesses>
     <customMetadataTypeAccesses>
