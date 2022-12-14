@@ -5,6 +5,7 @@
         <members>BooleanValuesHelperTest</members>
         <members>DatabaseHelper</members>
         <members>DatabaseHelperAsyncHelper</members>
+        <members>DatabaseHelperBase</members>
         <members>DatabaseHelperQueueable</members>
         <members>DatabaseHelperResult</members>
         <members>DatabaseHelperResultException</members>
@@ -171,6 +172,10 @@
         <members>User_Field_Map_Entry__mdt.Test_Map</members>
         <members>User_Field_Map_Entry__mdt.View_All</members>
         <name>ListView</name>
+    </types>
+    <types>
+        <members>Apex_Framework_Admin</members>
+        <name>PermissionSet</name>
     </types>
     <types>
         <members>Decimal2_Values__mdt.Validate_Label</members>

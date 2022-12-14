@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Lock_1</fullName>
+    <columns>MasterLabel</columns>
+    <columns>DeveloperName</columns>
+    <columns>Value__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>MasterLabel</field>
+        <operation>contains</operation>
+        <value>.lock</value>
+    </filters>
+    <label>Lock 1</label>
+    <language>en_US</language>
+</ListView>

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Non_Entity_Object__c</fullName>
+    <deprecated>false</deprecated>
     <description>This is the trigger object when it cannot be assigned as an Entity.
-        To update the picklist you'll need to remove this picklist from the package.  You'll
+        To update the picklist you&apos;ll need to remove this picklist from the package.  You&apos;ll
         then need to submit your new values as a merge request to be included as part of
-        the next update.
-    </description>
+        the next update.</description>
     <externalId>false</externalId>
     <fieldManageability>SubscriberControlled</fieldManageability>
     <inlineHelpText>This is the trigger object when it cannot be assigned as an Entity.</inlineHelpText>
