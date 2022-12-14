@@ -164,208 +164,68 @@
 
           <div class="section">
 
-            <h2 class="class-title top-level-type" id="SObjectCallableTrigger">
-              <span>SObjectCallableTrigger</span>
+            <h2 class="class-title top-level-type" id="DatabaseHelperBaseTest">
+              <span>DatabaseHelperBaseTest</span>
             </h2>
             <div class="class-container">
 
               <div class="class-description">
-                This is mainly intended as a sample callable trigger class. In this case it is a trigger we can assign to any SObject to copy the standard field, OwnerId, to a custom field, Owner__c. This is useful if you want to follow the lookup onto the owner record in queries and such. <br><br> If we have core trigger functionality we want to span across many SObject types, this the the class to implement it in.
+                Test class for DatabaseHelper.
               </div>
               <div class="class-subtitle">
                 Signature
               </div>
-
+              <div class="class-annotations">@IsTest</div>
               <div class="class-signature">
-                public without sharing class SObjectCallableTrigger implements Callable
+                private class DatabaseHelperBaseTest
               </div>
               <div class="class-subtitle">
                 Author
               </div>
               <div class="class-subtitle-description">
-                Bill Riemers &lt;briemers@redhat.com&gt;
+                Bill C Riemers &lt;briemers@redhat.com&gt;
               </div>
               <div class="class-subtitle">
                 Since
               </div>
               <div class="class-subtitle-description">
-                <li>2020-11-17 - Created</li>
+                <li>2020-08-18 US268650 - Created</li>
+                <li>2021-01-07 US281262 - Added setEnqueueScope for Queuable splitting of dml</li>
+                <li>2021-03-30 - Increase test coverage</li>
+                <li>2021-04-27 DE26549 - Added split test</li>
                 <li>2022-09-09 update for ApexDox commenting</li>
-              </div>
-            </div>
-            <div class="subsection properties SObjectCallableTrigger">
-              <h3 class="subsection-title properties">SObjectCallableTrigger Properties</h3>
-              <table class="attributes-table properties">
-
-                <tr>
-                  <th>Name</th>
-                  <th>Signature</th>
-
-
-                </tr>
-                <tr class="property private">
-                  <td class="attribute-name"><span>triggerArguments</span></td>
-                  <td>
-                    <div class="attribute-signature">
-                      private TriggerArguments triggerArguments
-                    </div>
-                  </td>
-
-
-                </tr>
-              </table>
-            </div>
-            <div class="subsection methods">
-              <h3 class="subsection-title methods">SObjectCallableTrigger Constructors</h3>
-              <div class="methods-container">
-                <ul class="methods-toc">
-                  <li class="method public">
-                    <a class="methods-toc__entry " href="#SObjectCallableTrigger.SObjectCallableTrigger">
-                      SObjectCallableTrigger ()
-                    </a>
-
-                    <div class="methods-toc__description">
-                      Standard constructor.
-                    </div>
-                  </li>
-                </ul>
-                <div class="method public">
-                  <h4 class="method-title " id="SObjectCallableTrigger.SObjectCallableTrigger">
-                    <span>SObjectCallableTrigger()</span>
-                  </h4>
-                  <div class="method-description">
-                    Standard constructor.
-                  </div>
-                  <div class="method-subtitle">
-                    Signature
-                  </div>
-
-                  <div class="method-signature">
-                    public SObjectCallableTrigger()
-                  </div>
-                </div>
+                <li>2022-12-13 update to test async callbacks</li>
               </div>
             </div>
             <div class="subsection methods">
-              <h3 class="subsection-title methods">SObjectCallableTrigger Methods</h3>
+              <h3 class="subsection-title methods">DatabaseHelperBaseTest Methods</h3>
               <div class="methods-container">
                 <ul class="methods-toc">
-                  <li class="method public">
-                    <a class="methods-toc__entry " href="#SObjectCallableTrigger.assignLegacy">
-                      assignLegacy (newList)
+                  <li class="method testmethod">
+                    <a class="methods-toc__entry " href="#DatabaseHelperBaseTest.splitTest">
+                      splitTest ()
                     </a>
 
                     <div class="methods-toc__description">
-                      Copy the ownerId to a custom look-up field. <br><br> This is a trigger method we use on many object types. So we might as define it here. This method will only work in before triggers. <br><br> It does not make sense to call this method if the SObject does not have both an OwnerId field and a Owner__c field.
-                    </div>
-                  </li>
-                  <li class="method public">
-                    <a class="methods-toc__entry " href="#SObjectCallableTrigger.assignLegacy_1">
-                      assignLegacy ()
-                    </a>
-
-                    <div class="methods-toc__description">
-                      Copy the ownerId to a custom look-up field. <br><br> This is a trigger method we use on many object types. So we might as define it here. This method will only work in before triggers. <br><br> It does not make sense to call this method if the SObject does not have both an OwnerId field and a Owner__c field.
-                    </div>
-                  </li>
-                  <li class="method public">
-                    <a class="methods-toc__entry " href="#SObjectCallableTrigger.call">
-                      call (action, args)
-                    </a>
-
-                    <div class="methods-toc__description">
-                      This is the callable method to invoke the triggers in this class. <br><br>
+                      Check we correctly split lists.
                     </div>
                   </li>
                 </ul>
-                <div class="method public">
-                  <h4 class="method-title " id="SObjectCallableTrigger.assignLegacy">
-                    <span>assignLegacy(newList)</span>
+                <div class="method testmethod">
+                  <h4 class="method-title " id="DatabaseHelperBaseTest.splitTest">
+                    <span>splitTest()</span>
                   </h4>
                   <div class="method-description">
-                    Copy the ownerId to a custom look-up field. <br><br> This is a trigger method we use on many object types. So we might as define it here. This method will only work in before triggers. <br><br> It does not make sense to call this method if the SObject does not have both an OwnerId field and a Owner__c field.
+                    Check we correctly split lists.
                   </div>
                   <div class="method-subtitle">
                     Signature
                   </div>
-
+                  <div class="method-annotations">@isTest</div>
                   <div class="method-signature">
-                    public static void assignLegacy(List&lt;SObject&gt; newList)
-                  </div>
-                  <div class="method-subtitle">Parameters</div>
-                  <div class="param-name">newList</div>
-                  <div class="param-type">
-                    Type: <code class="code-inline">List&lt;SObject&gt;</code>
-                  </div>
-                  <div class="param-description">of objects to update</div>
-                </div>
-                <div class="method public">
-                  <h4 class="method-title " id="SObjectCallableTrigger.assignLegacy_1">
-                    <span>assignLegacy()</span>
-                  </h4>
-                  <div class="method-description">
-                    Copy the ownerId to a custom look-up field. <br><br> This is a trigger method we use on many object types. So we might as define it here. This method will only work in before triggers. <br><br> It does not make sense to call this method if the SObject does not have both an OwnerId field and a Owner__c field.
-                  </div>
-                  <div class="method-subtitle">
-                    Signature
-                  </div>
-
-                  <div class="method-signature">
-                    public void assignLegacy()
+                    private static void splitTest()
                   </div>
                 </div>
-                <div class="method public">
-                  <h4 class="method-title " id="SObjectCallableTrigger.call">
-                    <span>call(action, args)</span>
-                  </h4>
-                  <div class="method-description">
-                    This is the callable method to invoke the triggers in this class. <br><br>
-                  </div>
-                  <div class="method-subtitle">
-                    Signature
-                  </div>
-
-                  <div class="method-signature">
-                    public Object call(String action, Map&lt;String,Object&gt; args)
-                  </div>
-                  <div class="method-subtitle">Parameters</div>
-                  <div class="param-name">action</div>
-                  <div class="param-type">
-                    Type: <code class="code-inline">String</code>
-                  </div>
-                  <div class="param-description">the trigger method to invoke</div>
-                  <div class="param-name">args</div>
-                  <div class="param-type">
-                    Type: <code class="code-inline">Map&lt;String,Object&gt;</code>
-                  </div>
-                  <div class="param-description">a map of Trigger values</div>
-                  <div class="method-subtitle">
-                    Returns
-                  </div>
-                  <div class="method-subtitle-description">
-                    null
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="section">
-
-            <h2 class="class-title " id="SObjectCallableTrigger.ExtensionMalformedCallException">
-              <span>SObjectCallableTrigger.ExtensionMalformedCallException</span>
-            </h2>
-            <div class="class-container">
-
-              <div class="class-description">
-                This exception is part of the best practices for classes implementing Callable.
-              </div>
-              <div class="class-subtitle">
-                Signature
-              </div>
-
-              <div class="class-signature">
-                public class ExtensionMalformedCallException extends Exception
               </div>
             </div>
           </div>

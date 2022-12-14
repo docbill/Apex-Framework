@@ -164,208 +164,194 @@
 
           <div class="section">
 
-            <h2 class="class-title top-level-type" id="SObjectCallableTrigger">
-              <span>SObjectCallableTrigger</span>
+            <h2 class="class-title top-level-type" id="DatabaseHelperResultException">
+              <span>DatabaseHelperResultException</span>
             </h2>
             <div class="class-container">
 
               <div class="class-description">
-                This is mainly intended as a sample callable trigger class. In this case it is a trigger we can assign to any SObject to copy the standard field, OwnerId, to a custom field, Owner__c. This is useful if you want to follow the lookup onto the owner record in queries and such. <br><br> If we have core trigger functionality we want to span across many SObject types, this the the class to implement it in.
+                We use an exception class for error, so we can throw if we want and we can get a stack trace. In order for the getError method to work, this class must have the same memembers as the Database.Error class.
               </div>
               <div class="class-subtitle">
                 Signature
               </div>
 
               <div class="class-signature">
-                public without sharing class SObjectCallableTrigger implements Callable
+                public abstract without sharing class DatabaseHelperResultException extends Exception
               </div>
               <div class="class-subtitle">
                 Author
               </div>
               <div class="class-subtitle-description">
-                Bill Riemers &lt;briemers@redhat.com&gt;
+                Bill C Riemers &lt;briemers@redhat.com&gt;
               </div>
               <div class="class-subtitle">
                 Since
               </div>
               <div class="class-subtitle-description">
-                <li>2020-11-17 - Created</li>
-                <li>2022-09-09 update for ApexDox commenting</li>
+                <li>2022-11-09 Created</li>
               </div>
             </div>
-            <div class="subsection properties SObjectCallableTrigger">
-              <h3 class="subsection-title properties">SObjectCallableTrigger Properties</h3>
+            <div class="subsection properties DatabaseHelperResultException">
+              <h3 class="subsection-title properties">DatabaseHelperResultException Properties</h3>
               <table class="attributes-table properties">
 
                 <tr>
                   <th>Name</th>
                   <th>Signature</th>
 
-
+                  <th>Description</th>
                 </tr>
-                <tr class="property private">
-                  <td class="attribute-name"><span>triggerArguments</span></td>
+                <tr class="property public">
+                  <td class="attribute-name"><span>fields</span></td>
                   <td>
                     <div class="attribute-signature">
-                      private TriggerArguments triggerArguments
+                      public String [] fields
                     </div>
                   </td>
 
 
+                  <td class="attribute-description">
+                    List of DmlFieldNames associated with this result.
+                  </td>
+                </tr>
+                <tr class="property private">
+                  <td class="attribute-name"><span>ignoreStackTraceString</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      private transient Boolean ignoreStackTraceString
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+
+                  </td>
+                </tr>
+                <tr class="property public">
+                  <td class="attribute-name"><span>message</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      public String message
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+                    Respective message for this exception
+                  </td>
+                </tr>
+                <tr class="property public">
+                  <td class="attribute-name"><span>stackTraceString</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      public String stackTraceString
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+                    Generate a stack trace string for the result.
+                  </td>
+                </tr>
+                <tr class="property public">
+                  <td class="attribute-name"><span>statusCode</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      public StatusCode statusCode
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+                    If not assigned, the DmlType of the getCause exception
+                  </td>
                 </tr>
               </table>
             </div>
             <div class="subsection methods">
-              <h3 class="subsection-title methods">SObjectCallableTrigger Constructors</h3>
+              <h3 class="subsection-title methods">DatabaseHelperResultException Methods</h3>
               <div class="methods-container">
                 <ul class="methods-toc">
+                  <li class="method private">
+                    <a class="methods-toc__entry " href="#DatabaseHelperResultException.blankValue">
+                      blankValue (value, blank)
+                    </a>
+
+                  </li>
                   <li class="method public">
-                    <a class="methods-toc__entry " href="#SObjectCallableTrigger.SObjectCallableTrigger">
-                      SObjectCallableTrigger ()
+                    <a class="methods-toc__entry " href="#DatabaseHelperResultException.getError">
+                      getError ()
                     </a>
 
                     <div class="methods-toc__description">
-                      Standard constructor.
+                      Get this result as a Database.Error
+                    </div>
+                  </li>
+                  <li class="method public">
+                    <a class="methods-toc__entry " href="#DatabaseHelperResultException.getStackTraceString">
+                      getStackTraceString ()
+                    </a>
+
+                    <div class="methods-toc__description">
+                      Get method for stack trace string
                     </div>
                   </li>
                 </ul>
-                <div class="method public">
-                  <h4 class="method-title " id="SObjectCallableTrigger.SObjectCallableTrigger">
-                    <span>SObjectCallableTrigger()</span>
+                <div class="method private">
+                  <h4 class="method-title " id="DatabaseHelperResultException.blankValue">
+                    <span>blankValue(value, blank)</span>
                   </h4>
-                  <div class="method-description">
-                    Standard constructor.
-                  </div>
                   <div class="method-subtitle">
                     Signature
                   </div>
 
                   <div class="method-signature">
-                    public SObjectCallableTrigger()
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="subsection methods">
-              <h3 class="subsection-title methods">SObjectCallableTrigger Methods</h3>
-              <div class="methods-container">
-                <ul class="methods-toc">
-                  <li class="method public">
-                    <a class="methods-toc__entry " href="#SObjectCallableTrigger.assignLegacy">
-                      assignLegacy (newList)
-                    </a>
-
-                    <div class="methods-toc__description">
-                      Copy the ownerId to a custom look-up field. <br><br> This is a trigger method we use on many object types. So we might as define it here. This method will only work in before triggers. <br><br> It does not make sense to call this method if the SObject does not have both an OwnerId field and a Owner__c field.
-                    </div>
-                  </li>
-                  <li class="method public">
-                    <a class="methods-toc__entry " href="#SObjectCallableTrigger.assignLegacy_1">
-                      assignLegacy ()
-                    </a>
-
-                    <div class="methods-toc__description">
-                      Copy the ownerId to a custom look-up field. <br><br> This is a trigger method we use on many object types. So we might as define it here. This method will only work in before triggers. <br><br> It does not make sense to call this method if the SObject does not have both an OwnerId field and a Owner__c field.
-                    </div>
-                  </li>
-                  <li class="method public">
-                    <a class="methods-toc__entry " href="#SObjectCallableTrigger.call">
-                      call (action, args)
-                    </a>
-
-                    <div class="methods-toc__description">
-                      This is the callable method to invoke the triggers in this class. <br><br>
-                    </div>
-                  </li>
-                </ul>
-                <div class="method public">
-                  <h4 class="method-title " id="SObjectCallableTrigger.assignLegacy">
-                    <span>assignLegacy(newList)</span>
-                  </h4>
-                  <div class="method-description">
-                    Copy the ownerId to a custom look-up field. <br><br> This is a trigger method we use on many object types. So we might as define it here. This method will only work in before triggers. <br><br> It does not make sense to call this method if the SObject does not have both an OwnerId field and a Owner__c field.
-                  </div>
-                  <div class="method-subtitle">
-                    Signature
-                  </div>
-
-                  <div class="method-signature">
-                    public static void assignLegacy(List&lt;SObject&gt; newList)
-                  </div>
-                  <div class="method-subtitle">Parameters</div>
-                  <div class="param-name">newList</div>
-                  <div class="param-type">
-                    Type: <code class="code-inline">List&lt;SObject&gt;</code>
-                  </div>
-                  <div class="param-description">of objects to update</div>
-                </div>
-                <div class="method public">
-                  <h4 class="method-title " id="SObjectCallableTrigger.assignLegacy_1">
-                    <span>assignLegacy()</span>
-                  </h4>
-                  <div class="method-description">
-                    Copy the ownerId to a custom look-up field. <br><br> This is a trigger method we use on many object types. So we might as define it here. This method will only work in before triggers. <br><br> It does not make sense to call this method if the SObject does not have both an OwnerId field and a Owner__c field.
-                  </div>
-                  <div class="method-subtitle">
-                    Signature
-                  </div>
-
-                  <div class="method-signature">
-                    public void assignLegacy()
+                    private static String blankValue(String value,String blank)
                   </div>
                 </div>
                 <div class="method public">
-                  <h4 class="method-title " id="SObjectCallableTrigger.call">
-                    <span>call(action, args)</span>
+                  <h4 class="method-title " id="DatabaseHelperResultException.getError">
+                    <span>getError()</span>
                   </h4>
                   <div class="method-description">
-                    This is the callable method to invoke the triggers in this class. <br><br>
+                    Get this result as a Database.Error
                   </div>
                   <div class="method-subtitle">
                     Signature
                   </div>
 
                   <div class="method-signature">
-                    public Object call(String action, Map&lt;String,Object&gt; args)
+                    public Database.Error getError()
                   </div>
-                  <div class="method-subtitle">Parameters</div>
-                  <div class="param-name">action</div>
-                  <div class="param-type">
-                    Type: <code class="code-inline">String</code>
-                  </div>
-                  <div class="param-description">the trigger method to invoke</div>
-                  <div class="param-name">args</div>
-                  <div class="param-type">
-                    Type: <code class="code-inline">Map&lt;String,Object&gt;</code>
-                  </div>
-                  <div class="param-description">a map of Trigger values</div>
                   <div class="method-subtitle">
                     Returns
                   </div>
                   <div class="method-subtitle-description">
-                    null
+                    a Database.Error copy of this result
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
+                <div class="method public">
+                  <h4 class="method-title " id="DatabaseHelperResultException.getStackTraceString">
+                    <span>getStackTraceString()</span>
+                  </h4>
+                  <div class="method-description">
+                    Get method for stack trace string
+                  </div>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
 
-          <div class="section">
-
-            <h2 class="class-title " id="SObjectCallableTrigger.ExtensionMalformedCallException">
-              <span>SObjectCallableTrigger.ExtensionMalformedCallException</span>
-            </h2>
-            <div class="class-container">
-
-              <div class="class-description">
-                This exception is part of the best practices for classes implementing Callable.
-              </div>
-              <div class="class-subtitle">
-                Signature
-              </div>
-
-              <div class="class-signature">
-                public class ExtensionMalformedCallException extends Exception
+                  <div class="method-signature">
+                    public override String getStackTraceString()
+                  </div>
+                  <div class="method-subtitle">
+                    Returns
+                  </div>
+                  <div class="method-subtitle-description">
+                    the stack trace
+                  </div>
+                </div>
               </div>
             </div>
           </div>

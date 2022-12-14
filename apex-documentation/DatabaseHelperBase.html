@@ -164,208 +164,418 @@
 
           <div class="section">
 
-            <h2 class="class-title top-level-type" id="SObjectCallableTrigger">
-              <span>SObjectCallableTrigger</span>
+            <h2 class="class-title top-level-type" id="DatabaseHelperBase">
+              <span>DatabaseHelperBase</span>
             </h2>
             <div class="class-container">
 
               <div class="class-description">
-                This is mainly intended as a sample callable trigger class. In this case it is a trigger we can assign to any SObject to copy the standard field, OwnerId, to a custom field, Owner__c. This is useful if you want to follow the lookup onto the owner record in queries and such. <br><br> If we have core trigger functionality we want to span across many SObject types, this the the class to implement it in.
+                This is the core part of the database helper
               </div>
               <div class="class-subtitle">
                 Signature
               </div>
 
               <div class="class-signature">
-                public without sharing class SObjectCallableTrigger implements Callable
+                public abstract with sharing class DatabaseHelperBase
               </div>
               <div class="class-subtitle">
                 Author
               </div>
               <div class="class-subtitle-description">
-                Bill Riemers &lt;briemers@redhat.com&gt;
+                Bill C Riemers &lt;briemers@redhat.com&gt;
               </div>
               <div class="class-subtitle">
                 Since
               </div>
               <div class="class-subtitle-description">
-                <li>2020-11-17 - Created</li>
-                <li>2022-09-09 update for ApexDox commenting</li>
+                <li>2022-11-09 support async callbacks</li>
               </div>
             </div>
-            <div class="subsection properties SObjectCallableTrigger">
-              <h3 class="subsection-title properties">SObjectCallableTrigger Properties</h3>
+            <div class="subsection properties DatabaseHelperBase">
+              <h3 class="subsection-title properties">DatabaseHelperBase Properties</h3>
               <table class="attributes-table properties">
 
                 <tr>
                   <th>Name</th>
                   <th>Signature</th>
 
-
+                  <th>Description</th>
                 </tr>
-                <tr class="property private">
-                  <td class="attribute-name"><span>triggerArguments</span></td>
+                <tr class="property protected">
+                  <td class="attribute-name"><span>checkLimits</span></td>
                   <td>
                     <div class="attribute-signature">
-                      private TriggerArguments triggerArguments
+                      protected Boolean checkLimits
                     </div>
                   </td>
 
 
+                  <td class="attribute-description">
+
+                  </td>
+                </tr>
+                <tr class="property protected">
+                  <td class="attribute-name"><span>deactivateTriggers</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      protected Boolean deactivateTriggers
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+
+                  </td>
+                </tr>
+                <tr class="property protected">
+                  <td class="attribute-name"><span>deleteCallback</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      protected DataSource.AsyncDeleteCallback deleteCallback
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+                    asynchronous callback for delete operations
+                  </td>
+                </tr>
+                <tr class="property protected">
+                  <td class="attribute-name"><span>enqueueScope</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      protected Integer enqueueScope
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+
+                  </td>
+                </tr>
+                <tr class="property protected">
+                  <td class="attribute-name"><span>externalIDField</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      protected Schema.SObjectField externalIDField
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+
+                  </td>
+                </tr>
+                <tr class="property protected">
+                  <td class="attribute-name"><span>legacyMode</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      protected Boolean legacyMode
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+
+                  </td>
+                </tr>
+                <tr class="property private">
+                  <td class="attribute-name"><span>MINIMUM_TIME_PER_DML</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      private static final Integer MINIMUM_TIME_PER_DML
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+                    This is just a wiled guess at the minimum numer of ms we should reserve for a DML Statement.
+                  </td>
+                </tr>
+                <tr class="property protected">
+                  <td class="attribute-name"><span>options</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      protected Database.DMLOptions options
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+                    The <code class="code-inline">Database.DMLOptions</code> that will be used in the <code class="code-inline">dmlStatement</code> call.
+                  </td>
+                </tr>
+                <tr class="property protected">
+                  <td class="attribute-name"><span>safeCallback</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      protected DatabaseHelper.AsyncSafeCallback safeCallback
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+                    asynchronous callback for all operations
+                  </td>
+                </tr>
+                <tr class="property protected">
+                  <td class="attribute-name"><span>saveCallback</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      protected DataSource.AsyncSaveCallback saveCallback
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+                    asynchronous callback for save operations
+                  </td>
+                </tr>
+                <tr class="property protected">
+                  <td class="attribute-name"><span>systemFinalizer</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      protected System.Finalizer systemFinalizer
+                    </div>
+                  </td>
+
+
+                  <td class="attribute-description">
+                    asynchronous finilizer
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <div class="subsection enums">
+              <h3 class="subsection-title enums">Enums</h3>
+              <table class="attributes-table enums">
+
+                <tr>
+                  <th>Name</th>
+                  <th>Signature</th>
+                  <th>Values</th>
+                  <th>Description</th>
+                </tr>
+                <tr class="enum public">
+                  <td class="attribute-name"><span>DMLOperation</span></td>
+                  <td>
+                    <div class="attribute-signature">
+                      public enum DMLOperation
+                    </div>
+                  </td>
+                  <td class="enum-values">INSERT_OP,&nbsp;UPDATE_OP,&nbsp;UPSERT_OP,&nbsp;DELETE_OP,&nbsp;UNDELETE_OP</td>
+
+                  <td class="attribute-description">
+                    Used internally.
+                  </td>
                 </tr>
               </table>
             </div>
             <div class="subsection methods">
-              <h3 class="subsection-title methods">SObjectCallableTrigger Constructors</h3>
+              <h3 class="subsection-title methods">DatabaseHelperBase Constructors</h3>
               <div class="methods-container">
                 <ul class="methods-toc">
-                  <li class="method public">
-                    <a class="methods-toc__entry " href="#SObjectCallableTrigger.SObjectCallableTrigger">
-                      SObjectCallableTrigger ()
+                  <li class="method protected">
+                    <a class="methods-toc__entry " href="#DatabaseHelperBase.DatabaseHelperBase">
+                      DatabaseHelperBase ()
                     </a>
 
                     <div class="methods-toc__description">
-                      Standard constructor.
+                      Standard Constructor.
                     </div>
                   </li>
                 </ul>
-                <div class="method public">
-                  <h4 class="method-title " id="SObjectCallableTrigger.SObjectCallableTrigger">
-                    <span>SObjectCallableTrigger()</span>
+                <div class="method protected">
+                  <h4 class="method-title " id="DatabaseHelperBase.DatabaseHelperBase">
+                    <span>DatabaseHelperBase()</span>
                   </h4>
                   <div class="method-description">
-                    Standard constructor.
+                    Standard Constructor.
                   </div>
                   <div class="method-subtitle">
                     Signature
                   </div>
 
                   <div class="method-signature">
-                    public SObjectCallableTrigger()
+                    protected DatabaseHelperBase()
                   </div>
                 </div>
               </div>
             </div>
             <div class="subsection methods">
-              <h3 class="subsection-title methods">SObjectCallableTrigger Methods</h3>
+              <h3 class="subsection-title methods">DatabaseHelperBase Methods</h3>
               <div class="methods-container">
                 <ul class="methods-toc">
+                  <li class="method private">
+                    <a class="methods-toc__entry " href="#DatabaseHelperBase.convertException">
+                      convertException (op, ex, recordIterator)
+                    </a>
+
+                  </li>
                   <li class="method public">
-                    <a class="methods-toc__entry " href="#SObjectCallableTrigger.assignLegacy">
-                      assignLegacy (newList)
+                    <a class="methods-toc__entry " href="#DatabaseHelperBase.dmlStatement">
+                      dmlStatement (op, recordList)
                     </a>
 
                     <div class="methods-toc__description">
-                      Copy the ownerId to a custom look-up field. <br><br> This is a trigger method we use on many object types. So we might as define it here. This method will only work in before triggers. <br><br> It does not make sense to call this method if the SObject does not have both an OwnerId field and a Owner__c field.
+                      This performs a database operation, with optional limit checks. If a limit is hit a custom LimitException is thrown.
                     </div>
                   </li>
                   <li class="method public">
-                    <a class="methods-toc__entry " href="#SObjectCallableTrigger.assignLegacy_1">
-                      assignLegacy ()
+                    <a class="methods-toc__entry " href="#DatabaseHelperBase.dmlStatementUseCallbacks">
+                      dmlStatementUseCallbacks (op, currentList)
                     </a>
 
                     <div class="methods-toc__description">
-                      Copy the ownerId to a custom look-up field. <br><br> This is a trigger method we use on many object types. So we might as define it here. This method will only work in before triggers. <br><br> It does not make sense to call this method if the SObject does not have both an OwnerId field and a Owner__c field.
+                      Called to perform our Database operation.
                     </div>
                   </li>
                   <li class="method public">
-                    <a class="methods-toc__entry " href="#SObjectCallableTrigger.call">
-                      call (action, args)
+                    <a class="methods-toc__entry " href="#DatabaseHelperBase.getEnqueueScope">
+                      getEnqueueScope ()
                     </a>
 
                     <div class="methods-toc__description">
-                      This is the callable method to invoke the triggers in this class. <br><br>
+                      Retrieve value set for enqueueScope.
+                    </div>
+                  </li>
+                  <li class="method private">
+                    <a class="methods-toc__entry " href="#DatabaseHelperBase.split">
+                      split (records, size)
+                    </a>
+
+                    <div class="methods-toc__description">
+                      Splits a list into smaller lists no greate than size. If size is negative the first list in the returned array will be empty.
                     </div>
                   </li>
                 </ul>
-                <div class="method public">
-                  <h4 class="method-title " id="SObjectCallableTrigger.assignLegacy">
-                    <span>assignLegacy(newList)</span>
+                <div class="method private">
+                  <h4 class="method-title " id="DatabaseHelperBase.convertException">
+                    <span>convertException(op, ex, recordIterator)</span>
                   </h4>
-                  <div class="method-description">
-                    Copy the ownerId to a custom look-up field. <br><br> This is a trigger method we use on many object types. So we might as define it here. This method will only work in before triggers. <br><br> It does not make sense to call this method if the SObject does not have both an OwnerId field and a Owner__c field.
-                  </div>
                   <div class="method-subtitle">
                     Signature
                   </div>
 
                   <div class="method-signature">
-                    public static void assignLegacy(List&lt;SObject&gt; newList)
-                  </div>
-                  <div class="method-subtitle">Parameters</div>
-                  <div class="param-name">newList</div>
-                  <div class="param-type">
-                    Type: <code class="code-inline">List&lt;SObject&gt;</code>
-                  </div>
-                  <div class="param-description">of objects to update</div>
-                </div>
-                <div class="method public">
-                  <h4 class="method-title " id="SObjectCallableTrigger.assignLegacy_1">
-                    <span>assignLegacy()</span>
-                  </h4>
-                  <div class="method-description">
-                    Copy the ownerId to a custom look-up field. <br><br> This is a trigger method we use on many object types. So we might as define it here. This method will only work in before triggers. <br><br> It does not make sense to call this method if the SObject does not have both an OwnerId field and a Owner__c field.
-                  </div>
-                  <div class="method-subtitle">
-                    Signature
-                  </div>
-
-                  <div class="method-signature">
-                    public void assignLegacy()
+                    private List&lt;Object&gt; convertException(DMLOperation op,Exception ex,Iterator&lt;SObject&gt; recordIterator)
                   </div>
                 </div>
                 <div class="method public">
-                  <h4 class="method-title " id="SObjectCallableTrigger.call">
-                    <span>call(action, args)</span>
+                  <h4 class="method-title " id="DatabaseHelperBase.dmlStatement">
+                    <span>dmlStatement(op, recordList)</span>
                   </h4>
                   <div class="method-description">
-                    This is the callable method to invoke the triggers in this class. <br><br>
+                    This performs a database operation, with optional limit checks. If a limit is hit a custom LimitException is thrown.
                   </div>
                   <div class="method-subtitle">
                     Signature
                   </div>
 
                   <div class="method-signature">
-                    public Object call(String action, Map&lt;String,Object&gt; args)
+                    public List&lt;Object&gt; dmlStatement( DMLOperation op, List&lt;SObject&gt; recordList )
                   </div>
                   <div class="method-subtitle">Parameters</div>
-                  <div class="param-name">action</div>
+                  <div class="param-name">op</div>
                   <div class="param-type">
-                    Type: <code class="code-inline">String</code>
+                    Type: <code class="code-inline">        DMLOperation</code>
                   </div>
-                  <div class="param-description">the trigger method to invoke</div>
-                  <div class="param-name">args</div>
+                  <div class="param-description">dml operation to perform</div>
+                  <div class="param-name">recordList</div>
                   <div class="param-type">
-                    Type: <code class="code-inline">Map&lt;String,Object&gt;</code>
+                    Type: <code class="code-inline">       List&lt;SObject&gt;</code>
                   </div>
-                  <div class="param-description">a map of Trigger values</div>
+                  <div class="param-description">to insert</div>
                   <div class="method-subtitle">
                     Returns
                   </div>
                   <div class="method-subtitle-description">
-                    null
+                    the results list
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
+                <div class="method public">
+                  <h4 class="method-title " id="DatabaseHelperBase.dmlStatementUseCallbacks">
+                    <span>dmlStatementUseCallbacks(op, currentList)</span>
+                  </h4>
+                  <div class="method-description">
+                    Called to perform our Database operation.
+                  </div>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
 
-          <div class="section">
+                  <div class="method-signature">
+                    public void dmlStatementUseCallbacks( DatabaseHelperBase.DMLOperation op, List&lt;SObject&gt; currentList )
+                  </div>
+                  <div class="method-subtitle">Parameters</div>
+                  <div class="param-name">op</div>
+                  <div class="param-type">
+                    Type: <code class="code-inline">        DatabaseHelperBase.DMLOperation</code>
+                  </div>
+                  <div class="param-description">Database operation to perform</div>
+                  <div class="param-name">currentList</div>
+                  <div class="param-type">
+                    Type: <code class="code-inline">       List&lt;SObject&gt;</code>
+                  </div>
+                  <div class="param-description">of records</div>
+                  <div class="method-subtitle">
+                    Returns
+                  </div>
+                  <div class="method-subtitle-description">
+                    this
+                  </div>
+                </div>
+                <div class="method public">
+                  <h4 class="method-title " id="DatabaseHelperBase.getEnqueueScope">
+                    <span>getEnqueueScope()</span>
+                  </h4>
+                  <div class="method-description">
+                    Retrieve value set for enqueueScope.
+                  </div>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
 
-            <h2 class="class-title " id="SObjectCallableTrigger.ExtensionMalformedCallException">
-              <span>SObjectCallableTrigger.ExtensionMalformedCallException</span>
-            </h2>
-            <div class="class-container">
-
-              <div class="class-description">
-                This exception is part of the best practices for classes implementing Callable.
-              </div>
-              <div class="class-subtitle">
-                Signature
-              </div>
-
-              <div class="class-signature">
-                public class ExtensionMalformedCallException extends Exception
+                  <div class="method-signature">
+                    public Integer getEnqueueScope()
+                  </div>
+                  <div class="method-subtitle">
+                    Returns
+                  </div>
+                  <div class="method-subtitle-description">
+                    enqueueScope
+                  </div>
+                </div>
+                <div class="method private">
+                  <h4 class="method-title " id="DatabaseHelperBase.split">
+                    <span>split(records, size)</span>
+                  </h4>
+                  <div class="method-description">
+                    Splits a list into smaller lists no greate than size. If size is negative the first list in the returned array will be empty.
+                  </div>
+                  <div class="method-subtitle">
+                    Signature
+                  </div>
+                  <div class="method-annotations">@TestVisible</div>
+                  <div class="method-signature">
+                    private static List&lt;List&lt;SObject&gt;&gt; split(List&lt;SObject&gt; records,Integer size)
+                  </div>
+                  <div class="method-subtitle">Parameters</div>
+                  <div class="param-name">records</div>
+                  <div class="param-type">
+                    Type: <code class="code-inline">List&lt;SObject&gt;</code>
+                  </div>
+                  <div class="param-description">list to split</div>
+                  <div class="param-name">size</div>
+                  <div class="param-description">the number of records per list</div>
+                  <div class="method-subtitle">
+                    Returns
+                  </div>
+                  <div class="method-subtitle-description">
+                    a list of records lists of the appropriate size
+                  </div>
+                </div>
               </div>
             </div>
           </div>
