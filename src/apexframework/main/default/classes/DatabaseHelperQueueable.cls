@@ -15,8 +15,8 @@
 public class DatabaseHelperQueueable implements Queueable {
     private static List<DatabaseHelperQueueable> databaseHelperQueueableList = null;
 
-    private DatabaseHelperAsyncHelper helper;
-    private DatabaseHelper.DMLOperation op;
+    private DatabaseHelperBase helper;
+    private DatabaseHelperBase.DMLOperation op;
     private List<List<SObject>> recordsList = new List<List<SObject>>();
     private List<DatabaseHelperQueueable> queueableList;
     private Integer enqueueScope;
@@ -32,11 +32,11 @@ public class DatabaseHelperQueueable implements Queueable {
      * @param recordsList list of records lists being daisychained
      */
     public DatabaseHelperQueueable(
-        DatabaseHelper helper,
-        DatabaseHelper.DMLOperation op,
+        DatabaseHelperBase helper,
+        DatabaseHelperBase.DMLOperation op,
         List<List<SObject>> recordsList)
     {
-        this.helper = new DatabaseHelperAsyncHelper(helper);
+        this.helper = helper;
         this.op = op;
         this.enqueueScope = helper.getEnqueueScope();
         for(List<SObject> records : recordsList) {
@@ -116,6 +116,6 @@ public class DatabaseHelperQueueable implements Queueable {
         this.queueableList = enqueueJob(this.queueableList);
         this.booleanSettingMap = null;
         this.overrideSettingMap = null;
-        helper.dmlStatement(op,currentList);
+        helper.dmlStatementUseCallbacks(op,currentList);
     }
 }

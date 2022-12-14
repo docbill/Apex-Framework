@@ -409,7 +409,7 @@ private class DatabaseHelperTest {
         }
         catch(DMLException ex) {
             TriggerManagement.lastRethrownException = ex;
-            result = new DatabaseHelperResult(DatabaseHelper.DMLOperation.INSERT_OP,ex,currentUser);
+            result = new DatabaseHelperResult(DatabaseHelperBase.DMLOperation.INSERT_OP,ex,currentUser);
             List<String> resultStrings = ex.getStackTraceString().split('\n');
             System.assertNotEquals(0,resultStrings.size(),'Expected a stack trace string');
         }
@@ -483,7 +483,7 @@ private class DatabaseHelperTest {
             new List<DatabaseHelperQueueable>{
                 new DatabaseHelperQueueable(
                     new DatabaseHelper(),
-                    DatabaseHelper.DMLOperation.INSERT_OP,
+                    DatabaseHelperBase.DMLOperation.INSERT_OP,
                     (new List<List<SObject>>{new List<SObject>{new Account(Name='Bob')}}) )
             }
         );
@@ -491,60 +491,6 @@ private class DatabaseHelperTest {
         queueableList = DatabaseHelperQueueable.enqueueJob(queueableList);
         Test.stopTest();
         System.assertEquals(null,queueableList,'queueableList');
-    }
-
-    /**
-     * @description 
-     * Check we correctly split lists.
-     */
-    @isTest
-    private static void splitTest() {
-        List<Account> accounts = (new List<Account>{
-            new Account(Name='1'),
-            new Account(Name='2'),
-            new Account(Name='3'),
-            new Account(Name='4'),
-            new Account(Name='5'),
-            new Account(Name='6'),
-            new Account(Name='7'),
-            new Account(Name='8')
-        });
-        List<List<SObject>> results = DatabaseHelper.split(accounts,null);
-        System.assertEquals(1,results.size());
-        System.assertEquals(accounts.size(),results[0].size());
-        results = DatabaseHelper.split(accounts,0);
-        System.assertEquals(1,results.size());
-        System.assertEquals(accounts.size(),results[0].size());
-        results = DatabaseHelper.split(accounts,1);
-        System.assertEquals(8,results.size());
-        System.assertEquals(1,results[0].size());
-        System.assertEquals(1,results[1].size());
-        System.assertEquals(1,results[2].size());
-        System.assertEquals(1,results[3].size());
-        System.assertEquals(1,results[4].size());
-        System.assertEquals(1,results[5].size());
-        System.assertEquals(1,results[6].size());
-        System.assertEquals(1,results[7].size());
-        results = DatabaseHelper.split(accounts,-1);
-        System.assertEquals(9,results.size());
-        System.assertEquals(0,results[0].size());
-        System.assertEquals(1,results[1].size());
-        System.assertEquals(1,results[2].size());
-        System.assertEquals(1,results[3].size());
-        System.assertEquals(1,results[4].size());
-        System.assertEquals(1,results[5].size());
-        System.assertEquals(1,results[6].size());
-        System.assertEquals(1,results[7].size());
-        System.assertEquals(1,results[8].size());
-        results = DatabaseHelper.split(accounts,4);
-        System.assertEquals(2,results.size());
-        System.assertEquals(4,results[0].size());
-        System.assertEquals(4,results[1].size());
-        results = DatabaseHelper.split(accounts,-4);
-        System.assertEquals(3,results.size());
-        System.assertEquals(0,results[0].size());
-        System.assertEquals(4,results[1].size());
-        System.assertEquals(4,results[2].size());
     }
 
     /**
@@ -580,9 +526,9 @@ private class DatabaseHelperTest {
         List<Contact> contacts = ( new List<Contact>{
             new Contact(LastName='Fudge'),
             new Contact(LastName='Chocolate')} );
-        DatabaseHelper helper = new DatabaseHelper();
-        helper.saveCallback = new AsyncSaveCallback();
-        helper.setEnqueueScope(contacts.size());
+        DatabaseHelper helper = new DatabaseHelper()
+            .setAsyncSaveCallback(new AsyncSaveCallback())
+            .setEnqueueScope(contacts.size());
     
         Test.startTest();
         List<Database.SaveResult> results = helper.legacyInsert(contacts);
@@ -605,9 +551,11 @@ private class DatabaseHelperTest {
             new Contact(LastName='Fudge'),
             new Contact(LastName='Chocolate')} );
         insert contacts;
-        DatabaseHelper helper = new DatabaseHelper();
-        helper.deleteCallback = new AsyncDeleteCallback();
-        helper.setEnqueueScope(contacts.size());
+        AsyncDeleteCallback callback = new AsyncDeleteCallback();
+        DatabaseHelper helper = new DatabaseHelper()
+            .setAsyncDeleteCallback(callback)
+            .setFinializer(callback)
+            .setEnqueueScope(contacts.size());
 
         Test.startTest();
         List<Database.DeleteResult> results = helper.legacyDelete(contacts);
@@ -626,8 +574,8 @@ private class DatabaseHelperTest {
      * Used to return results from asynchronous updates.
      */
     public class AsyncSafeCallback implements DatabaseHelper.AsyncSafeCallback {
-        public void processResults(DatabaseHelper.DMLOperation op,List<DatabaseHelper.Result> results) {
-            System.assertEquals(DatabaseHelper.DMLOperation.INSERT_OP,op,'Expected insert');
+        public void processResults(DatabaseHelperBase.DMLOperation op,List<DatabaseHelper.Result> results) {
+            System.assertEquals(DatabaseHelperBase.DMLOperation.INSERT_OP,op,'Expected insert');
             List<Contact> contacts = new List<Contact>();
             for(DatabaseHelper.Result result : results) {
                 Contact c = (Contact)result.getSObject();
@@ -653,12 +601,22 @@ private class DatabaseHelperTest {
      * @description
      * Implement the `DataSource.AsyncDeleteCallback`.
      */
-    public class AsyncDeleteCallback extends DataSource.AsyncDeleteCallback {
+    public class AsyncDeleteCallback 
+        extends DataSource.AsyncDeleteCallback
+        implements System.Finalizer
+    {
+        List<Contact> contacts = new List<Contact>();
+        public void execute(System.FinalizerContext ctx) {
+            undelete contacts;
+            for(Contact c : contacts) {
+                c.FirstName = 'Success';
+            }
+            update contacts;
+        }
+
         public override void processDelete(Database.DeleteResult result) {
             Contact c = new Contact(Id = result.getId());
-            undelete c;
-            c.FirstName='Success';
-            update c;
+            contacts.add( c );
         }
     }
 
