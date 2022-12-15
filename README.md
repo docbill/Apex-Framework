@@ -2,7 +2,7 @@
 
 This is a package of framework entities used by Apex coding standards, that should make it easier to follow best practices.  It is expected that most unlocked packages will have access to this framework by either a direct package dependency, or by org based dependency.   If for some reason neither is appropriate for your project, some of the components in this package may still be accessed by reflection and salesforce interfaces.
 
-## Release 1.3
+## Release 1.4
 
 This is the current open source release of this package.  This is based on code in Red Hat's production org.  Depreciated code has been removed from this release.  Everything remaining is believed to be of interest for the open source community.
 
