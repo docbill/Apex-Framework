@@ -1,0 +1,26 @@
+{
+	"docblock": {
+		"spacious": true,
+  		"omitDescriptionTag": false,
+  		"alignItems": false
+  	},
+	"engine": {
+		"source": [
+			{
+				"path": "${workspaceFolder}/src/apexframework/main/default/classes"
+			}
+		],
+		"targetDirectory": "${workspaceFolder}/apex-documentation",
+		"title": "ApexDox Apex Framework Project",
+		"cleanDir": true,
+		"showTOCSnippets": true,
+		"scope": [
+			"global",
+			"public",
+			"protected",
+			"private",
+			"webService",
+			"testMethod"
+		]
+	}
+}

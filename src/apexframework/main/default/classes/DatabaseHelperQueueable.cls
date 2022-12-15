@@ -10,14 +10,13 @@
  * @since 2021-04-28 - Separated from the DatabaseHelper class
  * @since 2021-10-27 US307550 - Fixed enqueueing multiple dml calls
  * @since 2022-09-09 update for ApexDox commenting
- * 
- * @todo Add a callback mechanism for errors
+ * @since 2022-11-09 support async callbacks
  */
 public class DatabaseHelperQueueable implements Queueable {
     private static List<DatabaseHelperQueueable> databaseHelperQueueableList = null;
 
-    private DatabaseHelper helper;
-    private DatabaseHelper.DMLOperation op;
+    private DatabaseHelperBase helper;
+    private DatabaseHelperBase.DMLOperation op;
     private List<List<SObject>> recordsList = new List<List<SObject>>();
     private List<DatabaseHelperQueueable> queueableList;
     private Integer enqueueScope;
@@ -33,8 +32,8 @@ public class DatabaseHelperQueueable implements Queueable {
      * @param recordsList list of records lists being daisychained
      */
     public DatabaseHelperQueueable(
-        DatabaseHelper helper,
-        DatabaseHelper.DMLOperation op,
+        DatabaseHelperBase helper,
+        DatabaseHelperBase.DMLOperation op,
         List<List<SObject>> recordsList)
     {
         this.helper = helper;
@@ -117,6 +116,6 @@ public class DatabaseHelperQueueable implements Queueable {
         this.queueableList = enqueueJob(this.queueableList);
         this.booleanSettingMap = null;
         this.overrideSettingMap = null;
-        helper.setEnqueueScope(null).dmlStatement(op,currentList);
+        helper.dmlStatementUseCallbacks(op,currentList);
     }
 }

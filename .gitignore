@@ -3,6 +3,7 @@
 # For useful gitignore templates see: https://github.com/github/gitignore
 
 # Salesforce cache
+.sf/
 .sfdx/
 .vscode/
 .localdevserver/
@@ -40,3 +41,5 @@ config/project-scratch-def.json
 
 **.mdapi/
 .sf/config.json
+
+.pmdCache

@@ -16,6 +16,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
     private final Object result;
     private final SObject record;
     private final Boolean insertFlag;
+    private final DatabaseHelperBase.DMLOperation op;
 
     /**
      * @description
@@ -24,11 +25,18 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
      * @param op the dml statement that was performed
      * @param result one of Database.SaveResult, Database.UpsertResult,...
      * @param record the message being operated on
+     * @param errors
      */
-    public DatabaseHelperResult(DatabaseHelper.DMLOperation op,Object result,SObject record,List<Database.Error> errors) {
+    public DatabaseHelperResult(
+        DatabaseHelperBase.DMLOperation op,
+        Object result,
+        SObject record,
+        List<Database.Error> errors
+    ) {
+        this.op = op;
         this.result = result;
         this.record = record;
-        this.insertFlag = (op == DatabaseHelper.DMLOperation.INSERT_OP);
+        this.insertFlag = (op == DatabaseHelperBase.DMLOperation.INSERT_OP);
         this.errors = errors;
         // make sure we initialize the stack trace
         this.exceptions.isEmpty();
@@ -42,10 +50,10 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
      * @param result one of Database.SaveResult, Database.UpsertResult,...
      * @param record the message being operated on
      */
-    public DatabaseHelperResult(DatabaseHelper.DMLOperation op,Exception result,SObject record) {
+    public DatabaseHelperResult(DatabaseHelperBase.DMLOperation op,Exception result,SObject record) {
         this.result = result;
         this.record = record;
-        this.insertFlag = (op == DatabaseHelper.DMLOperation.INSERT_OP);
+        this.insertFlag = (op == DatabaseHelperBase.DMLOperation.INSERT_OP);
         this.exceptions = new List<DatabaseHelper.ResultException>();
         if(! (result instanceof DatabaseHelper.ResultException)) {
             DatabaseHelper.ResultException xresult = new DatabaseHelper.ResultException(result);
@@ -208,7 +216,7 @@ public class DatabaseHelperResult implements DatabaseHelper.Result {
      * @return the list of converted results
      */
     public static List<Object> convertResultType(
-        DatabaseHelper.DMLOperation op,
+        DatabaseHelperBase.DMLOperation op,
         List<Object> results,
         List<SObject> records,
         Boolean legacyMode
