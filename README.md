@@ -135,4 +135,4 @@ The folder name must be declared in the sfdx-project.json file for this to work.
 
 The ApexDox documentation maybe viewed at:
 
-[ApexDox GitHack](https://rawcdn.githack.com/docbill/Apex-Framework/fa902f06019c43b72c59c41058599421daca5111/apex-documentation/index.html)
+[ApexDox GitHack](https://rawcdn.githack.com/docbill/Apex-Framework/453497c40c67ae4e23bf55ee124269d8d23efdc9/apex-documentation/index.html)
