@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>This is intended as a backwards compatible replacement for BooleanSettings that can be pushed as part of a package for better release management.   If a BooleanMetadata is defined, we will check for a field in BooleanHierarchy__c with the same developer name.  This allows any custom setting to be overwritten per user, role, or profile in the hierarchy.</description>
-    <label>Boolean Metadata</label>
-    <pluralLabel>Boolean Metadata</pluralLabel>
-    <visibility>Public</visibility>
-</CustomObject>
