@@ -8,13 +8,13 @@
       "path": "src/apexframework",
       "default": false,
       "package": "ApexFramework",
-      "versionName": "ver 1.4.0",
-      "versionNumber": "1.4.0.NEXT"
+      "versionName": "ver 1.5.0",
+      "versionNumber": "1.5.0.NEXT"
     }
   ],
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "55.0",
+  "sourceApiVersion": "59.0",
   "packageAliases": {
     "ApexFramework": "0Ho3a000000k9bwCAA",
     "ApexFramework@1.0.0-3": "04t3a000000LcyfAAC",
