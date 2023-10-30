@@ -13,6 +13,7 @@
  * @since 2021-04-27 DE26549 - Added split test
  * @since 2022-09-09 update for ApexDox commenting
  * @since 2022-12-13 update to test async callbacks
+ * @since 2023-10-30 ECM-19647 Test `setAllowSave` and `fakeUpsert` methods
  */
 @IsTest
 private class DatabaseHelperTest {
@@ -64,9 +65,10 @@ private class DatabaseHelperTest {
             }
             System.assertEquals(null,sr.getId(),'We should not have an Id on failure.');
         }
+        DatabaseHelper.alwaysSetSavePoint = true;
         System.assert(! contactIterator.hasNext(),'Unexpected contact');
         LimitHelper.cpuTimeReserved = 0;
-        for(DatabaseHelper.Result r : new DatabaseHelper().setOptAllOrNone(true).safeInsert(contacts)) {
+        for(DatabaseHelper.Result r : new DatabaseHelper().setOptAllOrNone(true).setAllowSave(true).fakeUpsert(contacts)) {
             System.assertEquals(true,DatabaseHelper.isSuccess(r));
             System.assertEquals(true,r.getErrors().isEmpty());
             System.assertEquals(null,r.getException());
