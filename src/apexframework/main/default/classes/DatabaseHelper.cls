@@ -298,13 +298,13 @@ public with sharing class DatabaseHelper extends DatabaseHelperBase {
                 (isInsert?insertList:updateList).add(record);
                 isInsertList.add(isInsert);
             }
-            List<Result> insertResult = safeInsert(recordList);
+            List<Result> insertResult = safeInsert(insertList);
             if( (this.options.OptAllOrNone == true && ! insertResult.isEmpty() && ! updateList.isEmpty()) 
                 || alwaysSetSavePoint
             ) {
                 sp = Database.setSavepoint();
             }
-            List<Result> updateResult = safeUpdate(recordList);
+            List<Result> updateResult = safeUpdate(updateList);
             for(Boolean isInsert : isInsertList) {
                 retval.add((isInsert?insertResult:updateResult).remove(0));
             }
