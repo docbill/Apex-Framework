@@ -18,8 +18,16 @@
  * @since 2021-10-27 US307550 - Fixed enqueueing multiple dml calls
  * @since 2022-09-09 update for ApexDox commenting
  * @since 2022-11-09 support async callbacks
+ * @since 2023-10-30 ECM-19647  Add `setAllowSave` and `fakeUpsert` methods
  */
 public with sharing class DatabaseHelper extends DatabaseHelperBase {
+    /**
+     * @description
+     * Set this option so we can get test coverage without doing both and insert and update.
+     */
+    @TestVisible
+    private static Boolean alwaysSetSavePoint = false;
+
     /**
      * @description
      * Standard Constructor.
@@ -133,6 +141,19 @@ public with sharing class DatabaseHelper extends DatabaseHelperBase {
         this.options.AllowFieldTruncation = value;
         return this;
     }
+
+    /**
+     * @description
+     * Set the `DuplicateRuleHeader.AllowSave` flag on the dmlOptions.  
+     * WARNING: This option is ignored when doing an upsert call.
+     * 
+     * @param value
+     * @return this
+     */
+    public DatabaseHelper setAllowSave(Boolean value) {
+        this.options.DuplicateRuleHeader.AllowSave = value;
+        return this;
+    }
     
     /**
      * @description
@@ -240,7 +261,9 @@ public with sharing class DatabaseHelper extends DatabaseHelperBase {
 
     /**
      * @description
-     * Called to upsert the recordList.
+     * Called to upsert the recordList.  Please note that
+     * upsorts do not user DML Options.  If you need DML Options
+     * like allowSave, then you should use `fakeUpsert` instead.
      * 
      * @param recordList
      * @return result list
@@ -248,6 +271,51 @@ public with sharing class DatabaseHelper extends DatabaseHelperBase {
     public List<Result> safeUpsert(List<SObject> recordList) {
         this.legacyMode = false;
         return (List<Result>)this.dmlStatement(DMLOperation.UPSERT_OP, recordList);
+    }
+
+    /**
+     * @description
+     * Called to insert records without an SFDC Id, and update
+     * records that have an SFDC Id.  This will do one more DML
+     * operation than a `safeUpsert` and will not user the `externalIDField`.
+     * However, the `DML Options` will be used.  If you need an
+     * option such as `allowSave` this is the obvious call to use.
+     * 
+     * A `SavePoint` use used to rollback inserts when `OptAllOrNone` is true.
+     * 
+     * @param recordList
+     * @return result list
+     */
+    public List<Result> fakeUpsert(List<SObject> recordList) {
+        List<Result> retval = new List<DatabaseHelper.Result>();
+        Savepoint sp = null;
+        try {
+            List<Boolean> isInsertList = new List<Boolean>();
+            List<SObject> insertList = new List<SObject>();
+            List<SObject> updateList = new List<SObject>();
+            for(SObject record : recordList) {
+                Boolean isInsert = (record?.Id == null);
+                (isInsert?insertList:updateList).add(record);
+                isInsertList.add(isInsert);
+            }
+            List<Result> insertResult = safeInsert(insertList);
+            if( (this.options.OptAllOrNone == true && ! insertResult.isEmpty() && ! updateList.isEmpty()) 
+                || alwaysSetSavePoint
+            ) {
+                sp = Database.setSavepoint();
+            }
+            List<Result> updateResult = safeUpdate(updateList);
+            for(Boolean isInsert : isInsertList) {
+                retval.add((isInsert?insertResult:updateResult).remove(0));
+            }
+            sp = null;
+        }
+        finally {
+            if(sp != null) {
+                Database.rollback(sp);
+            }
+        }
+        return retval;
     }
 
     /**
