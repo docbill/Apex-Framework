@@ -9,6 +9,11 @@ Callable Trigger Prososal
 
 ## Usage
 
+Developer slide decks:
+
+- [usage_walkthrough.md](usage_walkthrough.md) — client triggers, handlers, CMDT, unit tests
+- [codebase_walkthrough.md](codebase_walkthrough.md) — `TriggerManagement` / `TriggerArguments` internals, package build, redhatcrm pins
+
 As one can see in the following document, normally a user is only required to define a Client Trigger and Client Trigger Handle class to use this framework.
 
 [VPD Document](TriggerManagementUML.vpd)
